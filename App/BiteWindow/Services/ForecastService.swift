@@ -5,6 +5,8 @@ struct Forecast {
     enum Source { case live, cached, sample }
     let hours: [HourConditions]
     let source: Source
+    /// When the data was downloaded. Nil for sample weather and when nothing is saved.
+    var fetchedAt: Date? = nil
 }
 
 /// Loads hourly weather from the cache worker (backend/), keyed by geohash-5.
@@ -26,6 +28,28 @@ final class ForecastService {
         let hours: [Hour]
     }
 
+    /// One spot to keep available offline.
+    struct Place: Sendable {
+        let latitude: Double
+        let longitude: Double
+        let isSalt: Bool
+    }
+
+    /// UserDefaults key: time of the last successful `prefetch`, seconds since 1970.
+    static let lastPrefetchKey = "lastPrefetch"
+
+    /// Short timeouts: with one bar of signal the saved forecast should show
+    /// within seconds, not after URLSession's default 60 s.
+    private let session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10
+        config.timeoutIntervalForResource = 20
+        config.waitsForConnectivity = false
+        return URLSession(configuration: config)
+    }()
+
+    var isConfigured: Bool { baseURL != nil }
+
     private var baseURL: URL? {
         guard let raw = Bundle.main.object(forInfoDictionaryKey: "BiteAPIBase") as? String,
               !raw.contains("REPLACE"), let url = URL(string: raw) else { return nil }
@@ -40,19 +64,43 @@ final class ForecastService {
         components?.queryItems = [URLQueryItem(name: "gh", value: gh)]
         if let url = components?.url {
             do {
-                let (data, response) = try await URLSession.shared.data(from: url)
+                let (data, response) = try await session.data(from: url)
                 if (response as? HTTPURLResponse)?.statusCode == 200, let hours = Self.decode(data), !hours.isEmpty {
                     try? data.write(to: Self.cacheFile(gh), options: .atomic)
-                    return Forecast(hours: hours, source: .live)
+                    return Forecast(hours: hours, source: .live, fetchedAt: Date())
                 }
             } catch {
                 // Offline or backend down: fall through to the disk cache.
             }
         }
-        if let data = try? Data(contentsOf: Self.cacheFile(gh)), let hours = Self.decode(data), !hours.isEmpty {
-            return Forecast(hours: hours, source: .cached)
+        return cached(latitude: latitude, longitude: longitude) ?? Forecast(hours: [], source: .cached)
+    }
+
+    /// The forecast saved on disk for this location, without touching the network.
+    func cached(latitude: Double, longitude: Double) -> Forecast? {
+        let file = Self.cacheFile(Geohash.encode(latitude: latitude, longitude: longitude, precision: 5))
+        guard let data = try? Data(contentsOf: file), let hours = Self.decode(data), !hours.isEmpty else { return nil }
+        let attributes = try? FileManager.default.attributesOfItem(atPath: file.path)
+        return Forecast(hours: hours, source: .cached, fetchedAt: attributes?[.modificationDate] as? Date)
+    }
+
+    /// Downloads and saves the forecast (and tide constants for saltwater) for
+    /// every place, so they are there when the signal is gone. Returns how many
+    /// forecasts were saved.
+    func prefetch(_ places: [Place]) async -> Int {
+        guard isConfigured else { return 0 }
+        var saved = 0
+        for place in places {
+            let result = await forecast(latitude: place.latitude, longitude: place.longitude)
+            if result.source == .live { saved += 1 }
+            if place.isSalt {
+                _ = await tideStation(latitude: place.latitude, longitude: place.longitude)
+            }
         }
-        return Forecast(hours: [], source: .cached)
+        if saved > 0 {
+            UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: Self.lastPrefetchKey)
+        }
+        return saved
     }
 
     /// Expected catch for a trip under the global model. Uses the real forecast
@@ -87,7 +135,7 @@ final class ForecastService {
         var components = URLComponents(url: baseURL.appendingPathComponent("tide"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "gh", value: gh)]
         guard let url = components?.url,
-              let result = try? await URLSession.shared.data(from: url),
+              let result = try? await session.data(from: url),
               (result.1 as? HTTPURLResponse)?.statusCode == 200,
               let payload = try? JSONDecoder().decode(TidePayload.self, from: result.0) else { return nil }
         try? result.0.write(to: file, options: .atomic)

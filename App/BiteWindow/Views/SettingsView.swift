@@ -8,6 +8,9 @@ struct SettingsView: View {
     @State private var showPaywall = false
     /// Sampling itself is started and stopped by `RootView`, which observes the same key.
     @AppStorage(PressureSampler.enabledKey) private var livePressure = false
+    @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
+    @State private var downloading = false
+    @State private var downloadResult: String?
 
     var body: some View {
         NavigationStack {
@@ -32,6 +35,38 @@ struct SettingsView: View {
                     } else {
                         Text("This device has no barometer.")
                     }
+                }
+
+                Section {
+                    Button {
+                        downloading = true
+                        Task {
+                            let result = await OfflineStore.refresh()
+                            downloadResult = String(localized: "Saved \(result.saved) of \(result.total) spots")
+                            downloading = false
+                        }
+                    } label: {
+                        if downloading {
+                            HStack {
+                                ProgressView()
+                                Text("Downloading…")
+                            }
+                        } else {
+                            Label("Download forecasts for all spots", systemImage: "arrow.down.circle")
+                        }
+                    }
+                    .disabled(downloading)
+                    if let downloadResult {
+                        Text(verbatim: downloadResult).foregroundStyle(.secondary)
+                    }
+                    if lastPrefetch > 0 {
+                        Text("Last download: \(Date(timeIntervalSince1970: lastPrefetch).formatted(.relative(presentation: .named)))")
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Offline")
+                } footer: {
+                    Text("Forecasts for your spots are saved on this device and stay usable for about 10 days. Open the app or tap the button while you still have signal. With no saved forecast, the score uses sun, moon and tide only.")
                 }
 
                 Section {

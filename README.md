@@ -12,7 +12,7 @@ Evidence-calibrated fishing bite-window prediction for iOS. Working name.
 
 | Component | State |
 |---|---|
-| `BiteCore` | 28 unit tests pass on Linux (Swift 6.0, container `swift:6.0`) |
+| `BiteCore` | 29 unit tests pass on Linux (Swift 6.0, container `swift:6.0`) |
 | `backend` | 11 tests pass on Node 22; never deployed, never called the live WeatherKit or NOAA APIs (NOAA response shapes taken from docs) |
 | `App` | Compiles in CI (`ios` job, macos-15, iOS Simulator, unsigned). Never run on a simulator or device; no UI tests |
 | Tide engine | 8 constituents, tested for self-consistency only; not checked against NOAA predictions |
@@ -60,9 +60,18 @@ The app runs on synthetic sample weather until `BiteAPIBase` in `App/project.yml
 - `GET /tide?gh=<geohash-5>` returns `{ gh, station, km }`, `station` in the engine's `TideStation` JSON (or null). Station list cached 7 days, per-cell result 30 days.
 - Saltwater spots (inshore, offshore) attach the station to `SpotContext.tide`, which turns on the tide term, and list the day's high/low times. Free and Pro both see tide times.
 
+## Offline (as implemented)
+
+- Every forecast response is saved on disk per geohash-5 cell. A spot opens from the saved copy first, then replaces it if the network answers; requests time out after 10 s.
+- Forecasts for all spots are downloaded when the app comes to the foreground (at most hourly), from Settings → Offline, and through `BGAppRefreshTask` (iOS decides if and when that runs).
+- A saved forecast covers about 10 days from download. Beyond it, or with nothing saved, `Forecaster.curve(fillMissingWeather:)` scores from sun, moon, tide and the entered water temperature, with wind, pressure and cloud neutral. Those days are labelled in the UI.
+- Tide constants are saved indefinitely once fetched. Trips, spots and the log are local (SwiftData).
+- Trips ended without weather count as neutral in the personal fit, as before.
+- Not covered: map tiles (MapKit has no offline pack API; spots can still be added at the crosshair on a blank map), and the paywall, which needs the App Store.
+
 ## Languages
 
-English plus 17 translations in `App/BiteWindow/Localizable.xcstrings` (103 strings) and `InfoPlist.xcstrings`: de, nl, sv, nb, da, es, fr, it, pt-BR, fi, pl, ru, uk, tr, ja, ko, zh-Hans. Machine-translated, not reviewed by native speakers; species names for walleye and muskellunge are the least certain. Dates, times and numbers follow the device locale. Species names in `BiteCore` stay English; the app uses `Species.localizedName`. Tide station names come from NOAA in English.
+English plus 17 translations in `App/BiteWindow/Localizable.xcstrings` (109 strings) and `InfoPlist.xcstrings`: de, nl, sv, nb, da, es, fr, it, pt-BR, fi, pl, ru, uk, tr, ja, ko, zh-Hans. Machine-translated, not reviewed by native speakers; species names for walleye and muskellunge are the least certain. Dates, times and numbers follow the device locale. Species names in `BiteCore` stay English; the app uses `Species.localizedName`. Tide station names come from NOAA in English.
 
 ## Not built yet
 

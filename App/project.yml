@@ -23,6 +23,10 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        UIBackgroundModes:
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.dautovri.bitewindow.refresh
         NSMotionUsageDescription: Reads your phone's barometer to track the live pressure trend at your spot.
         # Weather cache worker (see backend/). Leave the placeholder to run on sample weather.
         BiteAPIBase: https://REPLACE.workers.dev

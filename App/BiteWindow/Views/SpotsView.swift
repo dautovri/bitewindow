@@ -70,7 +70,8 @@ private struct SpotRow: View {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         if let end = calendar.date(byAdding: .day, value: 1, to: today) {
-            let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end)
+            let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
+                                          fillMissingWeather: true)
                 .filter { $0.time < end }
             window = Forecaster.bestWindow(in: points)
         }
@@ -82,6 +83,9 @@ private struct DaySummary: Identifiable {
     let id: Date
     let window: BiteWindow?
     let points: [ScorePoint]
+
+    /// No weather covered any part of the day: the score is sun, moon and tide only.
+    var weatherless: Bool { !points.contains { $0.hasWeather } }
 }
 
 struct SpotDetailView: View {
@@ -103,13 +107,13 @@ struct SpotDetailView: View {
 
     /// Free: today and tomorrow. Pro: the full 10-day horizon.
     private func computeDays(pressure: Terms.PressureSeries?) -> [DaySummary] {
-        guard let forecast, !forecast.hours.isEmpty else { return [] }
+        guard let forecast else { return [] }
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let count = entitlements.isPro ? 10 : 2
         guard let end = calendar.date(byAdding: .day, value: count, to: today) else { return [] }
         let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
-                                      pressure: pressure)
+                                      pressure: pressure, fillMissingWeather: true)
         return Dictionary(grouping: points) { calendar.startOfDay(for: $0.time) }
             .filter { $0.key < end }
             .map { DaySummary(id: $0.key, window: Forecaster.bestWindow(in: $0.value), points: $0.value) }
@@ -150,8 +154,10 @@ struct SpotDetailView: View {
         }
         var out: [FactorBreakdown.Factor] = [.init(name: String(localized: "Light"), value: mean { $0.light })]
         if spot.waterTempC != nil { out.append(.init(name: String(localized: "Water temperature"), value: mean { $0.thermal })) }
-        out.append(.init(name: String(localized: "Wind"), value: mean { $0.wind }))
-        out.append(.init(name: String(localized: "Pressure trend"), value: mean { $0.pressure }))
+        if !day.weatherless {
+            out.append(.init(name: String(localized: "Wind"), value: mean { $0.wind }))
+            out.append(.init(name: String(localized: "Pressure trend"), value: mean { $0.pressure }))
+        }
         out.append(.init(name: String(localized: "Moon"), value: mean { $0.solunar }))
         if isSalt, tide != nil { out.append(.init(name: String(localized: "Tide"), value: mean { $0.tide })) }
         return out
@@ -263,7 +269,13 @@ struct SpotDetailView: View {
         }
         .navigationTitle(spot.name)
         .navigationBarTitleDisplayMode(.inline)
-        .task { forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude) }
+        .task {
+            // Saved forecast first, so the screen fills at once with weak or no signal.
+            if forecast == nil {
+                forecast = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude)
+            }
+            forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude)
+        }
         .task(id: spot.waterRaw) {
             guard isSalt, tide == nil else { return }
             tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
@@ -279,10 +291,11 @@ struct SpotDetailView: View {
                     .foregroundStyle(.orange)
             } else if forecast.source == .cached {
                 Group {
-                    if forecast.hours.isEmpty {
-                        Label("No forecast available offline", systemImage: "wifi.slash")
+                    if let saved = forecast.fetchedAt, !forecast.hours.isEmpty {
+                        Label("Offline — forecast saved \(saved.formatted(.relative(presentation: .named)))",
+                              systemImage: "wifi.slash")
                     } else {
-                        Label("Offline — showing last saved forecast", systemImage: "wifi.slash")
+                        Label("No weather data — sun, moon and tide only", systemImage: "wifi.slash")
                     }
                 }
                 .foregroundStyle(.secondary)
@@ -304,6 +317,7 @@ struct SpotDetailView: View {
             IndexGauge(index: day.window?.meanIndex, size: 38)
             VStack(alignment: .leading, spacing: 2) {
                 Text(day.id.formatted(.dateTime.weekday(.wide).month().day()))
+                    .foregroundStyle(day.weatherless ? .secondary : .primary)
                 Text(verbatim: day.window.map(timeRange) ?? String(localized: "No forecast"))
                     .font(.subheadline)
                     .monospacedDigit()
@@ -315,6 +329,12 @@ struct SpotDetailView: View {
     /// Pro: expected catch, hourly curve and factor breakdown. Everyone: tide times.
     @ViewBuilder
     private func dayDetail(_ day: DaySummary) -> some View {
+        // The banner at the top already says so when there is no weather at all.
+        if day.weatherless, forecast?.hours.isEmpty == false {
+            Label("No weather data — sun, moon and tide only", systemImage: "moon.stars")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
         if entitlements.isPro {
             if let window = day.window {
                 LabeledContent("Expected fish in window", value: expectedCatchText(day, window))

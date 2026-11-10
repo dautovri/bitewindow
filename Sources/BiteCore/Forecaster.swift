@@ -49,6 +49,13 @@ public struct ScorePoint: Sendable, Equatable {
     /// Bite index, 0...100. 50 = neutral.
     public let index: Double
     public let contributions: Contributions
+    /// False when no weather covered this instant and the score rests on
+    /// sun, moon, tide and water temperature alone (see `fillMissingWeather`).
+    public let hasWeather: Bool
+
+    public init(time: Date, index: Double, contributions: Contributions, hasWeather: Bool = true) {
+        self.time = time; self.index = index; self.contributions = contributions; self.hasWeather = hasWeather
+    }
 }
 
 public struct BiteWindow: Sendable, Equatable {
@@ -84,10 +91,14 @@ public enum Forecaster {
     /// Scores `[from, to]` every `step` seconds. `hours` should start 48 h before
     /// `from` so pressure deltas are defined; instants without weather are skipped.
     /// `pressure` overrides the pressure trace taken from `hours` (see `Barometry.fuse`).
+    /// With `fillMissingWeather`, instants without weather are scored anyway with
+    /// wind, pressure and cloud neutral, so the app still works with no network
+    /// and no saved forecast; those points carry `hasWeather == false`.
     public static func curve(context: SpotContext, hours: [HourConditions],
                              from: Date, to: Date, step: TimeInterval = 900,
                              weights: Weights? = nil,
-                             pressure: Terms.PressureSeries? = nil) -> [ScorePoint] {
+                             pressure: Terms.PressureSeries? = nil,
+                             fillMissingWeather: Bool = false) -> [ScorePoint] {
         let hours = hours.sorted { $0.time < $1.time }
         let w = weights ?? Weights.prior(water: context.water, species: context.species)
         let series = pressure ?? Terms.PressureSeries(hours.map { ($0.time, $0.pressureHPa) })
@@ -113,17 +124,20 @@ public enum Forecaster {
 
         var out: [ScorePoint] = []
         for (i, time) in times.enumerated() {
-            guard let h = interpolate(hours, at: time) else { continue }
+            let weather = interpolate(hours, at: time)
+            if weather == nil && !fillMissingWeather { continue }
             var c = Contributions()
             c.light = w.light * Terms.light(at: time, sunrise: nearest(sun.rises, to: time),
-                                            sunset: nearest(sun.sets, to: time), cloudCover: h.cloudCover)
+                                            sunset: nearest(sun.sets, to: time), cloudCover: weather?.cloudCover)
             if let tw = context.waterTempC {
                 c.thermal = w.thermal * Terms.thermal(waterTempC: tw, species: context.species)
             }
-            c.wind = w.wind * Terms.wind(speedKmh: h.windSpeedKmh,
-                                         towardDeg: h.windFromDeg.map { $0 + 180 },
-                                         bankBearingDeg: context.bankBearingDeg)
-            c.pressure = w.pressure * Terms.pressure(series, at: time, cloudCover: h.cloudCover)
+            if let h = weather {
+                c.wind = w.wind * Terms.wind(speedKmh: h.windSpeedKmh,
+                                             towardDeg: h.windFromDeg.map { $0 + 180 },
+                                             bankBearingDeg: context.bankBearingDeg)
+                c.pressure = w.pressure * Terms.pressure(series, at: time, cloudCover: h.cloudCover)
+            }
             c.solunar = w.solunar * Terms.solunar(at: time, majors: majors, minors: minors,
                                                   phaseAngle: Astro.moonPhaseAngle(time))
             if let rates = tideRates, w.tide > 0 {
@@ -131,7 +145,7 @@ public enum Forecaster {
                 let peak = rates[lo...hi].map { abs($0) }.max() ?? 0
                 c.tide = w.tide * Terms.tide(rate: rates[i], maxRateOfDay: peak)
             }
-            out.append(ScorePoint(time: time, index: index(for: c), contributions: c))
+            out.append(ScorePoint(time: time, index: index(for: c), contributions: c, hasWeather: weather != nil))
         }
         return out
     }

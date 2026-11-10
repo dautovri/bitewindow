@@ -67,15 +67,15 @@ public enum Terms {
 
     // MARK: Light
 
-    public static func light(at t: Date, sunrise: Date?, sunset: Date?, cloudCover: Double) -> Double {
+    /// Unknown cloud cover (`nil`) makes the cloud component neutral.
+    public static func light(at t: Date, sunrise: Date?, sunset: Date?, cloudCover: Double?) -> Double {
         func bump(_ e: Date?) -> Double {
             guard let e else { return 0 }
             let dm = t.timeIntervalSince(e) / 60
             return exp(-pow(dm / 60, 2))
         }
         let twilight = 2 * max(bump(sunrise), bump(sunset)) - 1
-        let c = max(0, min(1, cloudCover))
-        let cloud = 2 * (1 - pow(1 - c, 2)) - 1
+        let cloud = cloudCover.map { 2 * (1 - pow(1 - max(0, min(1, $0)), 2)) - 1 } ?? 0
         return 0.7 * twilight + 0.3 * cloud
     }
 

@@ -303,6 +303,35 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertEqual(Barometry.fuse(forecast: forecast, device: stale).count, 25)
     }
 
+    func testCurveFillsMissingWeatherFromAstronomyAlone() {
+        let ctx = SpotContext(latitude: 52.52, longitude: 13.405, water: .warmFreshwater, species: .walleye)
+        let from = utc(2026, 6, 21), to = utc(2026, 6, 22)
+        XCTAssertTrue(Forecaster.curve(context: ctx, hours: [], from: from, to: to).isEmpty)
+
+        let pts = Forecaster.curve(context: ctx, hours: [], from: from, to: to, fillMissingWeather: true)
+        XCTAssertEqual(pts.count, 97)
+        XCTAssertTrue(pts.allSatisfy { !$0.hasWeather })
+        XCTAssertTrue(pts.allSatisfy { $0.contributions.wind == 0 && $0.contributions.pressure == 0 })
+        // Twilight still drives the best window: sunrise is 02:43 UT, sunset 19:33 UT.
+        let best = Forecaster.bestWindow(in: pts)!
+        let mid = best.start.addingTimeInterval(best.end.timeIntervalSince(best.start) / 2)
+        let nearDawn = abs(mid.timeIntervalSince(utc(2026, 6, 21, 2, 43))) < 5400
+        let nearDusk = abs(mid.timeIntervalSince(utc(2026, 6, 21, 19, 33))) < 5400
+        XCTAssertTrue(nearDawn || nearDusk, "window centred at \(mid)")
+
+        // Weather that covers part of the range is used where it exists.
+        let hours = (0...6).map { HourConditions(time: from.addingTimeInterval(Double($0) * 3600), pressureHPa: 1015,
+                                                 cloudCover: 0.5, windSpeedKmh: 18, windFromDeg: nil, airTempC: 15) }
+        let mixed = Forecaster.curve(context: ctx, hours: hours, from: from, to: to, fillMissingWeather: true)
+        XCTAssertEqual(mixed.count, 97)
+        XCTAssertEqual(mixed.filter(\.hasWeather).count, 25)
+        XCTAssertGreaterThan(mixed[0].contributions.wind, 0)
+        // Unknown cloud is neutral, known cloud is not.
+        let dawn = utc(2026, 6, 21, 2, 43)
+        XCTAssertEqual(Terms.light(at: dawn, sunrise: dawn, sunset: nil, cloudCover: nil), 0.7, accuracy: 1e-9)
+        XCTAssertEqual(Terms.light(at: dawn, sunrise: dawn, sunset: nil, cloudCover: 1), 1.0, accuracy: 1e-9)
+    }
+
     func testCurveUsesOverridePressure() {
         let start = utc(2026, 6, 21)
         let hours = makeHours(from: start.addingTimeInterval(-48 * 3600), count: 60)

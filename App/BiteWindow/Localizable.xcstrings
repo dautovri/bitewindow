@@ -1697,6 +1697,218 @@
         }
       }
     },
+    "Download forecasts for all spots": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hent prognoser for alle pladser"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorhersagen für alle Spots laden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descargar pronósticos de todos los lugares"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lataa ennusteet kaikille paikoille"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Télécharger les prévisions de tous les spots"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scarica le previsioni per tutti gli spot"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのポイントの予報をダウンロード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 포인트의 예보 다운로드"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last ned varsler for alle plasser"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download voorspellingen voor alle stekken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pobierz prognozy dla wszystkich łowisk"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixar previsões de todos os pontos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузить прогнозы для всех мест"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hämta prognoser för alla platser"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tüm meralar için tahminleri indir"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажити прогнози для всіх місць"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载所有钓点的预报"
+          }
+        }
+      }
+    },
+    "Downloading…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henter…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird geladen…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descargando…"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ladataan…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download in corso…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロード中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드 중…"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laster ned…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaden…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pobieranie…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixando…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузка…"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hämtar…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İndiriliyor…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантаження…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在下载…"
+          }
+        }
+      }
+    },
     "End trip": {
       "localizations": {
         "da": {
@@ -2333,6 +2545,112 @@
         }
       }
     },
+    "Forecasts for your spots are saved on this device and stay usable for about 10 days. Open the app or tap the button while you still have signal. With no saved forecast, the score uses sun, moon and tide only.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognoser for dine pladser gemmes på denne enhed og kan bruges i ca. 10 dage. Åbn appen, eller tryk på knappen, mens du stadig har dækning. Uden en gemt prognose bruger scoren kun sol, måne og tidevand."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorhersagen für deine Spots werden auf diesem Gerät gespeichert und bleiben etwa 10 Tage nutzbar. Öffne die App oder tippe auf die Taste, solange du noch Empfang hast. Ohne gespeicherte Vorhersage basiert der Score nur auf Sonne, Mond und Gezeiten."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los pronósticos de tus lugares se guardan en este dispositivo y siguen siendo útiles durante unos 10 días. Abre la app o toca el botón mientras aún tengas cobertura. Sin un pronóstico guardado, la puntuación usa solo sol, luna y marea."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paikkojesi ennusteet tallennetaan tälle laitteelle, ja ne ovat käytettävissä noin 10 päivää. Avaa appi tai napauta painiketta, kun sinulla on vielä kenttää. Ilman tallennettua ennustetta pisteet perustuvat vain aurinkoon, kuuhun ja vuoroveteen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les prévisions de vos spots sont enregistrées sur cet appareil et restent utilisables environ 10 jours. Ouvrez l’app ou touchez le bouton tant que vous avez du réseau. Sans prévisions enregistrées, le score repose uniquement sur le soleil, la lune et la marée."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le previsioni per i tuoi spot vengono salvate su questo dispositivo e restano utilizzabili per circa 10 giorni. Apri l’app o tocca il pulsante finché hai ancora segnale. Senza previsioni salvate, il punteggio usa solo sole, luna e marea."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ポイントの予報はこのデバイスに保存され、約10日間利用できます。電波があるうちにアプリを開くか、ボタンをタップしてください。保存済みの予報がない場合、スコアは太陽・月・潮のみで計算されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "포인트 예보는 이 기기에 저장되며 약 10일 동안 사용할 수 있습니다. 신호가 있을 때 앱을 열거나 버튼을 탭하세요. 저장된 예보가 없으면 점수는 해, 달, 조석만으로 계산됩니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varsler for plassene dine lagres på denne enheten og kan brukes i omtrent 10 dager. Åpne appen eller trykk på knappen mens du fortsatt har dekning. Uten lagret varsel bruker poengsummen kun sol, måne og tidevann."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorspellingen voor je stekken worden op dit apparaat bewaard en blijven ongeveer 10 dagen bruikbaar. Open de app of tik op de knop zolang je nog bereik hebt. Zonder bewaarde voorspelling gebruikt de score alleen zon, maan en getij."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognozy dla Twoich łowisk są zapisywane na tym urządzeniu i pozostają przydatne przez około 10 dni. Otwórz aplikację lub stuknij przycisk, póki masz jeszcze zasięg. Bez zapisanej prognozy ocena uwzględnia tylko słońce, księżyc i pływy."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As previsões dos seus pontos ficam salvas neste dispositivo e continuam úteis por cerca de 10 dias. Abra o app ou toque no botão enquanto ainda tiver sinal. Sem previsão salva, a pontuação usa apenas sol, lua e maré."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогнозы для ваших мест сохраняются на этом устройстве и остаются пригодными около 10 дней. Откройте приложение или нажмите кнопку, пока есть связь. Без сохранённого прогноза оценка учитывает только солнце, луну и приливы."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognoser för dina platser sparas på den här enheten och kan användas i ungefär 10 dagar. Öppna appen eller tryck på knappen medan du fortfarande har täckning. Utan sparad prognos bygger poängen endast på sol, måne och tidvatten."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meralarınızın tahminleri bu aygıta kaydedilir ve yaklaşık 10 gün kullanılabilir. Hâlâ çekim varken uygulamayı açın veya düğmeye dokunun. Kayıtlı tahmin yoksa puan yalnızca güneş, ay ve gelgite dayanır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогнози для ваших місць зберігаються на цьому пристрої й залишаються придатними близько 10 днів. Відкрийте застосунок або торкніть кнопку, поки є зв’язок. Без збереженого прогнозу оцінка враховує лише сонце, місяць і припливи."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "钓点的预报会保存在此设备上，约 10 天内可用。请在仍有信号时打开 App 或轻点按钮。没有已保存的预报时，评分仅依据日、月和潮汐。"
+          }
+        }
+      }
+    },
     "History": {
       "localizations": {
         "da": {
@@ -2965,6 +3283,112 @@
           "stringUnit": {
             "state": "translated",
             "value": "大口黑鲈"
+          }
+        }
+      }
+    },
+    "Last download: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seneste hentning: %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzter Download: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Última descarga: %@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viimeisin lataus: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernier téléchargement : %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ultimo download: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前回のダウンロード：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마지막 다운로드: %@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siste nedlasting: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laatste download: %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ostatnie pobranie: %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último download: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последняя загрузка: %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senaste hämtning: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son indirme: %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Останнє завантаження: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次下载：%@"
           }
         }
       }
@@ -4559,112 +4983,6 @@
         }
       }
     },
-    "No forecast available offline": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen prognose tilgængelig offline"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offline keine Vorhersage verfügbar"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pronóstico no disponible sin conexión"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ennustetta ei saatavilla offline-tilassa"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucune prévision disponible hors ligne"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessuna previsione disponibile offline"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "オフラインでは予報を利用できません"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "오프라인에서는 예보를 사용할 수 없음"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen prognose tilgjengelig uten nett"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offline geen voorspelling beschikbaar"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prognoza niedostępna offline"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nenhuma previsão disponível offline"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Прогноз недоступен офлайн"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen prognos tillgänglig offline"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Çevrimdışıyken tahmin yok"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Прогноз недоступний офлайн"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "离线时无法获取预报"
-          }
-        }
-      }
-    },
     "No spot": {
       "localizations": {
         "da": {
@@ -4979,6 +5297,112 @@
           "stringUnit": {
             "state": "translated",
             "value": "此钓点附近未找到验潮站。评分将不计入潮汐。"
+          }
+        }
+      }
+    },
+    "No weather data — sun, moon and tide only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen vejrdata — kun sol, måne og tidevand"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Wetterdaten — nur Sonne, Mond und Gezeiten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin datos meteorológicos — solo sol, luna y marea"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ei säätietoja — vain aurinko, kuu ja vuorovesi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de données météo — soleil, lune et marée uniquement"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessun dato meteo — solo sole, luna e marea"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天気データなし — 太陽・月・潮のみ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "날씨 데이터 없음 — 해, 달, 조석만 사용"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen værdata — kun sol, måne og tidevann"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen weergegevens — alleen zon, maan en getij"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak danych pogodowych — tylko słońce, księżyc i pływy"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem dados do tempo — apenas sol, lua e maré"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет данных о погоде — только солнце, луна и приливы"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inga väderdata — endast sol, måne och tidvatten"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hava durumu verisi yok — yalnızca güneş, ay ve gelgit"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немає даних про погоду — лише сонце, місяць і припливи"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无天气数据 — 仅日、月和潮汐"
           }
         }
       }
@@ -5301,108 +5725,214 @@
         }
       }
     },
-    "Offline — showing last saved forecast": {
+    "Offline": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline — viser senest gemte prognose"
+            "value": "Offline"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline — letzte gesicherte Vorhersage wird angezeigt"
+            "value": "Offline"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin conexión — se muestra el último pronóstico guardado"
+            "value": "Sin conexión"
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline — näytetään viimeksi tallennettu ennuste"
+            "value": "Offline"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hors ligne — affichage des dernières prévisions enregistrées"
+            "value": "Hors ligne"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline — viene mostrata l’ultima previsione salvata"
+            "value": "Offline"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "オフライン — 最後に保存した予報を表示中"
+            "value": "オフライン"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "오프라인 — 마지막으로 저장된 예보 표시 중"
+            "value": "오프라인"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Frakoblet — viser sist lagrede prognose"
+            "value": "Frakoblet"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline — laatst bewaarde voorspelling wordt getoond"
+            "value": "Offline"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline — wyświetlana jest ostatnio zapisana prognoza"
+            "value": "Offline"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline — mostrando a última previsão salva"
+            "value": "Offline"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Офлайн — показан последний сохранённый прогноз"
+            "value": "Офлайн"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline — visar senast sparade prognos"
+            "value": "Offline"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Çevrimdışı — son kaydedilen tahmin gösteriliyor"
+            "value": "Çevrimdışı"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Офлайн — показано останній збережений прогноз"
+            "value": "Офлайн"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "离线 — 显示上次存储的预报"
+            "value": "离线"
+          }
+        }
+      }
+    },
+    "Offline — forecast saved %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — prognose gemt %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — Vorhersage gespeichert %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin conexión — pronóstico guardado %@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — ennuste tallennettu %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hors ligne — prévisions enregistrées %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — previsioni salvate %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフライン — 予報の保存：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오프라인 — 예보 저장: %@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frakoblet — varsel lagret %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — voorspelling bewaard %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — prognoza zapisana %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — previsão salva %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Офлайн — прогноз сохранён %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — prognos sparad %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çevrimdışı — tahmin %@ kaydedildi"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Офлайн — прогноз збережено %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "离线 — 预报保存于%@"
           }
         }
       }
@@ -6357,6 +6887,112 @@
           "stringUnit": {
             "state": "translated",
             "value": "存储"
+          }
+        }
+      }
+    },
+    "Saved %lld of %lld spots": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemte pladser: %lld af %lld"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeicherte Spots: %lld von %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lugares guardados: %lld de %lld"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tallennetut paikat: %lld/%lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spots enregistrés : %lld sur %lld"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spot salvati: %lld di %lld"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存済みポイント：%lld/%lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장된 포인트: %lld/%lld"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagrede plasser: %lld av %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewaarde stekken: %lld van %lld"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisane łowiska: %lld z %lld"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pontos salvos: %lld de %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранено мест: %lld из %lld"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparade platser: %lld av %lld"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydedilen meralar: %lld / %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено місць: %lld із %lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存钓点：%lld/%lld"
           }
         }
       }
