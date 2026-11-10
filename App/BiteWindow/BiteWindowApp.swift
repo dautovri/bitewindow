@@ -29,6 +29,7 @@ struct RootView: View {
             LogView().tabItem { Label("Log", systemImage: "book") }
             SettingsView().tabItem { Label("Settings", systemImage: "gearshape") }
         }
+        .tint(.teal)
         .task { pruneSamples() }
         // `initial: true` restarts sampling on launch when the toggle was left on.
         .onChange(of: livePressure, initial: true) { _, on in

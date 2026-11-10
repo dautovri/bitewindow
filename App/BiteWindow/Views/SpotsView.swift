@@ -5,6 +5,7 @@ import SwiftUI
 
 struct SpotsView: View {
     @Query(sort: \Spot.createdAt) private var spots: [Spot]
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationStack {
@@ -13,14 +14,72 @@ struct SpotsView: View {
                     ContentUnavailableView("No spots yet", systemImage: "mappin.and.ellipse",
                                            description: Text("Add a fishing spot from the Map tab to see its bite windows."))
                 } else {
-                    List(spots) { spot in
-                        NavigationLink(spot.name) { SpotDetailView(spot: spot) }
+                    List {
+                        ForEach(spots) { spot in
+                            NavigationLink {
+                                SpotDetailView(spot: spot)
+                            } label: {
+                                SpotRow(spot: spot)
+                            }
+                        }
+                        .onDelete { offsets in
+                            for index in offsets { modelContext.delete(spots[index]) }
+                        }
                     }
                 }
             }
             .navigationTitle("Forecast")
         }
     }
+}
+
+/// List row: today's best window and its index for one spot.
+private struct SpotRow: View {
+    let spot: Spot
+    @State private var window: BiteWindow?
+    @State private var loaded = false
+
+    private var subtitle: String {
+        if let window {
+            return "Best today \(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))"
+        }
+        return loaded ? "No forecast available" : "Loading…"
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            IndexGauge(index: window?.meanIndex, size: 46)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(spot.name).font(.headline)
+                Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
+                Text(spot.species.displayName).font(.caption).foregroundStyle(.tertiary)
+            }
+        }
+        .padding(.vertical, 2)
+        .task(id: "\(spot.waterRaw)|\(spot.speciesRaw)|\(spot.waterTempC ?? -999)") { await load() }
+    }
+
+    private func load() async {
+        var context = spot.context
+        if spot.isSalt {
+            context.tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
+        }
+        let forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude)
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        if let end = calendar.date(byAdding: .day, value: 1, to: today) {
+            let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end)
+                .filter { $0.time < end }
+            window = Forecaster.bestWindow(in: points)
+        }
+        loaded = true
+    }
+}
+
+private struct DaySummary: Identifiable {
+    let id: Date
+    let window: BiteWindow?
+    let points: [ScorePoint]
 }
 
 struct SpotDetailView: View {
@@ -31,7 +90,7 @@ struct SpotDetailView: View {
     @State private var tide: TideStation?
     @State private var showPaywall = false
 
-    private var isSalt: Bool { spot.water == .inshoreSalt || spot.water == .offshore }
+    private var isSalt: Bool { spot.isSalt }
 
     /// Spot context with tide attached for saltwater spots.
     private var context: SpotContext {
@@ -40,21 +99,15 @@ struct SpotDetailView: View {
         return c
     }
 
-    private struct DaySummary: Identifiable {
-        let id: Date
-        let window: BiteWindow?
-        let points: [ScorePoint]
-    }
-
     /// Free: today and tomorrow. Pro: the full 10-day horizon.
-    private var days: [DaySummary] {
+    private func computeDays(pressure: Terms.PressureSeries?) -> [DaySummary] {
         guard let forecast, !forecast.hours.isEmpty else { return [] }
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let count = entitlements.isPro ? 10 : 2
         guard let end = calendar.date(byAdding: .day, value: count, to: today) else { return [] }
         let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
-                                      pressure: livePressure)
+                                      pressure: pressure)
         return Dictionary(grouping: points) { calendar.startOfDay(for: $0.time) }
             .filter { $0.key < end }
             .map { DaySummary(id: $0.key, window: Forecaster.bestWindow(in: $0.value), points: $0.value) }
@@ -75,66 +128,74 @@ struct SpotDetailView: View {
 
     private var tripCount: Int { spot.fittedTrips.count }
 
+    private func timeRange(_ window: BiteWindow) -> String {
+        "\(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))"
+    }
+
     private func expectedCatchText(_ day: DaySummary, _ window: BiteWindow) -> String {
         let fish = CatchModel.expectedCatch(points: day.points, from: window.start, to: window.end)
             * spot.catchMultiplier.mean
         return "\(fish.formatted(.number.precision(.fractionLength(1)))) fish"
     }
 
+    /// Mean weighted contribution of each active factor over the window.
+    private func factors(_ day: DaySummary, _ window: BiteWindow) -> [FactorBreakdown.Factor] {
+        let inside = day.points.filter { $0.time >= window.start && $0.time <= window.end }
+        guard !inside.isEmpty else { return [] }
+        let n = Double(inside.count)
+        func mean(_ pick: (Contributions) -> Double) -> Double {
+            inside.reduce(0) { $0 + pick($1.contributions) } / n
+        }
+        var out: [FactorBreakdown.Factor] = [.init(name: "Light", value: mean { $0.light })]
+        if spot.waterTempC != nil { out.append(.init(name: "Water temperature", value: mean { $0.thermal })) }
+        out.append(.init(name: "Wind", value: mean { $0.wind }))
+        out.append(.init(name: "Pressure trend", value: mean { $0.pressure }))
+        out.append(.init(name: "Moon", value: mean { $0.solunar }))
+        if isSalt, tide != nil { out.append(.init(name: "Tide", value: mean { $0.tide })) }
+        return out
+    }
+
     var body: some View {
+        let pressure = livePressure
+        let days = computeDays(pressure: pressure)
         List {
-            if let forecast {
-                if forecast.source == .sample {
-                    Label("Sample weather — backend not configured", systemImage: "exclamationmark.triangle")
-                        .foregroundStyle(.orange)
-                } else if forecast.source == .cached {
-                    Label(forecast.hours.isEmpty ? "No forecast available offline" : "Offline — showing last saved forecast",
-                          systemImage: "wifi.slash")
-                        .foregroundStyle(.secondary)
+            statusSection(livePressure: pressure != nil)
+
+            if let today = days.first {
+                Section {
+                    if let window = today.window {
+                        HStack(spacing: 16) {
+                            IndexGauge(index: window.meanIndex, size: 78)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Best window").font(.subheadline).foregroundStyle(.secondary)
+                                Text(timeRange(window)).font(.title2.weight(.semibold)).monospacedDigit()
+                                Text(BiteScale.label(window.meanIndex))
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(BiteScale.color(window.meanIndex))
+                            }
+                        }
+                        .padding(.vertical, 6)
+                    } else {
+                        Text("Not enough forecast left for today.").foregroundStyle(.secondary)
+                    }
+                    dayDetail(today)
+                } header: {
+                    Text(today.id.formatted(.dateTime.weekday(.wide).month().day()))
                 }
-                if livePressure != nil {
-                    Label("Pressure trend from your phone's barometer", systemImage: "barometer")
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                ProgressView()
             }
 
-            ForEach(days) { day in
-                Section(day.id.formatted(date: .complete, time: .omitted)) {
-                    if let window = day.window {
-                        LabeledContent("Best window") {
-                            Text("\(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))")
-                        }
-                        LabeledContent("Bite index", value: "\(Int(window.meanIndex.rounded())) / 100")
-                    }
-                    if entitlements.isPro, let window = day.window {
-                        LabeledContent("Expected catch in window", value: expectedCatchText(day, window))
-                    }
-                    if isSalt, let tide {
-                        let next = tide.extremes(from: day.id, to: day.id.addingTimeInterval(86400))
-                        if !next.isEmpty {
-                            LabeledContent("Tides") {
-                                Text(next.map { "\($0.isHigh ? "H" : "L") \($0.time.formatted(date: .omitted, time: .shortened))" }
-                                    .joined(separator: "  "))
-                                    .font(.footnote.monospacedDigit())
-                            }
-                        }
+            if days.count > 1 {
+                Section("Coming up") {
+                    ForEach(Array(days.dropFirst())) { day in
                         if entitlements.isPro {
-                            Chart(tide.curve(from: day.id, to: day.id.addingTimeInterval(86400)), id: \.time) { sample in
-                                LineMark(x: .value("Time", sample.time), y: .value("Tide (m)", sample.height))
-                                    .interpolationMethod(.catmullRom)
+                            DisclosureGroup {
+                                dayDetail(day)
+                            } label: {
+                                dayLabel(day)
                             }
-                            .foregroundStyle(.teal)
-                            .frame(height: 100)
+                        } else {
+                            dayLabel(day)
                         }
-                    }
-                    if entitlements.isPro {
-                        Chart(day.points, id: \.time) { point in
-                            LineMark(x: .value("Time", point.time), y: .value("Index", point.index))
-                        }
-                        .chartYScale(domain: 0...100)
-                        .frame(height: 140)
                     }
                 }
             }
@@ -197,11 +258,80 @@ struct SpotDetailView: View {
             }
         }
         .navigationTitle(spot.name)
+        .navigationBarTitleDisplayMode(.inline)
         .task { forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude) }
         .task(id: spot.waterRaw) {
             guard isSalt, tide == nil else { return }
             tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
         }
         .sheet(isPresented: $showPaywall) { PaywallView() }
+    }
+
+    @ViewBuilder
+    private func statusSection(livePressure: Bool) -> some View {
+        if let forecast {
+            if forecast.source == .sample {
+                Label("Sample weather — backend not configured", systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(.orange)
+            } else if forecast.source == .cached {
+                Label(forecast.hours.isEmpty ? "No forecast available offline" : "Offline — showing last saved forecast",
+                      systemImage: "wifi.slash")
+                    .foregroundStyle(.secondary)
+            }
+            if livePressure {
+                Label("Pressure trend from your phone's barometer", systemImage: "barometer")
+                    .foregroundStyle(.secondary)
+            }
+        } else {
+            HStack {
+                ProgressView()
+                Text("Loading forecast…").foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func dayLabel(_ day: DaySummary) -> some View {
+        HStack(spacing: 12) {
+            IndexGauge(index: day.window?.meanIndex, size: 38)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(day.id.formatted(.dateTime.weekday(.wide).month().day()))
+                Text(day.window.map(timeRange) ?? "No forecast")
+                    .font(.subheadline)
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    /// Pro: expected catch, hourly curve and factor breakdown. Everyone: tide times.
+    @ViewBuilder
+    private func dayDetail(_ day: DaySummary) -> some View {
+        if entitlements.isPro {
+            if let window = day.window {
+                LabeledContent("Expected catch in window", value: expectedCatchText(day, window))
+            }
+            BiteCurveChart(points: day.points, window: day.window)
+                .frame(height: 150)
+                .padding(.vertical, 4)
+            if let window = day.window {
+                FactorBreakdown(factors: factors(day, window))
+            }
+        }
+        if isSalt, let tide {
+            let end = day.id.addingTimeInterval(86400)
+            let extremes = tide.extremes(from: day.id, to: end)
+            if !extremes.isEmpty {
+                LabeledContent("Tides") {
+                    Text(extremes.map { "\($0.isHigh ? "H" : "L") \($0.time.formatted(date: .omitted, time: .shortened))" }
+                        .joined(separator: "  "))
+                        .font(.footnote.monospacedDigit())
+                }
+            }
+            if entitlements.isPro {
+                TideChart(samples: tide.curve(from: day.id, to: end))
+                    .frame(height: 100)
+                    .padding(.vertical, 4)
+            }
+        }
     }
 }

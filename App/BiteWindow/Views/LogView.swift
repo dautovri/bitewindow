@@ -10,6 +10,7 @@ struct LogView: View {
     @Environment(\.modelContext) private var modelContext
 
     private var active: Trip? { trips.first { $0.isActive } }
+    private var finished: [Trip] { trips.filter { !$0.isActive } }
 
     var body: some View {
         NavigationStack {
@@ -20,27 +21,59 @@ struct LogView: View {
                     }
                 } else {
                     Section {
-                        Menu("Start trip") {
+                        Menu {
                             ForEach(spots) { spot in
                                 Button(spot.name) { modelContext.insert(Trip(spot: spot)) }
                             }
                             Button("No spot") { modelContext.insert(Trip(spot: nil)) }
+                        } label: {
+                            Label("Start trip", systemImage: "play.fill")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+
+                if !finished.isEmpty {
+                    Section("Totals") {
+                        let fish = finished.reduce(0) { $0 + $1.catchCount }
+                        let blanks = finished.filter { $0.catchCount == 0 }.count
+                        HStack {
+                            StatTile(value: "\(finished.count)", label: "Trips")
+                            StatTile(value: "\(fish)", label: "Fish")
+                            StatTile(value: "\(Int((Double(blanks) / Double(finished.count) * 100).rounded()))%", label: "Blank trips")
                         }
                     }
                 }
 
                 Section("History") {
-                    ForEach(trips.filter { !$0.isActive }) { trip in
-                        VStack(alignment: .leading) {
-                            Text(trip.spot?.name ?? "No spot")
-                            Text("\(trip.startedAt.formatted(date: .abbreviated, time: .shortened)) · \(trip.hours.formatted(.number.precision(.fractionLength(1)))) h · \(trip.catchCount) fish")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                    if finished.isEmpty {
+                        Text("No finished trips yet. Log every trip, blank ones included.")
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach(finished) { trip in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(trip.spot?.name ?? "No spot")
+                                Text("\(trip.startedAt.formatted(date: .abbreviated, time: .shortened)) · \(trip.hours.formatted(.number.precision(.fractionLength(1)))) h")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if trip.catchCount == 0 {
+                                Text("Blank").font(.subheadline).foregroundStyle(.secondary)
+                            } else {
+                                Label("\(trip.catchCount)", systemImage: "fish.fill")
+                                    .font(.headline)
+                                    .monospacedDigit()
+                                    .foregroundStyle(.teal)
+                            }
                         }
+                        .accessibilityElement(children: .combine)
                     }
                     .onDelete { offsets in
-                        let finished = trips.filter { !$0.isActive }
-                        for index in offsets { modelContext.delete(finished[index]) }
+                        let rows = finished
+                        for index in offsets { modelContext.delete(rows[index]) }
                     }
                 }
             }
@@ -53,11 +86,29 @@ private struct ActiveTripRow: View {
     @Bindable var trip: Trip
 
     var body: some View {
-        Text(trip.spot?.name ?? "No spot")
-        Text("Started \(trip.startedAt.formatted(date: .omitted, time: .shortened))")
-            .foregroundStyle(.secondary)
-        Stepper("Fish caught: \(trip.catchCount)", value: $trip.catchCount, in: 0...500)
-        Button(trip.catchCount == 0 ? "End trip — no fish" : "End trip") { end() }
+        VStack(alignment: .leading, spacing: 2) {
+            Text(trip.spot?.name ?? "No spot").font(.headline)
+            Text(trip.startedAt, style: .timer)
+                .font(.system(.largeTitle, design: .rounded).weight(.semibold))
+                .monospacedDigit()
+            Text("Started \(trip.startedAt.formatted(date: .omitted, time: .shortened))")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
+        Stepper(value: $trip.catchCount, in: 0...500) {
+            Label("\(trip.catchCount) fish", systemImage: "fish.fill")
+                .font(.title3.weight(.medium))
+                .monospacedDigit()
+        }
+        Button {
+            end()
+        } label: {
+            Text(trip.catchCount == 0 ? "End trip — no fish" : "End trip")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
     }
 
     /// Ends the trip and stores what the model expected for it, so the trip

@@ -19,21 +19,40 @@ struct SpotMapView: View {
         NavigationStack {
             Map(position: $position) {
                 ForEach(spots) { spot in
-                    Marker(spot.name, coordinate: CLLocationCoordinate2D(latitude: spot.latitude, longitude: spot.longitude))
+                    Marker(spot.name, systemImage: "fish.fill",
+                           coordinate: CLLocationCoordinate2D(latitude: spot.latitude, longitude: spot.longitude))
+                        .tint(.teal)
                 }
             }
+            .mapStyle(.hybrid)
+            .mapControls {
+                MapCompass()
+                MapScaleView()
+            }
             .onMapCameraChange { context in center = context.region.center }
-            .overlay { Image(systemName: "plus").font(.title2).allowsHitTesting(false) }
+            .overlay {
+                Image(systemName: "plus")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .shadow(radius: 2)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
             .safeAreaInset(edge: .bottom) {
-                Button("Add spot at crosshair") {
+                Button {
                     if !entitlements.isPro && spots.count >= EntitlementManager.freeSpotLimit {
                         showPaywall = true
                     } else {
                         newName = ""
                         showNamePrompt = true
                     }
+                } label: {
+                    Label("Add spot at crosshair", systemImage: "mappin.and.ellipse")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
+                .controlSize(.large)
                 .padding()
             }
             .navigationTitle("Map")

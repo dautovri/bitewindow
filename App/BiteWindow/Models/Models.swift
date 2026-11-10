@@ -42,6 +42,8 @@ final class Spot {
                     bankBearingDeg: bankBearingDeg, waterTempC: waterTempC)
     }
 
+    var isSalt: Bool { water == .inshoreSalt || water == .offshore }
+
     var activeTrip: Trip? { trips?.first { $0.isActive } }
 
     /// Finished trips that count toward the personal fit.
