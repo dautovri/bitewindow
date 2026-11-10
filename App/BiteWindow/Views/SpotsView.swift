@@ -41,18 +41,20 @@ private struct SpotRow: View {
 
     private var subtitle: String {
         if let window {
-            return "Best today \(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))"
+            let start = window.start.formatted(date: .omitted, time: .shortened)
+            let end = window.end.formatted(date: .omitted, time: .shortened)
+            return String(localized: "Best today \(start) – \(end)")
         }
-        return loaded ? "No forecast available" : "Loading…"
+        return loaded ? String(localized: "No forecast available") : String(localized: "Loading…")
     }
 
     var body: some View {
         HStack(spacing: 12) {
             IndexGauge(index: window?.meanIndex, size: 46)
             VStack(alignment: .leading, spacing: 2) {
-                Text(spot.name).font(.headline)
-                Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
-                Text(spot.species.displayName).font(.caption).foregroundStyle(.tertiary)
+                Text(verbatim: spot.name).font(.headline)
+                Text(verbatim: subtitle).font(.subheadline).foregroundStyle(.secondary)
+                Text(verbatim: spot.species.localizedName).font(.caption).foregroundStyle(.tertiary)
             }
         }
         .padding(.vertical, 2)
@@ -135,7 +137,7 @@ struct SpotDetailView: View {
     private func expectedCatchText(_ day: DaySummary, _ window: BiteWindow) -> String {
         let fish = CatchModel.expectedCatch(points: day.points, from: window.start, to: window.end)
             * spot.catchMultiplier.mean
-        return "\(fish.formatted(.number.precision(.fractionLength(1)))) fish"
+        return fish.formatted(.number.precision(.fractionLength(1)))
     }
 
     /// Mean weighted contribution of each active factor over the window.
@@ -146,12 +148,12 @@ struct SpotDetailView: View {
         func mean(_ pick: (Contributions) -> Double) -> Double {
             inside.reduce(0) { $0 + pick($1.contributions) } / n
         }
-        var out: [FactorBreakdown.Factor] = [.init(name: "Light", value: mean { $0.light })]
-        if spot.waterTempC != nil { out.append(.init(name: "Water temperature", value: mean { $0.thermal })) }
-        out.append(.init(name: "Wind", value: mean { $0.wind }))
-        out.append(.init(name: "Pressure trend", value: mean { $0.pressure }))
-        out.append(.init(name: "Moon", value: mean { $0.solunar }))
-        if isSalt, tide != nil { out.append(.init(name: "Tide", value: mean { $0.tide })) }
+        var out: [FactorBreakdown.Factor] = [.init(name: String(localized: "Light"), value: mean { $0.light })]
+        if spot.waterTempC != nil { out.append(.init(name: String(localized: "Water temperature"), value: mean { $0.thermal })) }
+        out.append(.init(name: String(localized: "Wind"), value: mean { $0.wind }))
+        out.append(.init(name: String(localized: "Pressure trend"), value: mean { $0.pressure }))
+        out.append(.init(name: String(localized: "Moon"), value: mean { $0.solunar }))
+        if isSalt, tide != nil { out.append(.init(name: String(localized: "Tide"), value: mean { $0.tide })) }
         return out
     }
 
@@ -168,7 +170,7 @@ struct SpotDetailView: View {
                             IndexGauge(index: window.meanIndex, size: 78)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Best window").font(.subheadline).foregroundStyle(.secondary)
-                                Text(timeRange(window)).font(.title2.weight(.semibold)).monospacedDigit()
+                                Text(verbatim: timeRange(window)).font(.title2.weight(.semibold)).monospacedDigit()
                                 Text(BiteScale.label(window.meanIndex))
                                     .font(.subheadline.weight(.medium))
                                     .foregroundStyle(BiteScale.color(window.meanIndex))
@@ -219,14 +221,16 @@ struct SpotDetailView: View {
             } header: {
                 Text("Your record")
             } footer: {
-                Text(tripCount == 0
-                     ? "Log trips here, blank ones included, and the expected catch adapts to you."
-                     : "Relative to the starting estimate. It moves slowly until about 20 trips are logged.")
+                if tripCount == 0 {
+                    Text("Log trips here, blank ones included, and the expected catch adapts to you.")
+                } else {
+                    Text("Relative to the starting estimate. It moves slowly until about 20 trips are logged.")
+                }
             }
 
             Section("Spot") {
                 Picker("Target species", selection: $spot.species) {
-                    ForEach(Species.allCases, id: \.self) { Text($0.displayName).tag($0) }
+                    ForEach(Species.allCases, id: \.self) { Text(verbatim: $0.localizedName).tag($0) }
                 }
                 Picker("Water", selection: $spot.water) {
                     Text("Warm freshwater").tag(WaterType.warmFreshwater)
@@ -274,9 +278,14 @@ struct SpotDetailView: View {
                 Label("Sample weather — backend not configured", systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
             } else if forecast.source == .cached {
-                Label(forecast.hours.isEmpty ? "No forecast available offline" : "Offline — showing last saved forecast",
-                      systemImage: "wifi.slash")
-                    .foregroundStyle(.secondary)
+                Group {
+                    if forecast.hours.isEmpty {
+                        Label("No forecast available offline", systemImage: "wifi.slash")
+                    } else {
+                        Label("Offline — showing last saved forecast", systemImage: "wifi.slash")
+                    }
+                }
+                .foregroundStyle(.secondary)
             }
             if livePressure {
                 Label("Pressure trend from your phone's barometer", systemImage: "barometer")
@@ -295,7 +304,7 @@ struct SpotDetailView: View {
             IndexGauge(index: day.window?.meanIndex, size: 38)
             VStack(alignment: .leading, spacing: 2) {
                 Text(day.id.formatted(.dateTime.weekday(.wide).month().day()))
-                Text(day.window.map(timeRange) ?? "No forecast")
+                Text(verbatim: day.window.map(timeRange) ?? String(localized: "No forecast"))
                     .font(.subheadline)
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
@@ -308,7 +317,7 @@ struct SpotDetailView: View {
     private func dayDetail(_ day: DaySummary) -> some View {
         if entitlements.isPro {
             if let window = day.window {
-                LabeledContent("Expected catch in window", value: expectedCatchText(day, window))
+                LabeledContent("Expected fish in window", value: expectedCatchText(day, window))
             }
             BiteCurveChart(points: day.points, window: day.window)
                 .frame(height: 150)
@@ -322,7 +331,7 @@ struct SpotDetailView: View {
             let extremes = tide.extremes(from: day.id, to: end)
             if !extremes.isEmpty {
                 LabeledContent("Tides") {
-                    Text(extremes.map { "\($0.isHigh ? "H" : "L") \($0.time.formatted(date: .omitted, time: .shortened))" }
+                    Text(verbatim: extremes.map { "\($0.isHigh ? "▲" : "▼") \($0.time.formatted(date: .omitted, time: .shortened))" }
                         .joined(separator: "  "))
                         .font(.footnote.monospacedDigit())
                 }

@@ -24,12 +24,14 @@ struct SettingsView: View {
                     Toggle("Live pressure from my phone", isOn: $livePressure)
                         .disabled(!sampler.isAvailable)
                     if let hPa = sampler.latestHPa {
-                        LabeledContent("Station pressure", value: "\(hPa.formatted(.number.precision(.fractionLength(1)))) hPa")
+                        LabeledContent("Station pressure", value: Measurement(value: hPa, unit: UnitPressure.hectopascals).formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(1)))))
                     }
                 } footer: {
-                    Text(sampler.isAvailable
-                         ? "Samples are stored on this device only, while the app is open, and deleted after three days. During a trip they replace the forecast pressure trend at that spot."
-                         : "This device has no barometer.")
+                    if sampler.isAvailable {
+                        Text("Samples are stored on this device only, while the app is open, and deleted after three days. During a trip they replace the forecast pressure trend at that spot.")
+                    } else {
+                        Text("This device has no barometer.")
+                    }
                 }
 
                 Section {

@@ -69,7 +69,7 @@ struct SpotMapView: View {
     private func addSpot() {
         guard let center else { return }
         let name = newName.trimmingCharacters(in: .whitespaces)
-        modelContext.insert(Spot(name: name.isEmpty ? "Spot \(spots.count + 1)" : name,
+        modelContext.insert(Spot(name: name.isEmpty ? String(localized: "Spot \(spots.count + 1)") : name,
                                  latitude: center.latitude, longitude: center.longitude))
     }
 }

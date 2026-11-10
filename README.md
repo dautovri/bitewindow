@@ -60,6 +60,10 @@ The app runs on synthetic sample weather until `BiteAPIBase` in `App/project.yml
 - `GET /tide?gh=<geohash-5>` returns `{ gh, station, km }`, `station` in the engine's `TideStation` JSON (or null). Station list cached 7 days, per-cell result 30 days.
 - Saltwater spots (inshore, offshore) attach the station to `SpotContext.tide`, which turns on the tide term, and list the day's high/low times. Free and Pro both see tide times.
 
+## Languages
+
+English plus 17 translations in `App/BiteWindow/Localizable.xcstrings` (103 strings) and `InfoPlist.xcstrings`: de, nl, sv, nb, da, es, fr, it, pt-BR, fi, pl, ru, uk, tr, ja, ko, zh-Hans. Machine-translated, not reviewed by native speakers; species names for walleye and muskellunge are the least certain. Dates, times and numbers follow the device locale. Species names in `BiteCore` stay English; the app uses `Species.localizedName`. Tide station names come from NOAA in English.
+
 ## Not built yet
 
 - Personal model: only the per-spot catch-rate scale is fitted (`CatchRateMultiplier`). Factor weights are not refitted from the log.

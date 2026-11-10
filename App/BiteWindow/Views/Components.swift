@@ -2,6 +2,18 @@ import BiteCore
 import Charts
 import SwiftUI
 
+extension Species {
+    /// `displayName` in BiteCore is English only; the app shows this.
+    var localizedName: String {
+        switch self {
+        case .largemouthBass: return String(localized: "Largemouth bass")
+        case .walleye: return String(localized: "Walleye")
+        case .northernPike: return String(localized: "Northern pike")
+        case .rainbowTrout: return String(localized: "Rainbow trout")
+        }
+    }
+}
+
 /// Colour and wording for a bite index. 50 is neutral.
 enum BiteScale {
     static func color(_ index: Double?) -> Color {
@@ -16,10 +28,10 @@ enum BiteScale {
 
     static func label(_ index: Double) -> String {
         switch index {
-        case 65...: return "Strong bite"
-        case 50..<65: return "Above average"
-        case 35..<50: return "Below average"
-        default: return "Slow"
+        case 65...: return String(localized: "Strong bite")
+        case 50..<65: return String(localized: "Above average")
+        case 35..<50: return String(localized: "Below average")
+        default: return String(localized: "Slow")
         }
     }
 }
@@ -44,7 +56,7 @@ struct IndexGauge: View {
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Bite index")
-        .accessibilityValue(index.map { "\(Int($0.rounded())) of 100" } ?? "not available")
+        .accessibilityValue(index.map { String(localized: "\(Int($0.rounded())) of 100") } ?? String(localized: "not available"))
     }
 }
 
@@ -136,7 +148,7 @@ struct FactorBreakdown: View {
                 .foregroundStyle(.secondary)
             ForEach(factors) { factor in
                 HStack {
-                    Text(factor.name).font(.subheadline)
+                    Text(verbatim: factor.name).font(.subheadline)
                     Spacer()
                     bar(factor.value)
                     Image(systemName: factor.value > 0.02 ? "arrow.up" : factor.value < -0.02 ? "arrow.down" : "minus")
@@ -145,8 +157,8 @@ struct FactorBreakdown: View {
                         .frame(width: 16)
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(factor.name)
-                .accessibilityValue(factor.value > 0.02 ? "helps" : factor.value < -0.02 ? "hurts" : "neutral")
+                .accessibilityLabel(Text(verbatim: factor.name))
+                .accessibilityValue(factor.value > 0.02 ? String(localized: "helps") : factor.value < -0.02 ? String(localized: "hurts") : String(localized: "neutral"))
             }
         }
         .padding(.vertical, 4)
@@ -175,8 +187,8 @@ struct StatTile: View {
 
     var body: some View {
         VStack(spacing: 2) {
-            Text(value).font(.title3.weight(.bold)).monospacedDigit()
-            Text(label).font(.caption).foregroundStyle(.secondary)
+            Text(verbatim: value).font(.title3.weight(.bold)).monospacedDigit()
+            Text(verbatim: label).font(.caption).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)

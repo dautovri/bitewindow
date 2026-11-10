@@ -1,0 +1,119 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSMotionUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aflæser barometeret i din iPhone for at følge tryktendensen i realtid på din plads."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liest das Barometer deines iPhones aus, um den aktuellen Drucktrend an deinem Spot zu verfolgen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reads your phone's barometer to track the live pressure trend at your spot."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lee el barómetro de tu teléfono para seguir en vivo la tendencia de la presión en tu lugar de pesca."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lukee puhelimesi ilmanpainemittaria seuratakseen reaaliaikaista painetrendiä paikallasi."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lit le baromètre de votre téléphone pour suivre en direct la tendance de la pression sur votre spot."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legge il barometro del tuo telefono per seguire in tempo reale la tendenza della pressione nel tuo spot."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ポイントの気圧傾向をリアルタイムで把握するため、スマートフォンの気圧計を読み取ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "포인트의 실시간 기압 추세를 추적하기 위해 휴대폰의 기압계를 읽습니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leser av barometeret i iPhonen din for å følge trykktrenden i sanntid på plassen din."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leest de barometer van je iPhone uit om de actuele druktrend op je stek te volgen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odczytuje barometr telefonu, aby śledzić na żywo trend ciśnienia na Twoim łowisku."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lê o barômetro do seu telefone para acompanhar ao vivo a tendência da pressão no seu ponto."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считывает показания барометра телефона, чтобы отслеживать тренд давления на вашем месте в реальном времени."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läser av barometern i din iPhone för att följa trycktrenden i realtid på din plats."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meranızdaki canlı basınç eğilimini izlemek için telefonunuzun barometresini okur."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зчитує показники барометра телефона, щоб відстежувати тренд тиску на вашому місці в реальному часі."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "读取手机气压计，以追踪钓点的实时气压趋势。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

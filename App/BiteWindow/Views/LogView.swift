@@ -39,9 +39,9 @@ struct LogView: View {
                         let fish = finished.reduce(0) { $0 + $1.catchCount }
                         let blanks = finished.filter { $0.catchCount == 0 }.count
                         HStack {
-                            StatTile(value: "\(finished.count)", label: "Trips")
-                            StatTile(value: "\(fish)", label: "Fish")
-                            StatTile(value: "\(Int((Double(blanks) / Double(finished.count) * 100).rounded()))%", label: "Blank trips")
+                            StatTile(value: "\(finished.count)", label: String(localized: "Trips"))
+                            StatTile(value: "\(fish)", label: String(localized: "Fish"))
+                            StatTile(value: "\(Int((Double(blanks) / Double(finished.count) * 100).rounded()))%", label: String(localized: "Blank trips"))
                         }
                     }
                 }
@@ -54,8 +54,8 @@ struct LogView: View {
                     ForEach(finished) { trip in
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(trip.spot?.name ?? "No spot")
-                                Text("\(trip.startedAt.formatted(date: .abbreviated, time: .shortened)) · \(trip.hours.formatted(.number.precision(.fractionLength(1)))) h")
+                                Text(verbatim: trip.spot?.name ?? String(localized: "No spot"))
+                                Text(verbatim: "\(trip.startedAt.formatted(date: .abbreviated, time: .shortened)) · \(Measurement(value: trip.hours, unit: UnitDuration.hours).formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(1)))))")
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
                             }
@@ -63,7 +63,7 @@ struct LogView: View {
                             if trip.catchCount == 0 {
                                 Text("Blank").font(.subheadline).foregroundStyle(.secondary)
                             } else {
-                                Label("\(trip.catchCount)", systemImage: "fish.fill")
+                                Label { Text(verbatim: "\(trip.catchCount)") } icon: { Image(systemName: "fish.fill") }
                                     .font(.headline)
                                     .monospacedDigit()
                                     .foregroundStyle(.teal)
@@ -87,7 +87,7 @@ private struct ActiveTripRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(trip.spot?.name ?? "No spot").font(.headline)
+            Text(verbatim: trip.spot?.name ?? String(localized: "No spot")).font(.headline)
             Text(trip.startedAt, style: .timer)
                 .font(.system(.largeTitle, design: .rounded).weight(.semibold))
                 .monospacedDigit()
@@ -97,16 +97,18 @@ private struct ActiveTripRow: View {
         }
         .padding(.vertical, 4)
         Stepper(value: $trip.catchCount, in: 0...500) {
-            Label("\(trip.catchCount) fish", systemImage: "fish.fill")
+            Label("Fish caught: \(trip.catchCount)", systemImage: "fish.fill")
                 .font(.title3.weight(.medium))
                 .monospacedDigit()
         }
         Button {
             end()
         } label: {
-            Text(trip.catchCount == 0 ? "End trip — no fish" : "End trip")
-                .font(.headline)
-                .frame(maxWidth: .infinity)
+            Group {
+                if trip.catchCount == 0 { Text("End trip — no fish") } else { Text("End trip") }
+            }
+            .font(.headline)
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
     }

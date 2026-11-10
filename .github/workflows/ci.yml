@@ -34,5 +34,14 @@ jobs:
       - run: >
           xcodebuild -project BiteWindow.xcodeproj -scheme BiteWindow
           -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath build
           CODE_SIGNING_ALLOWED=NO build
         working-directory: App
+      - name: Check bundled localizations
+        working-directory: App
+        run: |
+          app=build/Build/Products/Debug-iphonesimulator/BiteWindow.app
+          for l in en de nl sv nb da es fr it pt-BR fi pl ru uk tr ja ko zh-Hans; do
+            test -f "$app/$l.lproj/Localizable.strings" || { echo "missing $l"; ls "$app"; exit 1; }
+          done
+          test -f "$app/de.lproj/InfoPlist.strings"
