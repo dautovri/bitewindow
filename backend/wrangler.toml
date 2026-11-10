@@ -1,0 +1,15 @@
+name = "bitewindow-wx"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+# Create with: wrangler kv namespace create WX_CACHE, then paste the id.
+[[kv_namespaces]]
+binding = "WX_CACHE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+WEATHERKIT_TEAM_ID = "REPLACE_TEAM_ID"
+WEATHERKIT_SERVICE_ID = "REPLACE_SERVICE_ID"
+WEATHERKIT_KEY_ID = "REPLACE_KEY_ID"
+
+# Secret: wrangler secret put WEATHERKIT_PRIVATE_KEY   (contents of the .p8 file)
