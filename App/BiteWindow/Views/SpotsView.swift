@@ -28,7 +28,17 @@ struct SpotDetailView: View {
     @Environment(EntitlementManager.self) private var entitlements
     @Query(sort: \PressureSample.time) private var samples: [PressureSample]
     @State private var forecast: Forecast?
+    @State private var tide: TideStation?
     @State private var showPaywall = false
+
+    private var isSalt: Bool { spot.water == .inshoreSalt || spot.water == .offshore }
+
+    /// Spot context with tide attached for saltwater spots.
+    private var context: SpotContext {
+        var c = spot.context
+        if isSalt { c.tide = tide }
+        return c
+    }
 
     private struct DaySummary: Identifiable {
         let id: Date
@@ -43,7 +53,7 @@ struct SpotDetailView: View {
         let today = calendar.startOfDay(for: Date())
         let count = entitlements.isPro ? 10 : 2
         guard let end = calendar.date(byAdding: .day, value: count, to: today) else { return [] }
-        let points = Forecaster.curve(context: spot.context, hours: forecast.hours, from: today, to: end,
+        let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
                                       pressure: livePressure)
         return Dictionary(grouping: points) { calendar.startOfDay(for: $0.time) }
             .filter { $0.key < end }
@@ -101,6 +111,16 @@ struct SpotDetailView: View {
                     if entitlements.isPro, let window = day.window {
                         LabeledContent("Expected catch in window", value: expectedCatchText(day, window))
                     }
+                    if isSalt, let tide {
+                        let next = tide.extremes(from: day.id, to: day.id.addingTimeInterval(86400))
+                        if !next.isEmpty {
+                            LabeledContent("Tides") {
+                                Text(next.map { "\($0.isHigh ? "H" : "L") \($0.time.formatted(date: .omitted, time: .shortened))" }
+                                    .joined(separator: "  "))
+                                    .font(.footnote.monospacedDigit())
+                            }
+                        }
+                    }
                     if entitlements.isPro {
                         Chart(day.points, id: \.time) { point in
                             LineMark(x: .value("Time", point.time), y: .value("Index", point.index))
@@ -149,6 +169,19 @@ struct SpotDetailView: View {
                     .keyboardType(.decimalPad)
             }
 
+            if isSalt {
+                Section {
+                    if let tide {
+                        LabeledContent("Tide station", value: tide.name)
+                    } else {
+                        Text("No tide station found near this spot. The score runs without tide.")
+                            .foregroundStyle(.secondary)
+                    }
+                } footer: {
+                    Text("Tide predictions from NOAA harmonic constants. Not for navigation.")
+                }
+            }
+
             Section {
                 Link("Weather data: Apple Weather — legal attribution",
                      destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
@@ -157,6 +190,10 @@ struct SpotDetailView: View {
         }
         .navigationTitle(spot.name)
         .task { forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude) }
+        .task(id: spot.waterRaw) {
+            guard isSalt, tide == nil else { return }
+            tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
+        }
         .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 }

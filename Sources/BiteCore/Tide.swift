@@ -79,6 +79,36 @@ public struct TideStation: Codable, Sendable, Equatable {
         return sum
     }
 
+    public struct Extreme: Sendable, Equatable {
+        public let time: Date
+        public let height: Double
+        public let isHigh: Bool
+    }
+
+    /// High and low waters in `[from, to]`: sign changes of the rate, scanned
+    /// every `step` seconds and refined by bisection to under a minute.
+    public func extremes(from: Date, to: Date, step: TimeInterval = 600) -> [Extreme] {
+        guard to > from, step > 0 else { return [] }
+        var out: [Extreme] = []
+        var t0 = from, r0 = rate(at: from)
+        while t0 < to {
+            let t1 = min(to, t0.addingTimeInterval(step))
+            let r1 = rate(at: t1)
+            if r0 > 0 && r1 <= 0 || r0 < 0 && r1 >= 0 {
+                var lo = t0, hi = t1
+                let rising = r0 > 0
+                while hi.timeIntervalSince(lo) > 30 {
+                    let mid = lo.addingTimeInterval(hi.timeIntervalSince(lo) / 2)
+                    if (rate(at: mid) > 0) == rising { lo = mid } else { hi = mid }
+                }
+                let t = lo.addingTimeInterval(hi.timeIntervalSince(lo) / 2)
+                out.append(Extreme(time: t, height: height(at: t), isHigh: rising))
+            }
+            t0 = t1; r0 = r1
+        }
+        return out
+    }
+
     /// Rate of change in metres per hour (central difference over 10 minutes).
     public func rate(at date: Date) -> Double {
         let dt: TimeInterval = 300

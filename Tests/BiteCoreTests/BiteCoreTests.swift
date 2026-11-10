@@ -198,6 +198,18 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertNotEqual(st.height(at: t), st.height(at: t.addingTimeInterval(period / 2)), accuracy: 0.05)
     }
 
+    func testS2ExtremesAtSixHourIntervals() {
+        let st = TideStation(id: "t", name: "t", meanLevel: 2,
+                             constituents: [.init(name: "S2", amplitude: 1, phase: 0)])
+        let ex = st.extremes(from: utc(2026, 4, 1, 1), to: utc(2026, 4, 2, 1))
+        XCTAssertEqual(ex.map(\.isHigh), [false, true, false, true])
+        for (e, h) in zip(ex, [6, 12, 18, 24]) {
+            XCTAssertEqual(e.time.timeIntervalSince(utc(2026, 4, 1, h)), 0, accuracy: 60)
+            XCTAssertEqual(e.height, e.isHigh ? 3 : 1, accuracy: 1e-4)
+        }
+        XCTAssertTrue(st.extremes(from: utc(2026, 4, 1, 1), to: utc(2026, 4, 1, 1)).isEmpty)
+    }
+
     func testTideTermRange() {
         XCTAssertEqual(Terms.tide(rate: 0, maxRateOfDay: 0.5), -1)
         XCTAssertEqual(Terms.tide(rate: -0.5, maxRateOfDay: 0.5), 1)

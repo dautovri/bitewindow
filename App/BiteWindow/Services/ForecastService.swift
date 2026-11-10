@@ -69,6 +69,31 @@ final class ForecastService {
         return CatchModel.expectedCatch(points: points, from: from, to: to)
     }
 
+    private struct TidePayload: Codable {
+        let gh: String
+        let station: TideStation?
+    }
+
+    /// Harmonic constants for the nearest NOAA station, or nil when there is
+    /// none in range, no backend, or no network and nothing cached. Cached on
+    /// disk indefinitely: constants change on the scale of years.
+    func tideStation(latitude: Double, longitude: Double) async -> TideStation? {
+        let gh = Geohash.encode(latitude: latitude, longitude: longitude, precision: 5)
+        let file = Self.cacheFile("tide-\(gh)")
+        if let data = try? Data(contentsOf: file), let cached = try? JSONDecoder().decode(TidePayload.self, from: data) {
+            return cached.station
+        }
+        guard let baseURL else { return nil }
+        var components = URLComponents(url: baseURL.appendingPathComponent("tide"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "gh", value: gh)]
+        guard let url = components?.url,
+              let result = try? await URLSession.shared.data(from: url),
+              (result.1 as? HTTPURLResponse)?.statusCode == 200,
+              let payload = try? JSONDecoder().decode(TidePayload.self, from: result.0) else { return nil }
+        try? result.0.write(to: file, options: .atomic)
+        return payload.station
+    }
+
     private static func decode(_ data: Data) -> [HourConditions]? {
         guard let payload = try? JSONDecoder().decode(Payload.self, from: data) else { return nil }
         let plain = ISO8601DateFormatter()
@@ -84,7 +109,7 @@ final class ForecastService {
     private static func cacheFile(_ gh: String) -> URL {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("forecast-\(gh).json")
+        return dir.appendingPathComponent(gh.hasPrefix("tide-") ? "\(gh).json" : "forecast-\(gh).json")
     }
 
     /// Deterministic synthetic weather so the app runs before the backend exists.

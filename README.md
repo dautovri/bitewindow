@@ -6,16 +6,16 @@ Evidence-calibrated fishing bite-window prediction for iOS. Working name.
 |---|---|---|
 | Engine | `Sources/BiteCore` | Pure Swift: sun/moon ephemeris, solunar periods, bite-score terms, tide harmonics, Gamma–Poisson personalization, geohash |
 | App | `App/` | SwiftUI + SwiftData + StoreKit 2 + CoreMotion + MapKit, iOS 17+, generated with XcodeGen |
-| Backend | `backend/` | Cloudflare Worker: WeatherKit REST behind a geohash-5 / hourly KV cache |
+| Backend | `backend/` | Cloudflare Worker: WeatherKit REST behind a geohash-5 / hourly KV cache; NOAA CO-OPS harmonic constants for the nearest tide station (`/tide`) |
 
 ## Status
 
 | Component | State |
 |---|---|
 | `BiteCore` | 22 unit tests passed on Linux (Swift 6.0.3); `Personal.swift` and its 4 tests were written without a Swift toolchain and have never been compiled or run |
-| `backend` | 7 tests pass on Node 22; never deployed, never called the live WeatherKit API |
+| `backend` | 11 tests pass on Node 22; never deployed, never called the live WeatherKit or NOAA APIs (NOAA response shapes taken from docs) |
 | `App` | **Never compiled.** Written without Xcode; the `ios` CI job is its first build |
-| Tide engine | 8 constituents, tested for self-consistency only; not checked against NOAA predictions |
+| Tide engine | 8 constituents, tested for self-consistency only; not checked against NOAA predictions. `extremes` and its test never compiled |
 | Species thermal parameters, factor weights | Heuristic placeholders (see `docs/SCIENCE.md`) |
 
 ## Run
@@ -53,9 +53,14 @@ The app runs on synthetic sample weather until `BiteAPIBase` in `App/project.yml
 - The 0.5 fish/h baseline is a placeholder. The multiplier corrects it per spot once trips accumulate.
 - While a trip is active at a spot, phone barometer samples taken since the trip started replace the forecast pressure trace over the sampled span (`Barometry.fuse`: median offset removed, readings more than 2 hPa off dropped, at least 3 readings over 30 minutes).
 
+## Tides (as implemented)
+
+- `GET /tide?gh=<geohash-5>` returns `{ gh, station, km }`, `station` in the engine's `TideStation` JSON (or null). Station list cached 7 days, per-cell result 30 days.
+- Saltwater spots (inshore, offshore) attach the station to `SpotContext.tide`, which turns on the tide term, and list the day's high/low times. Free and Pro both see tide times.
+
 ## Not built yet
 
 - Personal model: only the per-spot catch-rate scale is fitted (`CatchRateMultiplier`). Factor weights are not refitted from the log.
 - Barometer: old `PressureSample` rows are never pruned; the "live pressure" toggle resets on launch.
-- Tides in the app: `TideStation` exists; no station data or UI.
+- Tides: US (NOAA) stations only; within 40 km of the spot; no validation against NOAA published predictions; no tide curve chart.
 - Bathymetry overlays, offline map packs, push alerts, CoreML model, App Store Server Notifications, backend rate limiting / App Attest.
