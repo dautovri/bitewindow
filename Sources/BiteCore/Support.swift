@@ -30,6 +30,11 @@ public struct CatchRateMultiplier: Codable, Sendable, Equatable {
 public enum Barometry {
     public static func hPa(fromKPa kPa: Double) -> Double { kPa * 10 }
 
+    /// Device samples older than this are never read again: `fuse` only uses
+    /// readings taken during a trip, and trips over `CatchModel.maxTripHours`
+    /// are ignored. Three days leaves margin for a trip left running.
+    public static let sampleRetention: TimeInterval = 72 * 3600
+
     /// Reduces station pressure to sea level.
     public static func seaLevel(stationHPa p: Double, altitudeMeters h: Double, tempC t: Double) -> Double {
         p * pow(1 - 0.0065 * h / (t + 0.0065 * h + 273.15), -5.257)

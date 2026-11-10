@@ -8,6 +8,9 @@ import Observation
 @MainActor
 @Observable
 final class PressureSampler {
+    /// UserDefaults key of the "live pressure" toggle.
+    nonisolated static let enabledKey = "livePressure"
+
     private let altimeter = CMAltimeter()
     private var burst: [Double] = []
     private var lastStored: Date?

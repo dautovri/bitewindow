@@ -120,6 +120,14 @@ struct SpotDetailView: View {
                                     .font(.footnote.monospacedDigit())
                             }
                         }
+                        if entitlements.isPro {
+                            Chart(tide.curve(from: day.id, to: day.id.addingTimeInterval(86400)), id: \.time) { sample in
+                                LineMark(x: .value("Time", sample.time), y: .value("Tide (m)", sample.height))
+                                    .interpolationMethod(.catmullRom)
+                            }
+                            .foregroundStyle(.teal)
+                            .frame(height: 100)
+                        }
                     }
                     if entitlements.isPro {
                         Chart(day.points, id: \.time) { point in
@@ -136,7 +144,7 @@ struct SpotDetailView: View {
                     Button {
                         showPaywall = true
                     } label: {
-                        Label("Unlock hourly curve, expected catch and 10-day outlook", systemImage: "lock")
+                        Label("Unlock hourly curve, tide curve, expected catch and 10-day outlook", systemImage: "lock")
                     }
                 }
             }

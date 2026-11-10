@@ -14,6 +14,8 @@ targets:
       - BiteWindow
     dependencies:
       - package: BiteCore
+    scheme:
+      testTargets: []
     info:
       path: BiteWindow/Info.plist
       properties:

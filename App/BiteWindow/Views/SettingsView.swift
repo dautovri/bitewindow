@@ -5,9 +5,9 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(EntitlementManager.self) private var entitlements
     @Environment(PressureSampler.self) private var sampler
-    @Environment(\.modelContext) private var modelContext
     @State private var showPaywall = false
-    @State private var livePressure = false
+    /// Sampling itself is started and stopped by `RootView`, which observes the same key.
+    @AppStorage(PressureSampler.enabledKey) private var livePressure = false
 
     var body: some View {
         NavigationStack {
@@ -28,7 +28,7 @@ struct SettingsView: View {
                     }
                 } footer: {
                     Text(sampler.isAvailable
-                         ? "Samples are stored on this device only, while the app is open. During a trip they replace the forecast pressure trend at that spot."
+                         ? "Samples are stored on this device only, while the app is open, and deleted after three days. During a trip they replace the forecast pressure trend at that spot."
                          : "This device has no barometer.")
                 }
 
@@ -38,16 +38,6 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .sheet(isPresented: $showPaywall) { PaywallView() }
-            .onChange(of: livePressure) { _, on in
-                if on {
-                    let context = modelContext
-                    sampler.start { hPa in
-                        context.insert(PressureSample(time: Date(), stationHPa: hPa))
-                    }
-                } else {
-                    sampler.stop()
-                }
-            }
         }
     }
 }
@@ -61,7 +51,7 @@ struct PaywallView: View {
             VStack(spacing: 8) {
                 Image(systemName: "fish").font(.largeTitle)
                 Text("BiteWindow Pro").font(.title2.bold())
-                Text("Hourly bite curve, expected catch tuned to your log, 10-day outlook and unlimited spots.")
+                Text("Hourly bite curve, tide curve, expected catch tuned to your log, 10-day outlook and unlimited spots.")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
             }

@@ -109,6 +109,24 @@ public struct TideStation: Codable, Sendable, Equatable {
         return out
     }
 
+    public struct Sample: Sendable, Equatable {
+        public let time: Date
+        public let height: Double
+    }
+
+    /// Heights every `step` seconds over `[from, to]`, both ends included, for plotting.
+    public func curve(from: Date, to: Date, step: TimeInterval = 900) -> [Sample] {
+        guard to >= from, step > 0 else { return [] }
+        var out: [Sample] = []
+        var t = from
+        while t < to {
+            out.append(Sample(time: t, height: height(at: t)))
+            t = t.addingTimeInterval(step)
+        }
+        out.append(Sample(time: to, height: height(at: to)))
+        return out
+    }
+
     /// Rate of change in metres per hour (central difference over 10 minutes).
     public func rate(at date: Date) -> Double {
         let dt: TimeInterval = 300

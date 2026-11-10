@@ -68,10 +68,11 @@ private struct ActiveTripRow: View {
         trip.expectedCatch = CatchModel.expectedCatch(points: [], from: start, to: finish)
         trip.endedAt = finish
         guard finish.timeIntervalSince(start) <= CatchModel.maxTripHours * 3600 else { return }
-        var context = trip.spot?.context
+        let base = trip.spot?.context
         let ended = trip
         Task { @MainActor in
-            if let c = context, c.water == .inshoreSalt || c.water == .offshore {
+            var context = base
+            if let c = base, c.water == .inshoreSalt || c.water == .offshore {
                 context?.tide = await ForecastService.shared.tideStation(latitude: c.latitude, longitude: c.longitude)
             }
             ended.expectedCatch = await ForecastService.shared.expectedCatch(context: context, from: start, to: finish)

@@ -12,10 +12,10 @@ Evidence-calibrated fishing bite-window prediction for iOS. Working name.
 
 | Component | State |
 |---|---|
-| `BiteCore` | 22 unit tests passed on Linux (Swift 6.0.3); `Personal.swift` and its 4 tests were written without a Swift toolchain and have never been compiled or run |
+| `BiteCore` | 28 unit tests pass on Linux (Swift 6.0, container `swift:6.0`) |
 | `backend` | 11 tests pass on Node 22; never deployed, never called the live WeatherKit or NOAA APIs (NOAA response shapes taken from docs) |
 | `App` | **Never compiled.** Written without Xcode; the `ios` CI job is its first build |
-| Tide engine | 8 constituents, tested for self-consistency only; not checked against NOAA predictions. `extremes` and its test never compiled |
+| Tide engine | 8 constituents, tested for self-consistency only; not checked against NOAA predictions |
 | Species thermal parameters, factor weights | Heuristic placeholders (see `docs/SCIENCE.md`) |
 
 ## Run
@@ -44,6 +44,7 @@ The app runs on synthetic sample weather until `BiteAPIBase` in `App/project.yml
 | Saved spots | 3 | unlimited |
 | Daily best window + index | today, tomorrow | 10 days |
 | Hourly bite curve | no | yes |
+| Tide height curve (saltwater) | no | yes |
 | Expected catch in the best window, scaled by your log | no | yes |
 
 ## Personal model and barometer (as implemented)
@@ -52,6 +53,7 @@ The app runs on synthetic sample weather until `BiteAPIBase` in `App/project.yml
 - `Spot.catchMultiplier` is the Gamma–Poisson posterior over that spot's finished trips of 24 h or less. Pro shows `expected catch in window × multiplier`. The bite index and the window timing do not change.
 - The 0.5 fish/h baseline is a placeholder. The multiplier corrects it per spot once trips accumulate.
 - While a trip is active at a spot, phone barometer samples taken since the trip started replace the forecast pressure trace over the sampled span (`Barometry.fuse`: median offset removed, readings more than 2 hPa off dropped, at least 3 readings over 30 minutes).
+- The "live pressure" toggle persists across launches (`UserDefaults`); samples older than 72 h are deleted at launch.
 
 ## Tides (as implemented)
 
@@ -61,6 +63,5 @@ The app runs on synthetic sample weather until `BiteAPIBase` in `App/project.yml
 ## Not built yet
 
 - Personal model: only the per-spot catch-rate scale is fitted (`CatchRateMultiplier`). Factor weights are not refitted from the log.
-- Barometer: old `PressureSample` rows are never pruned; the "live pressure" toggle resets on launch.
-- Tides: US (NOAA) stations only; within 40 km of the spot; no validation against NOAA published predictions; no tide curve chart.
+- Tides: US (NOAA) stations only; within 40 km of the spot; no validation against NOAA published predictions.
 - Bathymetry overlays, offline map packs, push alerts, CoreML model, App Store Server Notifications, backend rate limiting / App Attest.

@@ -198,6 +198,22 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertNotEqual(st.height(at: t), st.height(at: t.addingTimeInterval(period / 2)), accuracy: 0.05)
     }
 
+    func testTideCurveCoversBothEndsAndMatchesHeight() {
+        let st = TideStation(id: "t", name: "t", meanLevel: 1,
+                             constituents: [.init(name: "S2", amplitude: 0.5, phase: 0)])
+        let from = utc(2026, 5, 1), to = utc(2026, 5, 2)
+        let c = st.curve(from: from, to: to, step: 900)
+        XCTAssertEqual(c.count, 97)
+        XCTAssertEqual(c.first?.time, from)
+        XCTAssertEqual(c.last?.time, to)
+        for s in c { XCTAssertEqual(s.height, st.height(at: s.time), accuracy: 1e-12) }
+        XCTAssertEqual(c.map(\.height).max() ?? 0, 1.5, accuracy: 1e-6)
+        XCTAssertTrue(st.curve(from: to, to: from).isEmpty)
+        // A span that is not a multiple of the step still ends exactly at `to`.
+        XCTAssertEqual(st.curve(from: from, to: from.addingTimeInterval(1000), step: 900).map { $0.time.timeIntervalSince(from) },
+                       [0, 900, 1000])
+    }
+
     func testS2ExtremesAtSixHourIntervals() {
         let st = TideStation(id: "t", name: "t", meanLevel: 2,
                              constituents: [.init(name: "S2", amplitude: 1, phase: 0)])
