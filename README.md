@@ -14,7 +14,7 @@ Evidence-calibrated fishing bite-window prediction for iOS. Working name.
 |---|---|
 | `BiteCore` | 28 unit tests pass on Linux (Swift 6.0, container `swift:6.0`) |
 | `backend` | 11 tests pass on Node 22; never deployed, never called the live WeatherKit or NOAA APIs (NOAA response shapes taken from docs) |
-| `App` | **Never compiled.** Written without Xcode; the `ios` CI job is its first build |
+| `App` | Compiles in CI (`ios` job, macos-15, iOS Simulator, unsigned). Never run on a simulator or device; no UI tests |
 | Tide engine | 8 constituents, tested for self-consistency only; not checked against NOAA predictions |
 | Species thermal parameters, factor weights | Heuristic placeholders (see `docs/SCIENCE.md`) |
 
