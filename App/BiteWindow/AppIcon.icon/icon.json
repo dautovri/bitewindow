@@ -1,0 +1,72 @@
+{
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "foreground.png",
+          "name": "Ring",
+          "glass": true,
+          "position": {
+            "scale": 1,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "name": "Ring",
+      "specular": true,
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name": "Fish.png",
+          "name": "Fish",
+          "opacity": 1,
+          "blend-mode": "normal",
+          "glass": true,
+          "position": {
+            "scale": 1,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "name": "Fish",
+      "specular": true,
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared",
+    "circles": [
+      "watchOS"
+    ]
+  },
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.04706,0.16863,0.27059,1.00000",
+      "srgb:0.02353,0.07451,0.13333,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.1464466094067262,
+        "y": 0.14644660940672627
+      },
+      "stop": {
+        "x": 0.8535533905932737,
+        "y": 0.8535533905932737
+      }
+    }
+  }
+}
