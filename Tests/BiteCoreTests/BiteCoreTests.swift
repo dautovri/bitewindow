@@ -319,6 +319,13 @@ final class BiteCoreTests: XCTestCase {
         let nearDusk = abs(mid.timeIntervalSince(utc(2026, 6, 21, 19, 33))) < 5400
         XCTAssertTrue(nearDawn || nearDusk, "window centred at \(mid)")
 
+        // Later in the day, the window never starts before the cutoff.
+        let noon = utc(2026, 6, 21, 12)
+        let later = Forecaster.bestWindow(in: pts, notBefore: noon)!
+        XCTAssertGreaterThanOrEqual(later.start, noon)
+        // Too little day left: no window.
+        XCTAssertNil(Forecaster.bestWindow(in: pts, notBefore: utc(2026, 6, 21, 23, 30)))
+
         // Weather that covers part of the range is used where it exists.
         let hours = (0...6).map { HourConditions(time: from.addingTimeInterval(Double($0) * 3600), pressureHPa: 1015,
                                                  cloudCover: 0.5, windSpeedKmh: 18, windFromDeg: nil, airTempC: 15) }

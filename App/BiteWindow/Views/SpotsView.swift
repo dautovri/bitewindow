@@ -45,7 +45,8 @@ private struct SpotRow: View {
             let end = window.end.formatted(date: .omitted, time: .shortened)
             return String(localized: "Best today \(start) – \(end)")
         }
-        return loaded ? String(localized: "No forecast available") : String(localized: "Loading…")
+        // Sun and moon fill any gap in the weather, so a missing window means the day is nearly over.
+        return loaded ? String(localized: "Not enough forecast left for today.") : String(localized: "Loading…")
     }
 
     var body: some View {
@@ -73,7 +74,8 @@ private struct SpotRow: View {
             let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
                                           fillMissingWeather: true)
                 .filter { $0.time < end }
-            window = Forecaster.bestWindow(in: points)
+            // Windows that already started more than one 15-minute step ago are over for today.
+            window = Forecaster.bestWindow(in: points, notBefore: Date().addingTimeInterval(-900))
         }
         loaded = true
     }
@@ -114,9 +116,15 @@ struct SpotDetailView: View {
         guard let end = calendar.date(byAdding: .day, value: count, to: today) else { return [] }
         let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
                                       pressure: pressure, fillMissingWeather: true)
+        // Today's window starts no earlier than now; the curve still covers the whole day.
+        let cutoff = Date().addingTimeInterval(-900)
         return Dictionary(grouping: points) { calendar.startOfDay(for: $0.time) }
             .filter { $0.key < end }
-            .map { DaySummary(id: $0.key, window: Forecaster.bestWindow(in: $0.value), points: $0.value) }
+            .map { day in
+                DaySummary(id: day.key,
+                           window: Forecaster.bestWindow(in: day.value, notBefore: day.key == today ? cutoff : nil),
+                           points: day.value)
+            }
             .sorted { $0.id < $1.id }
     }
 

@@ -123,21 +123,26 @@ final class ForecastService {
     }
 
     /// Harmonic constants for the nearest NOAA station, or nil when there is
-    /// none in range, no backend, or no network and nothing cached. Cached on
-    /// disk indefinitely: constants change on the scale of years.
+    /// none in range, no backend, or no network and nothing cached. Constants
+    /// change on the scale of years, but a saved answer is re-checked after 30
+    /// days (1 day for "no station") so one bad response cannot stick for good.
+    /// A stale copy is still used when the refresh fails.
     func tideStation(latitude: Double, longitude: Double) async -> TideStation? {
         let gh = Geohash.encode(latitude: latitude, longitude: longitude, precision: 5)
         let file = Self.cacheFile("tide-\(gh)")
-        if let data = try? Data(contentsOf: file), let cached = try? JSONDecoder().decode(TidePayload.self, from: data) {
-            return cached.station
+        let cached = (try? Data(contentsOf: file)).flatMap { try? JSONDecoder().decode(TidePayload.self, from: $0) }
+        if let cached {
+            let saved = (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date
+            let maxAge: TimeInterval = cached.station == nil ? 86_400 : 30 * 86_400
+            if let saved, Date().timeIntervalSince(saved) < maxAge { return cached.station }
         }
-        guard let baseURL else { return nil }
+        guard let baseURL else { return cached?.station }
         var components = URLComponents(url: baseURL.appendingPathComponent("tide"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "gh", value: gh)]
         guard let url = components?.url,
               let result = try? await session.data(from: url),
               (result.1 as? HTTPURLResponse)?.statusCode == 200,
-              let payload = try? JSONDecoder().decode(TidePayload.self, from: result.0) else { return nil }
+              let payload = try? JSONDecoder().decode(TidePayload.self, from: result.0) else { return cached?.station }
         try? result.0.write(to: file, options: .atomic)
         return payload.station
     }

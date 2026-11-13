@@ -16,6 +16,15 @@ targets:
       - package: BiteCore
     scheme:
       testTargets: []
+    preBuildScripts:
+      - name: Block release builds on sample weather
+        basedOnDependencyAnalysis: false
+        script: |
+          # Debug runs on sample weather; a Release build (archive) must point at the deployed worker.
+          if [ "$CONFIGURATION" = "Release" ] && /usr/libexec/PlistBuddy -c "Print :BiteAPIBase" "$SRCROOT/BiteWindow/Info.plist" | grep -q REPLACE; then
+            echo "error: BiteAPIBase in App/project.yml is still the placeholder. Deploy backend/ and set the worker URL before a Release build."
+            exit 1
+          fi
     info:
       path: BiteWindow/Info.plist
       properties:

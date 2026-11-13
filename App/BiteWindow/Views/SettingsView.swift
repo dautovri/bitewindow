@@ -72,6 +72,11 @@ struct SettingsView: View {
                 Section {
                     NavigationLink("How the score works") { HowItWorksView() }
                 }
+
+                Section {
+                    Link("Privacy Policy", destination: Legal.privacy)
+                    Link("Terms of Use", destination: Legal.terms)
+                }
             }
             .navigationTitle("Settings")
             .sheet(isPresented: $showPaywall) { PaywallView() }
@@ -95,6 +100,9 @@ struct PaywallView: View {
             .padding()
         }
         .storeButton(.visible, for: .restorePurchases)
+        // Required on auto-renewable subscription paywalls (App Review 3.1.2).
+        .subscriptionStorePolicyDestination(url: Legal.privacy, for: .privacyPolicy)
+        .subscriptionStorePolicyDestination(url: Legal.terms, for: .termsOfService)
         .onInAppPurchaseCompletion { _, _ in
             await entitlements.refresh()
             if entitlements.isPro { dismiss() }
@@ -119,4 +127,11 @@ struct HowItWorksView: View {
         }
         .navigationTitle("How the score works")
     }
+}
+
+/// Legal pages linked from Settings and the paywall. The same privacy URL goes
+/// in App Store Connect; terms are Apple's standard EULA.
+enum Legal {
+    static let privacy = URL(string: "https://dautovri.com/bitewindow-privacy")!
+    static let terms = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 }

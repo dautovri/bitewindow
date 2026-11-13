@@ -150,8 +150,12 @@ public enum Forecaster {
         return out
     }
 
-    /// Highest-mean contiguous window of the given length.
-    public static func bestWindow(in points: [ScorePoint], length: TimeInterval = 7200) -> BiteWindow? {
+    /// Highest-mean contiguous window of the given length. With `notBefore`,
+    /// only windows starting at or after that time count (today's window
+    /// should not recommend hours that are already over).
+    public static func bestWindow(in points: [ScorePoint], length: TimeInterval = 7200,
+                                  notBefore: Date? = nil) -> BiteWindow? {
+        let points = notBefore.map { cutoff in points.filter { $0.time >= cutoff } } ?? points
         guard points.count >= 2 else { return nil }
         var best: BiteWindow?
         var j = 0

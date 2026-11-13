@@ -94,3 +94,63 @@ test("worker /tide: nearest station, no-station result, caching", async () => {
     globalThis.fetch = realFetch;
   }
 });
+
+test("worker /tide: NOAA failures are not cached", async () => {
+  const store = new Map<string, string>();
+  const env = {
+    WX_CACHE: { get: async (k: string) => store.get(k) ?? null, put: async (k: string, v: string) => void store.set(k, v) },
+    WEATHERKIT_TEAM_ID: "T",
+    WEATHERKIT_SERVICE_ID: "S",
+    WEATHERKIT_KEY_ID: "K",
+    WEATHERKIT_PRIVATE_KEY: "",
+  };
+  const realFetch = globalThis.fetch;
+  let datumsStatus = 503;
+  let listBody: unknown = { stations: [] };
+  globalThis.fetch = (async (input: any) => {
+    const u = String(input);
+    if (u.includes("stations.json")) return new Response(JSON.stringify(listBody));
+    if (u.includes("/harcon.json")) return new Response(JSON.stringify(harcon));
+    if (u.includes("/datums.json")) return new Response(JSON.stringify(datums), { status: datumsStatus });
+    return new Response("", { status: 404 });
+  }) as typeof fetch;
+  try {
+    // Empty station list: upstream error, nothing cached.
+    assert.equal((await worker.fetch(new Request("https://x/tide?gh=9q8zh"), env)).status, 502);
+    assert.equal(store.size, 0);
+
+    // Datums down: no station with a wrong mean level gets cached.
+    listBody = stationList;
+    assert.equal((await worker.fetch(new Request("https://x/tide?gh=9q8zh"), env)).status, 502);
+    assert.ok(!store.has("tide:9q8zh"));
+
+    datumsStatus = 200;
+    const ok = await (await worker.fetch(new Request("https://x/tide?gh=9q8zh"), env)).json();
+    assert.ok(ok.station.meanLevel > 0);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test("worker: cache misses are rate limited per IP, hits are not", async () => {
+  const store = new Map<string, string>([["tide:9q8zh", JSON.stringify({ gh: "9q8zh", station: null, km: null })]]);
+  const keys: string[] = [];
+  const env = {
+    WX_CACHE: { get: async (k: string) => store.get(k) ?? null, put: async (k: string, v: string) => void store.set(k, v) },
+    WEATHERKIT_TEAM_ID: "T",
+    WEATHERKIT_SERVICE_ID: "S",
+    WEATHERKIT_KEY_ID: "K",
+    WEATHERKIT_PRIVATE_KEY: "",
+    UPSTREAM_LIMITER: { limit: async ({ key }: { key: string }) => (keys.push(key), { success: false }) },
+  };
+  const headers = { "cf-connecting-ip": "203.0.113.7" };
+  const hit = await worker.fetch(new Request("https://x/tide?gh=9q8zh", { headers }), env);
+  assert.equal(hit.status, 200);
+  assert.equal(keys.length, 0);
+
+  const miss = await worker.fetch(new Request("https://x/tide?gh=9qdc4", { headers }), env);
+  assert.equal(miss.status, 429);
+  assert.deepEqual(keys, ["203.0.113.7"]);
+  const wx = await worker.fetch(new Request("https://x/wx?gh=u33dc", { headers }), env);
+  assert.equal(wx.status, 429);
+});
