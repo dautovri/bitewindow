@@ -1,18 +1,19 @@
 name = "bitewindow-wx"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
+account_id = "c9bf1ac36bfc945e9deb740689086223"
 
-# Create with: wrangler kv namespace create WX_CACHE, then paste the id.
 [[kv_namespaces]]
 binding = "WX_CACHE"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "430a4ab434d74c16bce881ed7091d722"
 
 [vars]
-WEATHERKIT_TEAM_ID = "REPLACE_TEAM_ID"
-WEATHERKIT_SERVICE_ID = "REPLACE_SERVICE_ID"
-WEATHERKIT_KEY_ID = "REPLACE_KEY_ID"
+WEATHERKIT_TEAM_ID = "27EZNUVV57"
+WEATHERKIT_SERVICE_ID = "com.dautovri.bitewindow.weatherkit"
+WEATHERKIT_KEY_ID = "XBFDGDBMD6"
 
-# Secret: wrangler secret put WEATHERKIT_PRIVATE_KEY   (contents of the .p8 file)
+# Secret: wrangler secret put WEATHERKIT_PRIVATE_KEY < AuthKey_XBFDGDBMD6.p8
+# (shared WeatherKit key, kept at ~/.config/weatherkit/; account limit allows no more keys)
 
 # Per-IP limit on cache misses (each costs a WeatherKit call or NOAA requests).
 # 60 per minute is far above one app's needs: a miss happens once per spot per hour.

@@ -25,7 +25,7 @@ struct BiteWindowApp: App {
 /// Keeps every spot's forecast saved on the device for use without signal.
 enum OfflineStore {
     /// Must match `BGTaskSchedulerPermittedIdentifiers` in project.yml.
-    static let refreshTaskID = "com.dautovri.bitewindow.refresh"
+    static let refreshTaskID = "com.dautovri.bitecurve.refresh"
 
     static let container: ModelContainer = {
         do {
@@ -63,13 +63,22 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage(PressureSampler.enabledKey) private var livePressure = false
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
+    @State private var selectedTab = 0
 
     var body: some View {
-        TabView {
-            SpotsView().tabItem { Label("Forecast", systemImage: "chart.line.uptrend.xyaxis") }
-            SpotMapView().tabItem { Label("Map", systemImage: "map") }
-            LogView().tabItem { Label("Log", systemImage: "book") }
-            SettingsView().tabItem { Label("Settings", systemImage: "gearshape") }
+        TabView(selection: $selectedTab) {
+            SpotsView(onAddSpot: { selectedTab = 1 })
+                .tabItem { Label("Forecast", systemImage: "chart.line.uptrend.xyaxis") }
+                .tag(0)
+            SpotMapView()
+                .tabItem { Label("Map", systemImage: "map") }
+                .tag(1)
+            LogView()
+                .tabItem { Label("Log", systemImage: "book") }
+                .tag(2)
+            SettingsView()
+                .tabItem { Label("Settings", systemImage: "gearshape") }
+                .tag(3)
         }
         .tint(.teal)
         .task { pruneSamples() }

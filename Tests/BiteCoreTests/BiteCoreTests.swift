@@ -129,6 +129,17 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertEqual(Weights.prior(water: .warmFreshwater, species: .largemouthBass).solunar, 0.05)
     }
 
+    func testDefaultSpeciesByRegion() {
+        XCTAssertEqual(Species.defaultSpecies(forRegion: "US"), .walleye)
+        XCTAssertEqual(Species.defaultSpecies(forRegion: "ca"), .walleye)
+        XCTAssertEqual(Species.defaultSpecies(forRegion: "MX"), .walleye)
+        XCTAssertEqual(Species.defaultSpecies(forRegion: "DE"), .northernPike)
+        XCTAssertEqual(Species.defaultSpecies(forRegion: "FI"), .northernPike)
+        XCTAssertEqual(Species.defaultSpecies(forRegion: "JP"), .northernPike)
+        XCTAssertEqual(Species.defaultSpecies(forRegion: nil), .northernPike)
+        XCTAssertEqual(Species.defaultSpecies(forRegion: ""), .northernPike)
+    }
+
     // MARK: Forecaster
 
     func makeHours(from start: Date, count: Int) -> [HourConditions] {

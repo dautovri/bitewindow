@@ -32,6 +32,21 @@ public enum Species: String, CaseIterable, Codable, Sendable {
     public var defaultWater: WaterType {
         self == .rainbowTrout ? .coldFreshwater : .warmFreshwater
     }
+
+    private static let northAmericanRegions: Set<String> = [
+        "AG", "AI", "AW", "BB", "BL", "BM", "BQ", "BS", "BZ", "CA", "CR", "CU",
+        "CW", "DM", "DO", "GD", "GL", "GP", "GT", "HN", "HT", "JM", "KN", "KY",
+        "LC", "MF", "MQ", "MS", "MX", "NI", "PA", "PM", "PR", "SV", "SX", "TC",
+        "TT", "US", "VC", "VG", "VI",
+    ]
+
+    /// North America defaults to walleye; everywhere else to northern pike.
+    public static func defaultSpecies(forRegion regionCode: String? = Locale.current.region?.identifier) -> Species {
+        guard let code = regionCode?.uppercased(), northAmericanRegions.contains(code) else {
+            return .northernPike
+        }
+        return .walleye
+    }
 }
 
 public enum WaterType: String, CaseIterable, Codable, Sendable {

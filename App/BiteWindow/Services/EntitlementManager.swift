@@ -6,9 +6,9 @@ import StoreKit
 @MainActor
 @Observable
 final class EntitlementManager {
-    static let annual = "bitewindow.pro.annual"
-    static let monthly = "bitewindow.pro.monthly"
-    static let lifetime = "bitewindow.pro.lifetime"
+    static let annual = "bitecurve.pro.annual"
+    static let monthly = "bitecurve.pro.monthly"
+    static let lifetime = "bitecurve.pro.lifetime"
     static let subscriptionIDs = [annual, monthly]
     static let allIDs: Set<String> = [annual, monthly, lifetime]
 

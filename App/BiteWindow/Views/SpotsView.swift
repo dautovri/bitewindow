@@ -4,6 +4,7 @@ import SwiftData
 import SwiftUI
 
 struct SpotsView: View {
+    var onAddSpot: () -> Void = {}
     @Query(sort: \Spot.createdAt) private var spots: [Spot]
     @Environment(\.modelContext) private var modelContext
 
@@ -11,8 +12,14 @@ struct SpotsView: View {
         NavigationStack {
             Group {
                 if spots.isEmpty {
-                    ContentUnavailableView("No spots yet", systemImage: "mappin.and.ellipse",
-                                           description: Text("Add a fishing spot from the Map tab to see its bite windows."))
+                    ContentUnavailableView {
+                        Label("No spots yet", systemImage: "mappin.and.ellipse")
+                    } description: {
+                        Text("Add a fishing spot from the Map tab to see its bite windows.")
+                    } actions: {
+                        Button("Add your first spot", action: onAddSpot)
+                            .buttonStyle(.borderedProminent)
+                    }
                 } else {
                     List {
                         ForEach(spots) { spot in
@@ -273,6 +280,8 @@ struct SpotDetailView: View {
                 Link("Weather data: Apple Weather — legal attribution",
                      destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
                     .font(.footnote)
+            } footer: {
+                Text("Bite windows are estimates from weather, sun, moon and tide. Fish don't read forecasts.")
             }
         }
         .navigationTitle(spot.name)

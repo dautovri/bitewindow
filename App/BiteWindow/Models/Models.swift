@@ -12,7 +12,7 @@ final class Spot {
     var latitude: Double = 0
     var longitude: Double = 0
     var waterRaw: String = WaterType.warmFreshwater.rawValue
-    var speciesRaw: String = Species.walleye.rawValue
+    var speciesRaw: String = Species.defaultSpecies().rawValue
     /// Bearing from open water to the fished bank.
     var bankBearingDeg: Double?
     var waterTempC: Double?
@@ -25,6 +25,7 @@ final class Spot {
         self.name = name
         self.latitude = latitude
         self.longitude = longitude
+        self.speciesRaw = Species.defaultSpecies().rawValue
     }
 
     var water: WaterType {
@@ -33,7 +34,7 @@ final class Spot {
     }
 
     var species: Species {
-        get { Species(rawValue: speciesRaw) ?? .walleye }
+        get { Species(rawValue: speciesRaw) ?? Species.defaultSpecies() }
         set { speciesRaw = newValue.rawValue }
     }
 

@@ -16,6 +16,7 @@ targets:
       - package: BiteCore
     scheme:
       testTargets: []
+      storeKitConfiguration: BiteWindow.storekit
     preBuildScripts:
       - name: Block release builds on sample weather
         basedOnDependencyAnalysis: false
@@ -28,22 +29,22 @@ targets:
     info:
       path: BiteWindow/Info.plist
       properties:
-        CFBundleDisplayName: BiteWindow
+        CFBundleDisplayName: BiteCurve
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UIBackgroundModes:
           - fetch
         BGTaskSchedulerPermittedIdentifiers:
-          - com.dautovri.bitewindow.refresh
+          - com.dautovri.bitecurve.refresh
         NSMotionUsageDescription: Reads your phone's barometer to track the live pressure trend at your spot.
-        # Weather cache worker (see backend/). Leave the placeholder to run on sample weather.
-        BiteAPIBase: https://REPLACE.workers.dev
+        # Weather cache worker (see backend/). Set to a URL containing REPLACE to run on sample weather.
+        BiteAPIBase: https://bitewindow-wx.dautov.workers.dev
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.dautovri.bitewindow
+        PRODUCT_BUNDLE_IDENTIFIER: com.dautovri.bitecurve
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.0"
-        MARKETING_VERSION: "0.1.0"
+        MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1"
