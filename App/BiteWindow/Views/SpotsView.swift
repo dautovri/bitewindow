@@ -73,20 +73,28 @@ private struct SpotRow: View {
 
     private func load() async {
         var context = spot.context
+        // Saved forecast first, so the row fills at once with weak or no signal;
+        // the network result (up to the 10 s timeout) replaces it.
+        if let saved = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude) {
+            window = bestToday(context: context, hours: saved.hours)
+            loaded = true
+        }
         if spot.isSalt {
             context.tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
         }
         let forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude)
+        window = bestToday(context: context, hours: forecast.hours)
+        loaded = true
+    }
+
+    private func bestToday(context: SpotContext, hours: [HourConditions]) -> BiteWindow? {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        if let end = calendar.date(byAdding: .day, value: 1, to: today) {
-            let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
-                                          fillMissingWeather: true)
-                .filter { $0.time < end }
-            // Windows that already started more than one 15-minute step ago are over for today.
-            window = Forecaster.bestWindow(in: points, notBefore: Date().addingTimeInterval(-900))
-        }
-        loaded = true
+        guard let end = calendar.date(byAdding: .day, value: 1, to: today) else { return nil }
+        let points = Forecaster.curve(context: context, hours: hours, from: today, to: end, fillMissingWeather: true)
+            .filter { $0.time < end }
+        // Windows that already started more than one 15-minute step ago are over for today.
+        return Forecaster.bestWindow(in: points, notBefore: Date().addingTimeInterval(-900))
     }
 }
 

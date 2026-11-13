@@ -96,3 +96,19 @@ test("worker: validates input, serves cache hits, caches misses", async () => {
     globalThis.fetch = realFetch;
   }
 });
+
+test("worker: every response carries security headers", async () => {
+  const env = {
+    WX_CACHE: { get: async () => null, put: async () => {} },
+    WEATHERKIT_TEAM_ID: "T",
+    WEATHERKIT_SERVICE_ID: "S",
+    WEATHERKIT_KEY_ID: "K",
+    WEATHERKIT_PRIVATE_KEY: "",
+  };
+  for (const path of ["/health", "/wx?gh=bad", "/nope"]) {
+    const res = await worker.fetch(new Request(`https://x${path}`), env);
+    assert.equal(res.headers.get("x-content-type-options"), "nosniff", path);
+    assert.match(res.headers.get("strict-transport-security") ?? "", /max-age=/, path);
+    assert.match(res.headers.get("content-security-policy") ?? "", /default-src 'none'/, path);
+  }
+});

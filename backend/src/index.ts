@@ -44,10 +44,18 @@ const tooMany = () => json({ error: "rate limited" }, 429, { "retry-after": "60"
 
 const DAY = 86_400;
 
+/** JSON API only: nothing may be rendered, framed or sniffed as another type. */
+const SECURITY_HEADERS = {
+  "strict-transport-security": "max-age=31536000; includeSubDomains",
+  "x-content-type-options": "nosniff",
+  "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+  "referrer-policy": "no-referrer",
+};
+
 const json = (body: unknown, status = 200, extra: Record<string, string> = {}) =>
   new Response(typeof body === "string" ? body : JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json", ...extra },
+    headers: { "content-type": "application/json; charset=utf-8", ...SECURITY_HEADERS, ...extra },
   });
 
 async function weather(gh: string, req: Request, env: Env): Promise<Response> {
