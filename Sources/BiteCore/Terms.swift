@@ -74,7 +74,9 @@ public enum Terms {
             let dm = t.timeIntervalSince(e) / 60
             return exp(-pow(dm / 60, 2))
         }
-        let twilight = 2 * max(bump(sunrise), bump(sunset)) - 1
+        // Polar day or polar night: no sunrise and no sunset. Neutral, not the
+        // bright-noon penalty for all 24 hours.
+        let twilight = (sunrise == nil && sunset == nil) ? 0 : 2 * max(bump(sunrise), bump(sunset)) - 1
         let cloud = cloudCover.map { 2 * (1 - pow(1 - max(0, min(1, $0)), 2)) - 1 } ?? 0
         return 0.7 * twilight + 0.3 * cloud
     }

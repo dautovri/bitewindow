@@ -45,6 +45,8 @@ private struct SpotRow: View {
     let spot: Spot
     @State private var window: BiteWindow?
     @State private var loaded = false
+    /// Changes when forecasts are downloaded again, so the row reloads.
+    @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
 
     private var subtitle: String {
         if let window {
@@ -66,7 +68,7 @@ private struct SpotRow: View {
             }
         }
         .padding(.vertical, 2)
-        .task(id: "\(spot.waterRaw)|\(spot.speciesRaw)|\(spot.waterTempC ?? -999)") { await load() }
+        .task(id: "\(spot.waterRaw)|\(spot.speciesRaw)|\(spot.waterTempC ?? -999)|\(lastPrefetch)") { await load() }
     }
 
     private func load() async {
@@ -364,7 +366,7 @@ struct SpotDetailView: View {
             }
         }
         if isSalt, let tide {
-            let end = day.id.addingTimeInterval(86400)
+            let end = Calendar.current.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86400)
             let extremes = tide.extremes(from: day.id, to: end)
             if !extremes.isEmpty {
                 LabeledContent("Tides") {

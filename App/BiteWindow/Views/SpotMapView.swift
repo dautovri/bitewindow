@@ -53,6 +53,8 @@ struct SpotMapView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
+                // The crosshair position is known once the map has reported its camera.
+                .disabled(center == nil)
                 .padding()
             }
             .navigationTitle("Map")
@@ -68,6 +70,11 @@ struct SpotMapView: View {
 
     private func addSpot() {
         guard let center else { return }
+        // Checked again here: the count can change while the name prompt is open.
+        guard entitlements.isPro || spots.count < EntitlementManager.freeSpotLimit else {
+            showPaywall = true
+            return
+        }
         let name = newName.trimmingCharacters(in: .whitespaces)
         modelContext.insert(Spot(name: name.isEmpty ? String(localized: "Spot \(spots.count + 1)") : name,
                                  latitude: center.latitude, longitude: center.longitude))

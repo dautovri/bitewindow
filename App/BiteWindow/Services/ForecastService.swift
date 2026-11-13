@@ -51,6 +51,10 @@ final class ForecastService {
     var isConfigured: Bool { baseURL != nil }
 
     private var baseURL: URL? {
+        #if DEBUG
+        // `-BCAPIBase <url>` points Debug builds at another host (failure drills).
+        if let override = UserDefaults.standard.string(forKey: "BCAPIBase"), let url = URL(string: override) { return url }
+        #endif
         guard let raw = Bundle.main.object(forInfoDictionaryKey: "BiteAPIBase") as? String,
               !raw.contains("REPLACE"), let url = URL(string: raw) else { return nil }
         return url

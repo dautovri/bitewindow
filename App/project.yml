@@ -10,8 +10,10 @@ targets:
   BiteWindow:
     type: application
     platform: iOS
+    # receipts/: local tool logs that must never ship in the bundle.
     sources:
-      - BiteWindow
+      - path: BiteWindow
+        excludes: ["receipts/**", "**/receipts.jsonl"]
     dependencies:
       - package: BiteCore
     scheme:
@@ -30,6 +32,7 @@ targets:
       path: BiteWindow/Info.plist
       properties:
         CFBundleDisplayName: BiteCurve
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

@@ -81,7 +81,12 @@ struct RootView: View {
                 .tag(3)
         }
         .tint(.teal)
-        .task { pruneSamples() }
+        .task {
+            pruneSamples()
+            #if DEBUG
+            seedSampleSpotsIfAsked()
+            #endif
+        }
         // Refresh saved forecasts whenever the app comes forward, at most hourly.
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
@@ -110,3 +115,34 @@ struct RootView: View {
         try? modelContext.delete(model: PressureSample.self, where: #Predicate { $0.time < cutoff })
     }
 }
+
+#if DEBUG
+extension RootView {
+    /// `-BCSeedSpots YES` fills an empty install with three sample spots and a
+    /// short trip log, for screenshots and UI checks. Debug builds only.
+    func seedSampleSpotsIfAsked() {
+        guard UserDefaults.standard.bool(forKey: "BCSeedSpots"),
+              ((try? modelContext.fetchCount(FetchDescriptor<Spot>())) ?? 0) == 0 else { return }
+        let minnetonka = Spot(name: "Lake Minnetonka", latitude: 44.933, longitude: -93.563)
+        minnetonka.species = .walleye
+        minnetonka.water = .warmFreshwater
+        let fork = Spot(name: "Lake Fork", latitude: 32.84, longitude: -95.58)
+        fork.species = .largemouthBass
+        fork.water = .warmFreshwater
+        let montauk = Spot(name: "Lake Taneycomo", latitude: 36.66, longitude: -93.23)
+        montauk.species = .rainbowTrout
+        montauk.water = .coldFreshwater
+        [minnetonka, fork, montauk].forEach(modelContext.insert)
+        let day: TimeInterval = 86_400
+        for (spot, daysAgo, hours, fish) in [(minnetonka, 2.0, 3.0, 4), (minnetonka, 9.0, 2.5, 0),
+                                             (fork, 5.0, 4.0, 6), (montauk, 12.0, 3.5, 2)] {
+            let trip = Trip(spot: spot)
+            trip.startedAt = Date().addingTimeInterval(-daysAgo * day)
+            trip.endedAt = trip.startedAt.addingTimeInterval(hours * 3600)
+            trip.catchCount = fish
+            modelContext.insert(trip)
+        }
+        try? modelContext.save()
+    }
+}
+#endif

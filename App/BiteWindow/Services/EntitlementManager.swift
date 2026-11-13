@@ -40,6 +40,10 @@ final class EntitlementManager {
                 pro = true
             }
         }
+        #if DEBUG
+        // `-BCPro YES` unlocks Pro in Debug builds (screenshots, UI checks).
+        if UserDefaults.standard.bool(forKey: "BCPro") { pro = true }
+        #endif
         isPro = pro
     }
 }

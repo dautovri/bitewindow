@@ -127,6 +127,11 @@ export default {
     }
     const gh = url.searchParams.get("gh");
     if (!isGeohash5(gh)) return json({ error: "gh must be a 5-character geohash" }, 400);
-    return url.pathname === "/wx" ? weather(gh, req, env) : tide(gh, req, env);
+    try {
+      return await (url.pathname === "/wx" ? weather(gh, req, env) : tide(gh, req, env));
+    } catch {
+      // Upstream reset, timed out or sent something that is not JSON.
+      return json({ error: "upstream" }, 502);
+    }
   },
 };

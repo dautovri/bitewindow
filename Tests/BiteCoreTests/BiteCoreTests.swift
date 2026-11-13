@@ -382,4 +382,12 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertNil(Geohash.decode("a!"))
         XCTAssertNil(Geohash.decode(""))
     }
+
+    func testLightIsNeutralWithoutSunriseOrSunset() {
+        // Polar day or night: no sun events. Not the bright-noon penalty all day.
+        let noon = Date(timeIntervalSince1970: 1_750_000_000)
+        XCTAssertEqual(Terms.light(at: noon, sunrise: nil, sunset: nil, cloudCover: nil), 0, accuracy: 1e-9)
+        // One event still counts.
+        XCTAssertGreaterThan(Terms.light(at: noon, sunrise: noon, sunset: nil, cloudCover: nil), 0.5)
+    }
 }
