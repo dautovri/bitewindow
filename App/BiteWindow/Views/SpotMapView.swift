@@ -11,6 +11,7 @@ struct SpotMapView: View {
     @Query private var spots: [Spot]
     @Environment(\.modelContext) private var modelContext
     @Environment(EntitlementManager.self) private var entitlements
+    @Environment(AppRouter.self) private var router
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
 
     @State private var position: MapCameraPosition = .automatic
@@ -76,6 +77,18 @@ struct SpotMapView: View {
             // Again each time the tab comes forward: the Forecast tab may have saved a spot's
             // first forecast in the meantime.
             .onAppear { appearances += 1 }
+            // From the welcome screen: go to the phone's position, or open the search.
+            .onChange(of: router.mapRequest, initial: true) {
+                guard let request = router.mapRequest else { return }
+                router.mapRequest = nil
+                switch request {
+                case .locate:
+                    locationCenter.requestCenter()
+                    showLocationHelp = locationCenter.isDenied
+                case .search:
+                    searchFocused = true
+                }
+            }
             .task(id: "\(appearances)|\(lastPrefetch)|\(spots.map { "\($0.id)\($0.waterRaw)\($0.speciesRaw)\($0.waterTempC ?? -999)\($0.timeZoneID ?? "")" }.joined())") {
                 var fresh: [UUID: Double] = [:]
                 var freshOutlooks: [UUID: SpotOutlook] = [:]
@@ -211,6 +224,7 @@ struct SpotMapView: View {
             if !entitlements.isPro && spots.count >= EntitlementManager.freeSpotLimit {
                 showPaywall = true
             } else if let center, !isLookingUp {
+                searchFocused = false
                 // The water's name, salt or fresh, and whether the point is on water at all;
                 // the prompt opens after three seconds at most, with or without an answer.
                 isLookingUp = true
@@ -288,6 +302,8 @@ struct SpotMapView: View {
             showPaywall = true
             return
         }
+        // Asked before the insert: the query may already count the new spot afterwards.
+        let isFirstSpot = spots.isEmpty
         let name = newName.trimmingCharacters(in: .whitespaces)
         let spot = Spot(name: name.isEmpty ? String(localized: "Spot \(spots.count + 1)") : name,
                         latitude: center.latitude, longitude: center.longitude)
@@ -301,6 +317,8 @@ struct SpotMapView: View {
         // lost if the app is closed right after it was added.
         try? modelContext.save()
         Task { await SpotTimeZone.resolveIfNeeded(spot) }
+        // The first spot: straight to its forecast.
+        if isFirstSpot { router.selectedTab = 0 }
     }
 }
 

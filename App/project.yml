@@ -14,8 +14,16 @@ targets:
     sources:
       - path: BiteWindow
         excludes: ["receipts/**", "**/receipts.jsonl"]
+      # Types the app and the widget extension both compile.
+      - path: Shared
     dependencies:
       - package: BiteCore
+      - target: BiteWidgets
+    # The app writes the widget snapshot into the shared group folder.
+    entitlements:
+      path: BiteWindow/BiteWindow.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.dautovri.bitecurve]
     scheme:
       testTargets: [BiteWindowTests]
       storeKitConfiguration: BiteWindow.storekit
@@ -55,6 +63,34 @@ targets:
         MARKETING_VERSION: "1.1"
         CURRENT_PROJECT_VERSION: "2"
         TARGETED_DEVICE_FAMILY: "1"
+  # Home and lock screen widgets. They read the snapshot the app writes; no scoring, no network.
+  BiteWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BiteWidgets
+      - path: Shared
+    info:
+      path: BiteWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: BiteCurve
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: BiteWidgets/BiteWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.dautovri.bitecurve]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dautovri.bitecurve.widgets
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SWIFT_VERSION: "5.0"
+        MARKETING_VERSION: "1.1"
+        CURRENT_PROJECT_VERSION: "2"
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
   BiteWindowTests:
     type: bundle.unit-test
     platform: iOS

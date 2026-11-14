@@ -52,6 +52,9 @@ enum OfflineStore {
     static func refresh() async -> (saved: Int, total: Int) {
         let all = places()
         let saved = await ForecastService.shared.prefetch(all)
+        // Alerts and widgets follow the newest forecast the phone has.
+        await BiteAlerts.reschedule()
+        await WidgetSnapshotWriter.update()
         return (saved, all.count)
     }
 
@@ -64,17 +67,31 @@ enum OfflineStore {
     }
 }
 
+/// Moves the user between tabs from anywhere (the welcome screen, the first saved spot).
+@MainActor
+@Observable
+final class AppRouter {
+    enum MapRequest { case locate, search }
+    var selectedTab = 0
+    /// Something the Map tab should do as soon as it is in front; it clears it when done.
+    var mapRequest: MapRequest?
+}
+
 struct RootView: View {
     @Environment(PressureSampler.self) private var sampler
+    @State private var router = AppRouter()
+    /// Set once the welcome screen was answered (or was never needed).
+    @AppStorage("didOnboard") private var didOnboard = false
+    @State private var showWelcome = false
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage(PressureSampler.enabledKey) private var livePressure = false
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
-    @State private var selectedTab = 0
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            SpotsView(onAddSpot: { selectedTab = 1 })
+        @Bindable var router = router
+        TabView(selection: $router.selectedTab) {
+            SpotsView(onAddSpot: { router.selectedTab = 1 })
                 .tabItem { Label("Forecast", systemImage: "chart.line.uptrend.xyaxis") }
                 .tag(0)
             SpotMapView()
@@ -88,17 +105,46 @@ struct RootView: View {
                 .tag(3)
         }
         .tint(Theme.accent)
+        .environment(router)
         .task {
             pruneSamples()
             #if DEBUG
             seedSampleSpotsIfAsked()
             #endif
+            // A first launch with nothing saved gets the welcome screen; anyone who already
+            // has spots (an update, a restored phone) never sees it.
+            if !didOnboard {
+                if ((try? modelContext.fetchCount(FetchDescriptor<Spot>())) ?? 0) == 0, !Self.skipsWelcome {
+                    showWelcome = true
+                } else {
+                    didOnboard = true
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showWelcome) {
+            WelcomeView { choice in
+                didOnboard = true
+                showWelcome = false
+                // The trial is offered once, after the first forecast has been seen.
+                UserDefaults.standard.set(true, forKey: WelcomeView.offerTrialKey)
+                switch choice {
+                case .locate: router.mapRequest = .locate; router.selectedTab = 1
+                case .search: router.mapRequest = .search; router.selectedTab = 1
+                case .skip: break
+                }
+            }
         }
         // Refresh saved forecasts whenever the app comes forward, at most hourly.
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
                 if Date().timeIntervalSince1970 - lastPrefetch > 3600 {
                     Task { _ = await OfflineStore.refresh() }
+                } else {
+                    // No download due, but time has passed: lay the alerts out again from now.
+                    Task {
+                        await BiteAlerts.reschedule()
+                        await WidgetSnapshotWriter.update()
+                    }
                 }
             } else if phase == .background {
                 OfflineStore.scheduleBackgroundRefresh()
@@ -115,6 +161,15 @@ struct RootView: View {
                 sampler.stop()
             }
         }
+    }
+
+    /// `-BCSkipWelcome YES` keeps the welcome screen away in Debug builds (UI checks, screenshots).
+    private static var skipsWelcome: Bool {
+        #if DEBUG
+        return UserDefaults.standard.bool(forKey: "BCSkipWelcome")
+        #else
+        return false
+        #endif
     }
 
     private func pruneSamples() {

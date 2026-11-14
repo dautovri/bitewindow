@@ -20,6 +20,9 @@ struct SpotsView: View {
     @Query(sort: \Spot.createdAt) private var spots: [Spot]
     @Environment(\.modelContext) private var modelContext
     @State private var opened: Spot?
+    @Environment(EntitlementManager.self) private var entitlements
+    @State private var showPlanner = false
+    @State private var showTrialOffer = false
 
     var body: some View {
         NavigationStack {
@@ -65,12 +68,44 @@ struct SpotsView: View {
             .navigationDestination(item: $opened) { spot in
                 SpotDetailView(spot: spot)
             }
+            .navigationDestination(isPresented: $showPlanner) { PlannerView() }
             .toolbar {
+                if !spots.isEmpty {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showPlanner = true
+                        } label: {
+                            Label("Planner", systemImage: "calendar")
+                        }
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: onAddSpot) {
                         Label("Add spot", systemImage: "plus")
                     }
                 }
+            }
+            .sheet(isPresented: $showTrialOffer) { PaywallView() }
+            // A spot added, removed or changed: the widgets and alerts follow.
+            .task(id: spots.map { "\($0.id)\($0.name)\($0.waterRaw)\($0.speciesRaw)\($0.waterTempC ?? -999)" }.joined()) {
+                try? await Task.sleep(for: .seconds(4))
+                guard !Task.isCancelled else { return }
+                await WidgetSnapshotWriter.update()
+                await BiteAlerts.reschedule()
+            }
+            // Once, for someone who came through the welcome screen: after their first spot
+            // has had time to show its forecast, offer the Pro trial.
+            .task(id: spots.count) {
+                guard spots.count == 1, !entitlements.isPro,
+                      UserDefaults.standard.bool(forKey: WelcomeView.offerTrialKey) else { return }
+                try? await Task.sleep(for: .seconds(8))
+                // Not over a spot or the planner: wait until the list is in front again.
+                while !Task.isCancelled, opened != nil || showPlanner {
+                    try? await Task.sleep(for: .seconds(2))
+                }
+                guard !Task.isCancelled, !entitlements.isPro else { return }
+                UserDefaults.standard.set(false, forKey: WelcomeView.offerTrialKey)
+                showTrialOffer = true
             }
         }
     }
@@ -276,6 +311,8 @@ private struct DaySummary: Identifiable {
 
 struct SpotDetailView: View {
     @Bindable var spot: Spot
+    /// The day to open on (from the planner); nil opens on today.
+    var initialDay: Date? = nil
     @Environment(EntitlementManager.self) private var entitlements
     @Query(sort: \PressureSample.time) private var samples: [PressureSample]
     @State private var forecast: Forecast?
@@ -288,6 +325,8 @@ struct SpotDetailView: View {
     @State private var waterReading: Spot.WaterReading?
     /// What is typed in the water temperature field (see `storeWaterTemperature`).
     @State private var waterText = ""
+    /// A small picture of the share card for the share sheet's header.
+    @State private var shareThumbnail: Image?
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
 
     /// How far the day strip reaches.
@@ -512,7 +551,32 @@ struct SpotDetailView: View {
         }
         .onChange(of: spot.waterTempC) { waterReading = spot.waterReading }
         .onChange(of: waterText) { storeWaterTemperature(waterText) }
-        .onAppear { waterText = waterTemperatureString() }
+        .onAppear {
+            waterText = waterTemperatureString()
+            if selectedDay == nil { selectedDay = initialDay }
+        }
+        .toolbar {
+            if let day, let window = day.window {
+                ToolbarItem(placement: .primaryAction) {
+                    let share = ForecastShare(spotName: spot.name, day: day.id, window: window, timeZone: spot.timeZone)
+                    ShareLink(item: share, preview: SharePreview(Text(verbatim: spot.name), image: shareThumbnail ?? Image(systemName: "fish.fill"))) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                    // Drawn once per day shown, not on every redraw of the screen.
+                    .task(id: "\(day.id.timeIntervalSince1970)|\(window.start.timeIntervalSince1970)|\(Int(window.meanIndex))") {
+                        shareThumbnail = share.thumbnail
+                    }
+                    #if DEBUG
+                    // `-BCDumpShare YES` writes the card to the temp folder, to look at it in UI checks.
+                    .task(id: day.id) {
+                        if UserDefaults.standard.bool(forKey: "BCDumpShare"), let data = share.uiImage(scale: 2)?.pngData() {
+                            try? data.write(to: FileManager.default.temporaryDirectory.appendingPathComponent("share.png"))
+                        }
+                    }
+                    #endif
+                }
+            }
+        }
         .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 

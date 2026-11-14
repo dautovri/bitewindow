@@ -1,5 +1,6 @@
 import BiteCore
 import Foundation
+import os
 
 struct Forecast {
     enum Source { case live, cached, sample }
@@ -66,18 +67,29 @@ final class ForecastService {
 
         var components = URLComponents(url: baseURL.appendingPathComponent("wx"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "gh", value: gh)]
-        if let url = components?.url {
-            do {
-                let (data, response) = try await session.data(from: url)
-                if (response as? HTTPURLResponse)?.statusCode == 200, let hours = Self.decode(data), !hours.isEmpty {
-                    try? data.write(to: Self.cacheFile(gh), options: .atomic)
-                    return Forecast(hours: hours, source: .live, fetchedAt: Date())
-                }
-            } catch {
-                // Offline or backend down: fall through to the disk cache.
+        if let url = components?.url, let (data, response) = await download(url) {
+            if (response as? HTTPURLResponse)?.statusCode == 200, let hours = Self.decode(data), !hours.isEmpty {
+                try? data.write(to: Self.cacheFile(gh), options: .atomic)
+                return Forecast(hours: hours, source: .live, fetchedAt: Date())
             }
         }
         return cached(latitude: latitude, longitude: longitude) ?? Forecast(hours: [], source: .cached)
+    }
+
+    /// One GET that finishes even when the caller is cancelled. Views load in `.task`, which
+    /// SwiftUI cancels whenever the view is rebuilt (a tab switch right after adding a spot did
+    /// exactly that); a cancelled request left a new spot without weather until the next launch.
+    private func download(_ url: URL) async -> (Data, URLResponse)? {
+        let session = session
+        return await Task.detached {
+            do {
+                return try await session.data(from: url)
+            } catch {
+                Logger(subsystem: "com.dautovri.bitecurve", category: "network")
+                    .info("GET \(url.path, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
+                return nil
+            }
+        }.value
     }
 
     /// The forecast saved on disk for this location, without touching the network.
@@ -180,7 +192,7 @@ final class ForecastService {
             URLQueryItem(name: "kind", value: isSalt ? "salt" : "fresh"),
         ]
         guard let url = components?.url,
-              let result = try? await session.data(from: url),
+              let result = await download(url),
               (result.1 as? HTTPURLResponse)?.statusCode == 200,
               let payload = try? JSONDecoder().decode(WaterPayload.self, from: result.0),
               let temp = payload.tempC, let source = payload.source.flatMap(WaterEstimate.Source.init(rawValue:)),
@@ -223,7 +235,7 @@ final class ForecastService {
         var components = URLComponents(url: baseURL.appendingPathComponent("tide"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "gh", value: gh)]
         guard let url = components?.url,
-              let result = try? await session.data(from: url),
+              let result = await download(url),
               (result.1 as? HTTPURLResponse)?.statusCode == 200,
               let payload = try? JSONDecoder().decode(TidePayload.self, from: result.0) else { return cached?.station }
         try? result.0.write(to: file, options: .atomic)

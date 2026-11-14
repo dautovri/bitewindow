@@ -11,6 +11,10 @@ struct SettingsView: View {
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
     @State private var downloading = false
     @State private var downloadResult: String?
+    @AppStorage(BiteAlerts.enabledKey) private var alertsOn = false
+    @AppStorage(BiteAlerts.thresholdKey) private var alertThreshold = BiteAlerts.defaultThreshold
+    /// iOS refused notifications: the toggle goes back off and the footer says where to allow them.
+    @State private var alertsDenied = false
 
     var body: some View {
         NavigationStack {
@@ -24,6 +28,40 @@ struct SettingsView: View {
                 }
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
+
+                Section {
+                    Toggle("Bite alerts", isOn: $alertsOn)
+                    if alertsOn {
+                        Picker("Alert me for", selection: $alertThreshold) {
+                            Text("Above average (50+)").tag(50.0)
+                            Text("Strong bite (65+)").tag(65.0)
+                        }
+                    }
+                } footer: {
+                    if alertsDenied {
+                        Text("Notifications are off for BiteCurve. Allow them in the Settings app to get bite alerts.")
+                    } else {
+                        Text("A notification an hour before a good window at one of your spots, and the evening before a good day. Worked out on this iPhone from the saved forecasts.")
+                    }
+                }
+                .listRowBackground(Theme.card)
+                .onChange(of: alertsOn) { _, on in
+                    Task {
+                        if on {
+                            // Refused: the toggle goes back off (which runs this again with
+                            // `on == false`, so the note is only cleared on a success).
+                            if await BiteAlerts.requestPermission() {
+                                alertsDenied = false
+                            } else {
+                                alertsDenied = true
+                                alertsOn = false
+                                return
+                            }
+                        }
+                        await BiteAlerts.reschedule()
+                    }
+                }
+                .onChange(of: alertThreshold) { Task { await BiteAlerts.reschedule() } }
 
                 Section {
                     Toggle("Live pressure from my phone", isOn: $livePressure)
