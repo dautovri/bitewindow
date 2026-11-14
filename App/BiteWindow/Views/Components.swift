@@ -18,11 +18,13 @@ extension Species {
 enum BiteScale {
     static func color(_ index: Double?) -> Color {
         guard let index else { return .secondary }
+        // Four clearly different steps, so 51 and 68 no longer look alike. A slow day is
+        // quiet slate, not alarm red: nothing is wrong, the fish are just not feeding.
         switch index {
-        case 65...: return .green
-        case 50..<65: return .teal
-        case 35..<50: return .orange
-        default: return .red
+        case 65...: return Color(light: 0x059669, dark: 0x34D399)
+        case 50..<65: return Color(light: 0x0891B2, dark: 0x22D3EE)
+        case 35..<50: return Color(light: 0xD97706, dark: 0xFBBF24)
+        default: return Color(light: 0x64748B, dark: 0x94A3B8)
         }
     }
 

@@ -80,7 +80,7 @@ struct RootView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape") }
                 .tag(3)
         }
-        .tint(.teal)
+        .tint(Theme.accent)
         .task {
             pruneSamples()
             #if DEBUG
