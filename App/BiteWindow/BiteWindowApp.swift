@@ -5,12 +5,19 @@ import SwiftUI
 
 @main
 struct BiteWindowApp: App {
-    @State private var entitlements = EntitlementManager()
+    /// True while the app only hosts unit tests. It then shows nothing and stays away from
+    /// StoreKit: the first contact fixes the process to Apple's sandbox, and the tests'
+    /// purchases in their local store would wait for an Apple Account for good.
+    static let isHostingTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+
+    @State private var entitlements = EntitlementManager(listens: !BiteWindowApp.isHostingTests)
     @State private var sampler = PressureSampler()
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            Group {
+                if Self.isHostingTests { Color.clear } else { RootView() }
+            }
                 .environment(entitlements)
                 .environment(sampler)
         }

@@ -17,7 +17,9 @@ final class EntitlementManager {
     private(set) var isPro = false
     private var updates: Task<Void, Never>?
 
-    init() {
+    /// `listens: false` leaves StoreKit alone until `refresh()` is called (unit tests).
+    init(listens: Bool = true) {
+        guard listens else { return }
         // Renewals, refunds, Family Sharing changes and purchases made outside the app.
         updates = Task { [weak self] in
             for await result in Transaction.updates {

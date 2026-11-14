@@ -17,7 +17,7 @@ targets:
     dependencies:
       - package: BiteCore
     scheme:
-      testTargets: []
+      testTargets: [BiteWindowTests]
       storeKitConfiguration: BiteWindow.storekit
     preBuildScripts:
       - name: Block release builds on sample weather
@@ -54,3 +54,20 @@ targets:
         MARKETING_VERSION: "1.1"
         CURRENT_PROJECT_VERSION: "2"
         TARGETED_DEVICE_FAMILY: "1"
+  BiteWindowTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: BiteWindowTests
+      # The local store the purchase tests buy from.
+      - path: BiteWindow.storekit
+        buildPhase: resources
+    dependencies:
+      - target: BiteWindow
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dautovri.bitecurve.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/BiteWindow.app/BiteWindow"
+        BUNDLE_LOADER: "$(TEST_HOST)"
