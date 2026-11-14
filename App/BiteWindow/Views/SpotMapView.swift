@@ -175,7 +175,7 @@ struct SpotMapView: View {
         guard let saved = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude) else {
             return nil
         }
-        let calendar = Calendar.current
+        let calendar = spot.calendar
         let now = Date()
         let today = calendar.startOfDay(for: now)
         guard let end = calendar.date(byAdding: .day, value: 1, to: today) else { return nil }
@@ -194,11 +194,13 @@ struct SpotMapView: View {
             return
         }
         let name = newName.trimmingCharacters(in: .whitespaces)
-        modelContext.insert(Spot(name: name.isEmpty ? String(localized: "Spot \(spots.count + 1)") : name,
-                                 latitude: center.latitude, longitude: center.longitude))
+        let spot = Spot(name: name.isEmpty ? String(localized: "Spot \(spots.count + 1)") : name,
+                        latitude: center.latitude, longitude: center.longitude)
+        modelContext.insert(spot)
         // Saved at once: the system's own save can come seconds later, and a spot must not be
         // lost if the app is closed right after it was added.
         try? modelContext.save()
+        Task { await SpotTimeZone.resolveIfNeeded(spot) }
     }
 }
 

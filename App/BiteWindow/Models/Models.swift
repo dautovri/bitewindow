@@ -16,6 +16,8 @@ final class Spot {
     /// Bearing from open water to the fished bank.
     var bankBearingDeg: Double?
     var waterTempC: Double?
+    /// The spot's own time zone (looked up once from its coordinates); nil until known.
+    var timeZoneID: String?
     var createdAt: Date = Date()
 
     @Relationship(deleteRule: .nullify, inverse: \Trip.spot)
@@ -44,6 +46,17 @@ final class Spot {
     }
 
     var isSalt: Bool { water == .inshoreSalt || water == .offshore }
+
+    /// Times at a spot are shown in the spot's zone, not the phone's: a window at a lake two
+    /// zones away is planned on that lake's clock. The phone's zone until the lookup answers.
+    var timeZone: TimeZone { timeZoneID.flatMap(TimeZone.init(identifier:)) ?? .current }
+
+    /// Days at the spot begin at its own midnight.
+    var calendar: Calendar {
+        var calendar = Calendar.current
+        calendar.timeZone = timeZone
+        return calendar
+    }
 
     var activeTrip: Trip? { trips?.first { $0.isActive } }
 

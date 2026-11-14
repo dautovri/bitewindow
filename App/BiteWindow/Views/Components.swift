@@ -71,6 +71,7 @@ struct BiteCurveChart: View {
     var sunrise: Date? = nil
     var sunset: Date? = nil
     var domain: ClosedRange<Date>? = nil
+    var timeZone: TimeZone = .current
 
     private var span: ClosedRange<Date>? {
         if let domain { return domain }
@@ -83,6 +84,8 @@ struct BiteCurveChart: View {
         guard let span, span.contains(t) else { return nil }
         return t
     }
+
+    private var zoneCalendar: Calendar { var c = Calendar.current; c.timeZone = timeZone; return c }
 
     var body: some View {
         let color = BiteScale.color(window?.meanIndex)
@@ -126,9 +129,9 @@ struct BiteCurveChart: View {
         .chartXScale(domain: span ?? Date()...Date().addingTimeInterval(86_400))
         .chartYAxis { AxisMarks(values: [0, 50, 100]) }
         .chartXAxis {
-            AxisMarks(values: .stride(by: .hour, count: 6)) { _ in
+            AxisMarks(values: .stride(by: .hour, count: 6, calendar: zoneCalendar)) { _ in
                 AxisGridLine()
-                AxisValueLabel(format: .dateTime.hour())
+                AxisValueLabel(format: Date.FormatStyle(timeZone: timeZone).hour())
             }
         }
         .accessibilityLabel("Bite index through the day")
@@ -137,6 +140,9 @@ struct BiteCurveChart: View {
 
 struct TideChart: View {
     let samples: [TideStation.Sample]
+    var timeZone: TimeZone = .current
+
+    private var zoneCalendar: Calendar { var c = Calendar.current; c.timeZone = timeZone; return c }
 
     var body: some View {
         Chart(samples, id: \.time) { sample in
@@ -149,9 +155,9 @@ struct TideChart: View {
                 .foregroundStyle(Theme.tide)
         }
         .chartXAxis {
-            AxisMarks(values: .stride(by: .hour, count: 6)) { _ in
+            AxisMarks(values: .stride(by: .hour, count: 6, calendar: zoneCalendar)) { _ in
                 AxisGridLine()
-                AxisValueLabel(format: .dateTime.hour())
+                AxisValueLabel(format: Date.FormatStyle(timeZone: timeZone).hour())
             }
         }
         .accessibilityLabel("Tide height through the day")

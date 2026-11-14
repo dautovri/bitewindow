@@ -96,7 +96,7 @@ private struct SpotSnapshot {
         // Windows that already started more than one 15-minute step ago are over for today.
         self.today = Forecaster.bestWindow(in: points, notBefore: now.addingTimeInterval(-900))
         self.tomorrow = Forecaster.bestWindow(in: all.filter { $0.time >= tomorrow && $0.time < end })
-        conditions = Conditions(at: now, hours: forecast.hours, latitude: spot.latitude, longitude: spot.longitude)
+        conditions = Conditions(at: now, hours: forecast.hours, latitude: spot.latitude, longitude: spot.longitude, calendar: calendar)
         isOffline = forecast.source == .cached
     }
 }
@@ -169,7 +169,7 @@ private struct SpotCard: View {
         .card()
         .contentShape(.rect(cornerRadius: Theme.cardRadius))
         .accessibilityElement(children: .combine)
-        .task(id: "\(spot.waterRaw)|\(spot.speciesRaw)|\(spot.waterTempC ?? -999)|\(lastPrefetch)") { await load() }
+        .task(id: "\(spot.waterRaw)|\(spot.speciesRaw)|\(spot.waterTempC ?? -999)|\(spot.timeZoneID ?? "")|\(lastPrefetch)") { await load() }
     }
 
     /// Today's best window, or why there is none.
@@ -177,7 +177,7 @@ private struct SpotCard: View {
         if let window = snapshot.today {
             let color = BiteScale.color(window.meanIndex)
             Label {
-                Text(verbatim: "\(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))")
+                Text(verbatim: "\(window.start.clock(in: spot.timeZone)) – \(window.end.clock(in: spot.timeZone))")
                     .monospacedDigit()
             } icon: {
                 Image(systemName: "clock.fill")
@@ -187,7 +187,7 @@ private struct SpotCard: View {
             .padding(.vertical, 6)
             .padding(.horizontal, 10)
             .background(color.opacity(0.13), in: .capsule)
-            .accessibilityLabel(Text("Best today \(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))"))
+            .accessibilityLabel(Text("Best today \(window.start.clock(in: spot.timeZone)) – \(window.end.clock(in: spot.timeZone))"))
         } else {
             // Sun and moon fill any gap in the weather, so a missing window means the day is nearly over.
             Text(loaded ? "Not enough forecast left for today." : "Loading…")
@@ -223,15 +223,17 @@ private struct SpotCard: View {
         // Saved forecast first, so the card fills at once with weak or no signal;
         // the network result (up to the 10 s timeout) replaces it.
         if let saved = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude) {
-            snapshot = SpotSnapshot(spot: spot, context: context, forecast: saved)
+            snapshot = SpotSnapshot(spot: spot, context: context, forecast: saved, calendar: spot.calendar)
             loaded = true
         }
         if spot.isSalt {
             context.tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
         }
         let forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude)
-        snapshot = SpotSnapshot(spot: spot, context: context, forecast: forecast)
+        snapshot = SpotSnapshot(spot: spot, context: context, forecast: forecast, calendar: spot.calendar)
         loaded = true
+        // Once the spot's zone is known the card redraws in it (the zone is part of the task id).
+        await SpotTimeZone.resolveIfNeeded(spot)
     }
 }
 
@@ -303,7 +305,7 @@ struct SpotDetailView: View {
     /// Free: today and tomorrow, then locked dates. Pro: the full 10-day horizon.
     private func computeDays(pressure: Terms.PressureSeries?) -> [DaySummary] {
         guard let forecast else { return [] }
-        let calendar = Calendar.current
+        let calendar = spot.calendar
         let today = calendar.startOfDay(for: Date())
         let count = entitlements.isPro ? Self.horizonDays : Self.freeDays
         guard let end = calendar.date(byAdding: .day, value: count, to: today) else { return [] }
@@ -344,7 +346,7 @@ struct SpotDetailView: View {
     private var tripCount: Int { spot.fittedTrips.count }
 
     private func timeRange(_ window: BiteWindow) -> String {
-        "\(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))"
+        "\(window.start.clock(in: spot.timeZone)) – \(window.end.clock(in: spot.timeZone))"
     }
 
     private func expectedCatchText(_ day: DaySummary, _ window: BiteWindow) -> String {
@@ -357,11 +359,12 @@ struct SpotDetailView: View {
     /// without one, otherwise midday.
     private func moment(_ day: DaySummary) -> Date {
         if let window = day.window { return window.start.addingTimeInterval(window.end.timeIntervalSince(window.start) / 2) }
-        return Calendar.current.isDateInToday(day.id) ? Date() : day.id.addingTimeInterval(12 * 3600)
+        return spot.calendar.isDateInToday(day.id) ? Date() : day.id.addingTimeInterval(12 * 3600)
     }
 
     private func conditions(_ day: DaySummary) -> Conditions {
-        Conditions(at: moment(day), hours: forecast?.hours ?? [], latitude: spot.latitude, longitude: spot.longitude)
+        Conditions(at: moment(day), hours: forecast?.hours ?? [], latitude: spot.latitude, longitude: spot.longitude,
+                   calendar: spot.calendar)
     }
 
     /// Mean weighted contribution of each active factor over the window, with the reading behind it.
@@ -403,7 +406,7 @@ struct SpotDetailView: View {
 
                 if !days.isEmpty {
                     DayStrip(days: days.map { .init(date: $0.id, index: $0.window?.meanIndex, isLocked: $0.isLocked) },
-                             selected: day?.id) { tapped in
+                             selected: day?.id, timeZone: spot.timeZone) { tapped in
                         if tapped.isLocked {
                             showPaywall = true
                         } else {
@@ -489,7 +492,10 @@ struct SpotDetailView: View {
     /// The day's index and best window, the expected catch, and the weather in that window.
     private func heroCard(_ day: DaySummary, _ conditions: Conditions) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(day.id.formatted(.dateTime.weekday(.wide).month().day()))
+            // Away from the phone's own zone, say whose clock the times are on.
+            Text(verbatim: day.id.formatted(.dateTime.weekday(.wide).month().day(), in: spot.timeZone)
+                 + (spot.timeZone.secondsFromGMT(for: day.id) == TimeZone.current.secondsFromGMT(for: day.id)
+                    ? "" : " · " + (spot.timeZone.abbreviation(for: day.id) ?? spot.timeZone.identifier)))
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
             if let window = day.window {
@@ -509,7 +515,7 @@ struct SpotDetailView: View {
                 }
                 .accessibilityElement(children: .combine)
             } else {
-                Text(Calendar.current.isDateInToday(day.id) ? "Not enough forecast left for today." : "No forecast")
+                Text(spot.calendar.isDateInToday(day.id) ? "Not enough forecast left for today." : "No forecast")
                     .foregroundStyle(.secondary)
             }
 
@@ -529,7 +535,7 @@ struct SpotDetailView: View {
                 if conditions.hour != nil {
                     // The readings are for the middle of the window, not for now.
                     Label {
-                        Text(moment(day), format: .dateTime.hour().minute())
+                        Text(verbatim: moment(day).clock(in: spot.timeZone))
                     } icon: {
                         Image(systemName: "clock")
                     }
@@ -586,13 +592,14 @@ struct SpotDetailView: View {
     /// frame (daylight, best window) with the curve withheld, never a made-up one.
     @ViewBuilder
     private func chartCard(_ day: DaySummary, _ conditions: Conditions) -> some View {
-        let dayEnd = Calendar.current.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
+        let dayEnd = spot.calendar.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
         if entitlements.isPro {
             VStack(alignment: .leading, spacing: 10) {
-                BiteCurveChart(points: day.points, window: day.window, sunrise: conditions.sunrise, sunset: conditions.sunset)
+                BiteCurveChart(points: day.points, window: day.window, sunrise: conditions.sunrise, sunset: conditions.sunset,
+                               timeZone: spot.timeZone)
                     .frame(height: 190)
                 if isSalt, let tide {
-                    TideChart(samples: tide.curve(from: day.id, to: dayEnd))
+                    TideChart(samples: tide.curve(from: day.id, to: dayEnd), timeZone: spot.timeZone)
                         .frame(height: 84)
                 }
             }
@@ -602,7 +609,7 @@ struct SpotDetailView: View {
                 showPaywall = true
             } label: {
                 BiteCurveChart(points: [], window: day.window, sunrise: conditions.sunrise, sunset: conditions.sunset,
-                               domain: day.id...dayEnd)
+                               domain: day.id...dayEnd, timeZone: spot.timeZone)
                     .frame(height: 170)
                     .overlay {
                         Label("Unlock hourly curve, tide curve, expected catch and 10-day outlook", systemImage: "lock.fill")
@@ -626,11 +633,11 @@ struct SpotDetailView: View {
         if isSalt {
             VStack(alignment: .leading, spacing: 10) {
                 if let tide {
-                    let end = Calendar.current.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
+                    let end = spot.calendar.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
                     let extremes = tide.extremes(from: day.id, to: end)
                     if !extremes.isEmpty {
                         LabeledContent("Tides") {
-                            Text(verbatim: extremes.map { "\($0.isHigh ? "▲" : "▼") \($0.time.formatted(date: .omitted, time: .shortened))" }
+                            Text(verbatim: extremes.map { "\($0.isHigh ? "▲" : "▼") \($0.time.clock(in: spot.timeZone))" }
                                 .joined(separator: "  "))
                                 .font(.footnote.monospacedDigit())
                         }
@@ -751,6 +758,7 @@ struct DayStrip: View {
 
     let days: [Day]
     let selected: Date?
+    var timeZone: TimeZone = .current
     let onTap: (Day) -> Void
 
     var body: some View {
@@ -762,10 +770,10 @@ struct DayStrip: View {
                         onTap(day)
                     } label: {
                         VStack(spacing: 5) {
-                            Text(day.date.formatted(.dateTime.weekday(.abbreviated)))
+                            Text(verbatim: day.date.formatted(.dateTime.weekday(.abbreviated), in: timeZone))
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(.secondary)
-                            Text(day.date.formatted(.dateTime.day()))
+                            Text(verbatim: day.date.formatted(.dateTime.day(), in: timeZone))
                                 .font(.subheadline.weight(.semibold))
                                 .monospacedDigit()
                             if day.isLocked {
@@ -793,7 +801,7 @@ struct DayStrip: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text(day.date.formatted(.dateTime.weekday(.wide).month().day())))
+                    .accessibilityLabel(Text(verbatim: day.date.formatted(.dateTime.weekday(.wide).month().day(), in: timeZone)))
                     .accessibilityValue(day.isLocked
                                         ? Text("BiteCurve Pro")
                                         : Text(verbatim: day.index.map { "\(Int($0.rounded()))" } ?? "–"))

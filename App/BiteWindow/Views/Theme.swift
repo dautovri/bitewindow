@@ -1,4 +1,5 @@
 import BiteCore
+import CoreLocation
 import SwiftUI
 import UIKit
 
@@ -97,7 +98,11 @@ struct Conditions {
     let sunset: Date?
     let moonPhaseAngle: Double
 
+    /// The zone the clock times are written in.
+    let timeZone: TimeZone
+
     init(at time: Date, hours: [HourConditions], latitude: Double, longitude: Double, calendar: Calendar = .current) {
+        timeZone = calendar.timeZone
         let sorted = hours.sorted { $0.time < $1.time }
         // The forecast hour that contains `time`, within an hour and a half at most.
         let nearest = sorted.min { abs($0.time.timeIntervalSince(time)) < abs($1.time.timeIntervalSince(time)) }
@@ -165,7 +170,7 @@ struct Conditions {
     }
 
     func clock(_ date: Date?) -> String? {
-        date.map { $0.formatted(date: .omitted, time: .shortened) }
+        date.map { $0.clock(in: timeZone) }
     }
 }
 
@@ -257,5 +262,39 @@ struct SunMoonStrip: View {
                 .accessibilityLabel("Moon")
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+extension Date {
+    /// The time of day in a given zone, in the phone's 12- or 24-hour style.
+    func clock(in timeZone: TimeZone) -> String {
+        var style = Date.FormatStyle(date: .omitted, time: .shortened)
+        style.timeZone = timeZone
+        return formatted(style)
+    }
+
+    /// A date format written in a given zone.
+    func formatted(_ style: Date.FormatStyle, in timeZone: TimeZone) -> String {
+        var style = style
+        style.timeZone = timeZone
+        return formatted(style)
+    }
+}
+
+/// Looks up a spot's time zone from its coordinates with Apple's geocoder. This needs a
+/// connection but no location permission: the coordinates are the spot's, not the phone's.
+@MainActor
+enum SpotTimeZone {
+    private static var inFlight: Set<UUID> = []
+
+    static func resolveIfNeeded(_ spot: Spot) async {
+        guard spot.timeZoneID == nil, !inFlight.contains(spot.id) else { return }
+        inFlight.insert(spot.id)
+        defer { inFlight.remove(spot.id) }
+        let location = CLLocation(latitude: spot.latitude, longitude: spot.longitude)
+        guard let placemark = try? await CLGeocoder().reverseGeocodeLocation(location).first,
+              let zone = placemark.timeZone else { return }
+        spot.timeZoneID = zone.identifier
+        try? spot.modelContext?.save()
     }
 }
