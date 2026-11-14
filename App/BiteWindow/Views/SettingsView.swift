@@ -210,8 +210,10 @@ struct PaywallView: View {
                             .font(.largeTitle)
                             .foregroundStyle(Theme.accent)
                             .accessibilityHidden(true)
-                        Text("BiteCurve Pro").font(.title2.bold())
-                        Text("Hourly bite curve, tide curve, expected catch tuned to your log, 10-day outlook and unlimited spots.")
+                        // Resolved here, in the app's language: inside the store view the locale is
+                        // the App Store storefront's, so a plain key came out in English.
+                        Text(verbatim: String(localized: "BiteCurve Pro")).font(.title2.bold())
+                        Text(verbatim: String(localized: "Hourly bite curve, tide curve, expected catch tuned to your log, 10-day outlook and unlimited spots."))
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.secondary)
                     }

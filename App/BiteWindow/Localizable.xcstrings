@@ -360,7 +360,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "十字の位置にポイントを追加"
+            "value": "十字カーソルの位置にポイントを追加"
           }
         },
         "ko": {
@@ -772,7 +772,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le mieux en ce moment"
+            "value": "Les plus adaptés maintenant"
           }
         },
         "it": {
@@ -784,7 +784,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今いちばん合う魚"
+            "value": "現在もっとも条件が合う魚"
           }
         },
         "ko": {
@@ -844,7 +844,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "当前最适合"
+            "value": "当前最佳匹配"
           }
         }
       }
@@ -3616,7 +3616,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Vorhersagen für deine Spots werden auf diesem Gerät gespeichert und bleiben etwa 10 Tage nutzbar. Öffne die App oder tippe auf die Taste, solange du noch Empfang hast. Ohne gespeicherte Vorhersage basiert der Score nur auf Sonne, Mond und Gezeiten."
+            "value": "Die Vorhersagen für deine Spots werden auf diesem Gerät gespeichert und bleiben etwa 10 Tage nutzbar. Öffne die App oder tippe auf die Taste, solange du noch Empfang hast. Ohne gespeicherte Vorhersage basiert der Beißindex nur auf Sonne, Mond und Gezeiten."
           }
         },
         "es": {
@@ -3628,7 +3628,7 @@
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Paikkojesi ennusteet tallennetaan tälle laitteelle, ja ne ovat käytettävissä noin 10 päivää. Avaa appi tai napauta painiketta, kun sinulla on vielä kenttää. Ilman tallennettua ennustetta pisteet perustuvat vain aurinkoon, kuuhun ja vuoroveteen."
+            "value": "Paikkojesi ennusteet tallennetaan tälle laitteelle, ja ne ovat käytettävissä noin 10 päivää. Avaa sovellus tai napauta painiketta, kun sinulla on vielä kenttää. Ilman tallennettua ennustetta pisteet perustuvat vain aurinkoon, kuuhun ja vuoroveteen."
           }
         },
         "fr": {
@@ -3934,7 +3934,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "So funktioniert der Wert"
+            "value": "So funktioniert der Beißindex"
           }
         },
         "es": {
@@ -3952,7 +3952,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comment fonctionne le score"
+            "value": "Calcul du score"
           }
         },
         "it": {
@@ -4000,7 +4000,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Как рассчитывается оценка"
+            "value": "Расчёт оценки"
           }
         },
         "sv": {
@@ -4630,7 +4630,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pressão ao vivo do meu telefone"
+            "value": "Pressão em tempo real do meu telefone"
           }
         },
         "ru": {
@@ -8280,7 +8280,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sichern"
+            "value": "Speichern"
           }
         },
         "es": {
@@ -8900,7 +8900,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在一项为期六年的研究中，日月潮汐表（Solunar）未能预测鳟鱼的上鱼率，对北美狗鱼仅显示出有限的影响。因此月亮的权重较小。"
+            "value": "在一项为期六年的研究中，日月潮汐表未能预测鳟鱼的上鱼率，对北美狗鱼仅显示出有限的影响。因此月亮的权重较小。"
           }
         }
       }
@@ -11950,7 +11950,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Вода около %@ · оценка по воздуху"
+            "value": "Вода около %@ · оценка по температуре воздуха"
           }
         },
         "sv": {

@@ -446,8 +446,9 @@ private struct SpeciesNowCard: View {
                         .font(.headline)
                         .lineLimit(1)
                     if let temp = outlook?.waterTempC, !isSalt {
+                        // °C or °F as the weather strip shows it.
                         let degrees = Measurement(value: temp, unit: UnitTemperature.celsius)
-                            .formatted(.measurement(width: .abbreviated, usage: .asProvided,
+                            .formatted(.measurement(width: .abbreviated, usage: .weather,
                                                     numberFormatStyle: .number.precision(.fractionLength(0))))
                         Text(outlook?.isMeasured == true ? "Water \(degrees) · measured" : "Water about \(degrees) · estimated from air")
                             .font(.caption)
