@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import WidgetKit
+import os
 
 /// Writes what the widgets show (see `WidgetSnapshot`) from the saved forecasts and tells
 /// WidgetKit to redraw. Called whenever forecasts are refreshed, the app comes forward or
@@ -24,6 +25,8 @@ enum WidgetSnapshotWriter {
         if let old = WidgetSnapshot.load(), old.spots == snapshot.spots { return }
         if snapshot.save() {
             WidgetCenter.shared.reloadTimelines(ofKind: WidgetSnapshot.widgetKind)
+        } else {
+            Logger(subsystem: "com.dautovri.bitecurve", category: "widget").error("widget snapshot could not be saved")
         }
     }
 }

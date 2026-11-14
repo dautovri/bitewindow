@@ -1,8 +1,9 @@
 import Foundation
+import Security
 import SwiftUI
 
 /// What the widgets show, written by the app each time forecasts are scored and read by the
-/// widget extension from the shared app-group folder. The widget does no scoring or
+/// widget extension from a shared keychain group. The widget does no scoring or
 /// networking of its own: it shows what the app last worked out, day by day.
 struct WidgetSnapshot: Codable, Equatable {
     struct Day: Codable, Equatable {
@@ -25,24 +26,48 @@ struct WidgetSnapshot: Codable, Equatable {
     let updated: Date
     let spots: [Spot]
 
-    static let appGroup = "group.com.dautovri.bitecurve"
     static let widgetKind = "BiteForecast"
 
-    private static var fileURL: URL? {
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
-            .appendingPathComponent("widget-snapshot.json")
+    // The snapshot travels from the app to the widget extension as one item in a keychain
+    // group both are signed into. An app group folder would be the usual place, but an app
+    // group has to be registered by hand in the developer portal (Apple's API cannot), and a
+    // keychain group needs nothing beyond the team's own prefix. The item is a few kilobytes.
+    private static let service = "com.dautovri.bitecurve.widget-snapshot"
+
+    /// `<team prefix>com.dautovri.bitecurve.shared`, as in both targets' entitlements. The
+    /// prefix comes from the build (Info.plist) and is empty in unsigned simulator builds.
+    private static var accessGroup: String {
+        let prefix = Bundle.main.object(forInfoDictionaryKey: "AppIdentifierPrefix") as? String ?? ""
+        return prefix + "com.dautovri.bitecurve.shared"
+    }
+
+    private static var baseQuery: [String: Any] {
+        [kSecClass as String: kSecClassGenericPassword,
+         kSecAttrService as String: service,
+         kSecAttrAccount as String: "snapshot",
+         kSecAttrAccessGroup as String: accessGroup]
     }
 
     static func load() -> WidgetSnapshot? {
-        guard let url = fileURL, let data = try? Data(contentsOf: url) else { return nil }
+        var query = baseQuery
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        var item: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess, let data = item as? Data else { return nil }
         return try? JSONDecoder().decode(WidgetSnapshot.self, from: data)
     }
 
-    /// Returns false when the shared folder is not there (no app-group entitlement).
+    /// Returns false when the item could not be written (the keychain group is missing from
+    /// the signature).
     @discardableResult
     func save() -> Bool {
-        guard let url = Self.fileURL, let data = try? JSONEncoder().encode(self) else { return false }
-        return (try? data.write(to: url, options: .atomic)) != nil
+        guard let data = try? JSONEncoder().encode(self) else { return false }
+        SecItemDelete(Self.baseQuery as CFDictionary)
+        var item = Self.baseQuery
+        item[kSecValueData as String] = data
+        // Readable by the widget whenever the phone has been unlocked once since boot.
+        item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        return SecItemAdd(item as CFDictionary, nil) == errSecSuccess
     }
 
     /// One spot's outlook for the moment `now`: today's window while it is still ahead or

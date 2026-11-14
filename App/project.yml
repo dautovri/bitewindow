@@ -19,11 +19,11 @@ targets:
     dependencies:
       - package: BiteCore
       - target: BiteWidgets
-    # The app writes the widget snapshot into the shared group folder.
+    # The app hands the widget its snapshot through this keychain group (see WidgetSnapshot).
     entitlements:
       path: BiteWindow/BiteWindow.entitlements
       properties:
-        com.apple.security.application-groups: [group.com.dautovri.bitecurve]
+        keychain-access-groups: ["$(AppIdentifierPrefix)com.dautovri.bitecurve.shared"]
     scheme:
       testTargets: [BiteWindowTests]
       storeKitConfiguration: BiteWindow.storekit
@@ -40,6 +40,8 @@ targets:
       path: BiteWindow/Info.plist
       properties:
         CFBundleDisplayName: BiteCurve
+        # The team prefix of the shared keychain group (see Shared/WidgetSnapshot.swift).
+        AppIdentifierPrefix: $(AppIdentifierPrefix)
         # From the build settings below, so one place sets the version.
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -74,6 +76,7 @@ targets:
       path: BiteWidgets/Info.plist
       properties:
         CFBundleDisplayName: BiteCurve
+        AppIdentifierPrefix: $(AppIdentifierPrefix)
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
@@ -81,7 +84,7 @@ targets:
     entitlements:
       path: BiteWidgets/BiteWidgets.entitlements
       properties:
-        com.apple.security.application-groups: [group.com.dautovri.bitecurve]
+        keychain-access-groups: ["$(AppIdentifierPrefix)com.dautovri.bitecurve.shared"]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dautovri.bitecurve.widgets
