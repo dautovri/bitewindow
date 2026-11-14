@@ -286,9 +286,14 @@ extension Date {
 @MainActor
 enum SpotTimeZone {
     private static var inFlight: Set<UUID> = []
+    /// When each spot was last asked about: a failed lookup (offline, open sea) is not
+    /// repeated on every redraw, which the geocoder would answer by refusing all requests.
+    private static var lastAttempt: [UUID: Date] = [:]
 
     static func resolveIfNeeded(_ spot: Spot) async {
-        guard spot.timeZoneID == nil, !inFlight.contains(spot.id) else { return }
+        guard spot.timeZoneID == nil, !inFlight.contains(spot.id),
+              Date().timeIntervalSince(lastAttempt[spot.id] ?? .distantPast) > 300 else { return }
+        lastAttempt[spot.id] = Date()
         inFlight.insert(spot.id)
         defer { inFlight.remove(spot.id) }
         let location = CLLocation(latitude: spot.latitude, longitude: spot.longitude)

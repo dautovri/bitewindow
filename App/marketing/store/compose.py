@@ -1,6 +1,6 @@
 """BiteCurve iPhone screenshots (shotkit.py), English.
 
-Inputs: real simulator captures in RAW named en-{detail,forecast,outlook,map,log}.png
+Inputs: real simulator captures in RAW named en-{detail,forecast,factors,map,log}.png
 (Debug build, sample spots, Central time). Teal canvas, white headline at the
 top, the real screen in an iPhone frame running off the bottom edge.
 No prices and no "free"/"Pro" wording.
@@ -18,8 +18,8 @@ SLIDES = [
     # (capture, eyebrow, headline, phone options)
     ("detail",   "Weather, sun, moon and tide",   "Know the best hours\nto fish today",     {}),
     ("forecast", "Every spot you fish",           "One bite index\nfor each spot",          {}),
-    ("outlook",  "The days ahead",                "Pick your day\nbefore you drive",        {}),
-    ("map",      "Your own spots",                "Drop a pin\nwhere you fish",             {"top": 800}),
+    ("factors",  "Wind, pressure, light, moon",   "See what drives\nthe bite",              {}),
+    ("map",      "Search any lake or river",      "Drop a pin\nwhere you fish",             {"top": 800}),
     ("log",      "Blank trips count too",         "A log that learns\nyour water",          {}),
 ]
 

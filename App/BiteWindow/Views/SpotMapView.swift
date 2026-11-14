@@ -58,7 +58,7 @@ struct SpotMapView: View {
             // Again each time the tab comes forward: the Forecast tab may have saved a spot's
             // first forecast in the meantime.
             .onAppear { appearances += 1 }
-            .task(id: "\(appearances)|\(lastPrefetch)|\(spots.map { "\($0.id)\($0.waterRaw)\($0.speciesRaw)\($0.waterTempC ?? -999)" }.joined())") {
+            .task(id: "\(appearances)|\(lastPrefetch)|\(spots.map { "\($0.id)\($0.waterRaw)\($0.speciesRaw)\($0.waterTempC ?? -999)\($0.timeZoneID ?? "")" }.joined())") {
                 var fresh: [UUID: Double] = [:]
                 for spot in spots {
                     // The tide counts at saltwater spots, as on the Forecast tab (saved station first).

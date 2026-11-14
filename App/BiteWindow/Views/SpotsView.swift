@@ -445,6 +445,8 @@ struct SpotDetailView: View {
                 forecast = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude)
             }
             forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude)
+            // In case this screen opened before the card on the Forecast tab had asked.
+            await SpotTimeZone.resolveIfNeeded(spot)
         }
         .task(id: spot.waterRaw) {
             guard isSalt, tide == nil else { return }
