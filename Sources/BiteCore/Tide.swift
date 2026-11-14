@@ -1,11 +1,12 @@
 import Foundation
 
 /// Harmonic tide prediction from station constituents (e.g. NOAA CO-OPS).
-/// Supports the eight largest constituents; others in the input are ignored.
+/// Supports the eight largest constituents and the two seasonal ones (SA, SSA); others in
+/// the input are ignored.
 /// NOT validated against published predictions yet — see README.
 public struct TideStation: Codable, Sendable, Equatable {
     public struct Constituent: Codable, Sendable, Equatable {
-        /// "M2", "S2", "N2", "K2", "K1", "O1", "P1", "Q1"
+        /// "M2", "S2", "N2", "K2", "K1", "O1", "P1", "Q1", "SA", "SSA"
         public var name: String
         /// Amplitude H in metres.
         public var amplitude: Double
@@ -51,6 +52,15 @@ public struct TideStation: Codable, Sendable, Equatable {
                 (f, u) = (1.0004 - 0.0373 * cos(N) + 0.0002 * cos(2 * N), -2.14 * sin(N))
             case "S2":
                 v = 2 * t15
+                (f, u) = (1, 0)
+            // The yearly and half-yearly cycles of sea level (weather and water temperature):
+            // slow, so they do not move the bite score, but they shift every height by up to
+            // some 10 cm in places such as Florida.
+            case "SA":
+                v = h
+                (f, u) = (1, 0)
+            case "SSA":
+                v = 2 * h
                 (f, u) = (1, 0)
             case "K2":
                 v = 2 * t15 + 2 * h

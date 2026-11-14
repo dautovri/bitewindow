@@ -3,9 +3,10 @@ import MapKit
 import Observation
 import SwiftData
 import SwiftUI
+import UIKit
 
 /// Spots on a map. A spot is dropped at the map centre, so no location
-/// permission is needed.
+/// permission is needed; "my location" asks for it only when tapped.
 struct SpotMapView: View {
     @Query private var spots: [Spot]
     @Environment(\.modelContext) private var modelContext
@@ -26,11 +27,20 @@ struct SpotMapView: View {
     @State private var selectedSpotID: UUID?
     @State private var appearances = 0
     @State private var searchCompleter = PlaceSearchCompleter()
+    @State private var locationCenter = LocationCenter()
+    /// What the geocoder found at the crosshair when "Add spot" was tapped.
+    @State private var suggestion = SpotSuggestion()
+    @State private var isLookingUp = false
+    /// The crosshair position the lookup was made for; the spot is saved exactly there.
+    @State private var pendingCoordinate: CLLocationCoordinate2D?
+    @State private var showLocationHelp = false
     @FocusState private var searchFocused: Bool
 
     var body: some View {
         NavigationStack {
             Map(position: $position, selection: $selectedSpotID) {
+                // Only once location was allowed: MapKit would otherwise ask for it by itself.
+                if locationCenter.isAuthorized { UserAnnotation() }
                 ForEach(spots) { spot in
                     let index = indices[spot.id]
                     Annotation(spot.name, coordinate: CLLocationCoordinate2D(latitude: spot.latitude, longitude: spot.longitude)) {
@@ -74,7 +84,7 @@ struct SpotMapView: View {
                     let tide = spot.isSalt
                         ? await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude) : nil
                     fresh[spot.id] = currentIndex(for: spot, tide: tide)
-                    freshOutlooks[spot.id] = outlook(for: spot)
+                    freshOutlooks[spot.id] = outlook(for: spot, tide: tide)
                 }
                 indices = fresh
                 outlooks = freshOutlooks
@@ -85,6 +95,22 @@ struct SpotMapView: View {
                 TextField("Name", text: $newName)
                 Button("Save") { addSpot() }
                 Button("Cancel", role: .cancel) {}
+            } message: {
+                if suggestion.looksLikeLand {
+                    Text("No lake, river or sea was found at this point. Move the crosshair onto the water, or save it anyway.")
+                }
+            }
+            .onChange(of: locationCenter.centerRequests) {
+                withAnimation { position = .userLocation(fallback: .automatic) }
+            }
+            .alert("Location is off for BiteCurve", isPresented: Binding(get: { locationCenter.isDenied && showLocationHelp },
+                                                                         set: { showLocationHelp = $0 })) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Allow location in Settings to centre the map on where you are. The app works without it.")
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
         }
@@ -107,6 +133,20 @@ struct SpotMapView: View {
                         .overlay(Circle().strokeBorder(Theme.stroke, lineWidth: 1))
                 }
                 .accessibilityLabel(Text("Map style"))
+                Button {
+                    searchFocused = false
+                    locationCenter.requestCenter()
+                    // Only when it was refused earlier; the first ask is the system's own prompt.
+                    showLocationHelp = locationCenter.isDenied
+                } label: {
+                    Image(systemName: locationCenter.isAuthorized ? "location.fill" : "location")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(Theme.accent)
+                        .frame(width: 40, height: 40)
+                        .background(.regularMaterial, in: .circle)
+                        .overlay(Circle().strokeBorder(Theme.stroke, lineWidth: 1))
+                }
+                .accessibilityLabel(Text("My location"))
             }
             .frame(maxWidth: Theme.readableWidth)
 
@@ -170,9 +210,17 @@ struct SpotMapView: View {
         Button {
             if !entitlements.isPro && spots.count >= EntitlementManager.freeSpotLimit {
                 showPaywall = true
-            } else {
-                newName = ""
-                showNamePrompt = true
+            } else if let center, !isLookingUp {
+                // The water's name, salt or fresh, and whether the point is on water at all;
+                // the prompt opens after three seconds at most, with or without an answer.
+                isLookingUp = true
+                pendingCoordinate = center
+                Task {
+                    suggestion = await SpotSuggestion.lookup(latitude: center.latitude, longitude: center.longitude)
+                    newName = suggestion.waterName ?? ""
+                    isLookingUp = false
+                    showNamePrompt = true
+                }
             }
         } label: {
             Label("Add spot at crosshair", systemImage: "plus")
@@ -216,19 +264,25 @@ struct SpotMapView: View {
 
     /// Fish ranked by how well the water suits them now, from the saved forecast only. The
     /// measured water temperature when there is one, else an estimate from the last days' air.
-    private func outlook(for spot: Spot) -> SpotOutlook? {
+    private func outlook(for spot: Spot, tide: TideStation?) -> SpotOutlook? {
         guard let saved = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude) else {
             return nil
         }
         let now = Date()
-        let measured = spot.waterTempC
-        let waterTemp = measured ?? Terms.estimatedWaterTempC(hours: saved.hours, now: now)
-        let ranked = Forecaster.speciesNow(context: spot.context, hours: saved.hours, now: now, waterTempC: waterTemp)
-        return SpotOutlook(waterTempC: waterTemp, isMeasured: measured != nil, ranked: ranked)
+        // Measured, else the saved estimate, else (inland, nothing saved yet) the last days' air.
+        var reading = spot.waterReading
+        if reading == nil, !spot.isSalt, let rough = Terms.estimatedWaterTempC(hours: saved.hours, now: now) {
+            reading = .modelled(rough)
+        }
+        var context = spot.context
+        context.tide = tide
+        let ranked = Forecaster.speciesNow(context: context, hours: saved.hours, now: now, waterTempC: reading?.tempC)
+        return SpotOutlook(reading: reading, ranked: ranked)
     }
 
     private func addSpot() {
-        guard let center else { return }
+        guard let center = pendingCoordinate ?? center else { return }
+        pendingCoordinate = nil
         // Checked again here: the count can change while the name prompt is open.
         guard entitlements.isPro || spots.count < EntitlementManager.freeSpotLimit else {
             showPaywall = true
@@ -237,6 +291,11 @@ struct SpotMapView: View {
         let name = newName.trimmingCharacters(in: .whitespaces)
         let spot = Spot(name: name.isEmpty ? String(localized: "Spot \(spots.count + 1)") : name,
                         latitude: center.latitude, longitude: center.longitude)
+        // From the geocoder: sea or inland water, the fish usual in that country, the zone.
+        if let water = suggestion.water { spot.water = water }
+        spot.species = Species.defaultSpecies(forRegion: suggestion.regionCode ?? Locale.current.region?.identifier, water: spot.water)
+        spot.timeZoneID = suggestion.timeZoneID
+        suggestion = SpotSuggestion()
         modelContext.insert(spot)
         // Saved at once: the system's own save can come seconds later, and a spot must not be
         // lost if the app is closed right after it was added.
@@ -362,8 +421,7 @@ private struct SpotPill: View {
 
 /// Which fish the water at a spot suits right now.
 struct SpotOutlook: Equatable {
-    var waterTempC: Double?
-    var isMeasured: Bool
+    var reading: Spot.WaterReading?
     /// Best first; empty without a water temperature or at a saltwater spot.
     var ranked: [SpeciesOutlook]
 }
@@ -450,14 +508,20 @@ private struct SpeciesNowCard: View {
                     Text(verbatim: name)
                         .font(.headline)
                         .lineLimit(1)
-                    if let temp = outlook?.waterTempC, !isSalt {
+                    if let reading = outlook?.reading {
                         // °C or °F as the weather strip shows it.
-                        let degrees = Measurement(value: temp, unit: UnitTemperature.celsius)
+                        let degrees = Measurement(value: reading.tempC, unit: UnitTemperature.celsius)
                             .formatted(.measurement(width: .abbreviated, usage: .weather,
                                                     numberFormatStyle: .number.precision(.fractionLength(0))))
-                        Text(outlook?.isMeasured == true ? "Water \(degrees) · measured" : "Water about \(degrees) · estimated from air")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Group {
+                            switch reading {
+                            case .measured: Text("Water \(degrees) · measured")
+                            case .satellite: Text("Water about \(degrees) · satellite estimate")
+                            case .modelled: Text("Water about \(degrees) · estimated from air")
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
@@ -470,9 +534,7 @@ private struct SpeciesNowCard: View {
                 .accessibilityLabel(Text("Close"))
             }
 
-            if isSalt {
-                message("Fish suggestions are for freshwater spots.")
-            } else if let ranked = outlook?.ranked, !ranked.isEmpty {
+            if let ranked = outlook?.ranked, !ranked.isEmpty {
                 Text("Best match right now")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
@@ -483,6 +545,9 @@ private struct SpeciesNowCard: View {
                 Text("Conditions that suit each fish, not a survey of this water.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+            } else if isSalt, outlook != nil {
+                // Weather is saved but no sea temperature has arrived for this spot yet.
+                message("No sea temperature for this spot yet. Open it on the Forecast tab while online.")
             } else {
                 message("Open this spot on the Forecast tab to download weather.")
             }

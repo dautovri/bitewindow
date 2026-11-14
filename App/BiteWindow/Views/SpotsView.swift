@@ -220,10 +220,13 @@ private struct SpotCard: View {
             snapshot = SpotSnapshot(spot: spot, context: context, forecast: saved, calendar: spot.calendar)
             loaded = true
         }
-        if spot.isSalt {
-            context.tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
-        }
+        let tide = spot.isSalt
+            ? await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude) : nil
         let forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude)
+        // The water estimate feeds the score; the context is rebuilt once it is in.
+        await ForecastService.shared.waterEstimate(latitude: spot.latitude, longitude: spot.longitude, isSalt: spot.isSalt)
+        context = spot.context
+        context.tide = tide
         snapshot = SpotSnapshot(spot: spot, context: context, forecast: forecast, calendar: spot.calendar)
         loaded = true
         // Once the spot's zone is known the card redraws in it (the zone is part of the task id).
@@ -280,6 +283,11 @@ struct SpotDetailView: View {
     @State private var showPaywall = false
     /// The day the screen explains; nil means today.
     @State private var selectedDay: Date?
+    /// Where the water temperature in the score comes from; set again when an estimate arrives,
+    /// which also redraws the screen with it.
+    @State private var waterReading: Spot.WaterReading?
+    /// What is typed in the water temperature field (see `storeWaterTemperature`).
+    @State private var waterText = ""
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
 
     /// How far the day strip reaches.
@@ -339,16 +347,49 @@ struct SpotDetailView: View {
 
     private var tripCount: Int { spot.fittedTrips.count }
 
+    /// The side of the water the angler stands on, as the bearing from open water to that bank.
+    private static let banks: [(degrees: Double, name: LocalizedStringKey)] = [
+        (0, "North bank"), (45, "Northeast bank"), (90, "East bank"), (135, "Southeast bank"),
+        (180, "South bank"), (225, "Southwest bank"), (270, "West bank"), (315, "Northwest bank"),
+    ]
+
     /// The unit the forecast shows temperatures in (°F in the US), so the field matches it.
     private var temperatureUnit: UnitTemperature { UnitTemperature(forLocale: .current, usage: .weather) }
 
-    /// The water temperature in that unit; stored in °C either way.
-    private var waterTemperature: Binding<Double?> {
-        let unit = temperatureUnit
-        return Binding {
-            spot.waterTempC.map { Measurement(value: $0, unit: UnitTemperature.celsius).converted(to: unit).value }
-        } set: { value in
-            spot.waterTempC = value.map { Measurement(value: $0, unit: unit).converted(to: .celsius).value }
+    /// The measured water temperature as the angler types it, in that unit. Kept as text
+    /// while typing ("68." must not lose its dot); every valid state is stored in °C at once,
+    /// and an empty field goes back to the estimate. Comma and dot both count as the decimal mark.
+    private func storeWaterTemperature(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: ".")
+        if trimmed.isEmpty {
+            spot.waterTempC = nil
+        } else if let value = Double(trimmed) {
+            let celsius = Measurement(value: value, unit: temperatureUnit).converted(to: .celsius).value
+            // Liquid water an angler can fish in.
+            if (-3...40).contains(celsius) { spot.waterTempC = celsius }
+        }
+    }
+
+    private func waterTemperatureString() -> String {
+        guard let celsius = spot.waterTempC else { return "" }
+        let value = Measurement(value: celsius, unit: UnitTemperature.celsius).converted(to: temperatureUnit).value
+        return value.formatted(.number.precision(.fractionLength(0...1)).grouping(.never))
+    }
+
+    /// The estimate in use, shown greyed in the empty field ("≈ 6").
+    private var estimatePrompt: String? {
+        guard let waterReading, !waterReading.isMeasured else { return nil }
+        let value = Measurement(value: waterReading.tempC, unit: UnitTemperature.celsius).converted(to: temperatureUnit).value
+        return "≈ " + value.formatted(.number.precision(.fractionLength(0)))
+    }
+
+    /// Says where the temperature in the score comes from.
+    private var waterSourceNote: LocalizedStringKey? {
+        switch waterReading {
+        case .satellite: return "Estimated from NOAA satellite sea-surface data. Type your own reading to replace it."
+        case .modelled: return "Estimated from the last 30 days of air temperature. Type your own reading to replace it."
+        case .measured: return "Your reading. Clear the field to go back to the estimate."
+        case nil: return nil
         }
     }
 
@@ -385,10 +426,11 @@ struct SpotDetailView: View {
         var out: [FactorBreakdown.Factor] = [
             .init(name: String(localized: "Light"), value: mean { $0.light }, symbol: conditions.cloudSymbol, reading: conditions.cloud)
         ]
-        if let water = spot.waterTempC {
-            // In the same unit as the field it was typed into (°F in the US).
-            let reading = Measurement(value: water, unit: UnitTemperature.celsius)
+        if let water = spot.waterReading {
+            // In the same unit as the field it was typed into (°F in the US); "≈" marks an estimate.
+            let degrees = Measurement(value: water.tempC, unit: UnitTemperature.celsius)
                 .formatted(.measurement(width: .abbreviated, usage: .weather, numberFormatStyle: .number.precision(.fractionLength(0))))
+            let reading = water.isMeasured ? degrees : "≈ " + degrees
             out.append(.init(name: String(localized: "Water temperature"), value: mean { $0.thermal }, symbol: "thermometer.medium", reading: reading))
         }
         if !day.weatherless {
@@ -460,9 +502,17 @@ struct SpotDetailView: View {
             await SpotTimeZone.resolveIfNeeded(spot)
         }
         .task(id: spot.waterRaw) {
+            // A water changed to another habitat cannot keep its fish.
+            spot.alignSpeciesWithWater()
+            waterReading = spot.waterReading
+            await ForecastService.shared.waterEstimate(latitude: spot.latitude, longitude: spot.longitude, isSalt: isSalt)
+            waterReading = spot.waterReading
             guard isSalt, tide == nil else { return }
             tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
         }
+        .onChange(of: spot.waterTempC) { waterReading = spot.waterReading }
+        .onChange(of: waterText) { storeWaterTemperature(waterText) }
+        .onAppear { waterText = waterTemperatureString() }
         .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 
@@ -699,7 +749,7 @@ struct SpotDetailView: View {
             VStack(spacing: 6) {
                 LabeledContent("Target species") {
                     Picker("Target species", selection: $spot.species) {
-                        ForEach(Species.allCases, id: \.self) { Text(verbatim: $0.localizedName).tag($0) }
+                        ForEach(Species.choices(for: spot.water), id: \.self) { Text(verbatim: $0.localizedName).tag($0) }
                     }
                     .labelsHidden()
                     .pickerStyle(.menu)
@@ -715,9 +765,24 @@ struct SpotDetailView: View {
                     .fixedSize()
                 }
                 Divider().overlay(Theme.stroke)
+                // Wind blowing onto the bank you stand on scores higher than wind off it.
+                LabeledContent("Bank you fish from") {
+                    Picker("Bank you fish from", selection: $spot.bankBearingDeg) {
+                        Text("Not set").tag(Double?.none)
+                        ForEach(Self.banks, id: \.degrees) { bank in
+                            Text(bank.name).tag(Double?.some(bank.degrees))
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                }
+                Divider().overlay(Theme.stroke)
                 LabeledContent("Water temperature") {
                     HStack(spacing: 4) {
-                        TextField("Optional", value: waterTemperature, format: .number.precision(.fractionLength(0...1)))
+                        TextField(text: $waterText, prompt: Text(verbatim: estimatePrompt ?? String(localized: "Optional"))) {
+                            Text("Water temperature")
+                        }
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .foregroundStyle(Theme.accent)
@@ -731,6 +796,12 @@ struct SpotDetailView: View {
                     .background(Theme.well, in: .rect(cornerRadius: 10, style: .continuous))
                 }
                 .padding(.vertical, 6)
+                if let waterSourceNote {
+                    Text(waterSourceNote)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
             .tint(Theme.accent)
             .card()

@@ -100,6 +100,7 @@ final class ForecastService {
             if place.isSalt {
                 _ = await tideStation(latitude: place.latitude, longitude: place.longitude)
             }
+            await waterEstimate(latitude: place.latitude, longitude: place.longitude, isSalt: place.isSalt)
         }
         if saved > 0 {
             UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: Self.lastPrefetchKey)
@@ -119,6 +120,84 @@ final class ForecastService {
             }
         }
         return CatchModel.expectedCatch(points: points, from: from, to: to)
+    }
+
+    // MARK: Water temperature
+
+    /// Estimated water temperature for a spot from the backend (`/water`): the satellite
+    /// sea-surface analysis at sea, a model from 30 days of air temperature inland.
+    struct WaterEstimate: Codable, Equatable {
+        enum Source: String, Codable { case sst, air }
+        let tempC: Double
+        let source: Source
+    }
+
+    private struct WaterPayload: Codable {
+        let tempC: Double?
+        let source: String?
+    }
+
+    /// The estimate saved on disk, without touching the network. Water changes by tenths of a
+    /// degree a day, so a copy up to ten days old is still better than none (offline trips).
+    func cachedWaterEstimate(latitude: Double, longitude: Double, isSalt: Bool) -> WaterEstimate? {
+        let file = Self.waterFile(latitude: latitude, longitude: longitude, isSalt: isSalt)
+        // Asked on every redraw of a spot: the disk is read at most once a minute per spot.
+        waterLock.lock()
+        if let memo = waterMemo[file.path], Date().timeIntervalSince(memo.at) < 60 {
+            waterLock.unlock()
+            return memo.estimate
+        }
+        waterLock.unlock()
+        let estimate = readWaterEstimate(file)
+        waterLock.lock()
+        waterMemo[file.path] = (estimate, Date())
+        waterLock.unlock()
+        return estimate
+    }
+
+    private let waterLock = NSLock()
+    private var waterMemo: [String: (estimate: WaterEstimate?, at: Date)] = [:]
+
+    private func readWaterEstimate(_ file: URL) -> WaterEstimate? {
+        guard let saved = (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date,
+              Date().timeIntervalSince(saved) < 10 * 86_400,
+              let data = try? Data(contentsOf: file) else { return nil }
+        return try? JSONDecoder().decode(WaterEstimate.self, from: data)
+    }
+
+    /// Downloads the estimate when the saved one is older than 12 hours. Returns the best
+    /// available answer; nil with no backend, no network and nothing saved, or no estimate.
+    @discardableResult
+    func waterEstimate(latitude: Double, longitude: Double, isSalt: Bool) async -> WaterEstimate? {
+        let file = Self.waterFile(latitude: latitude, longitude: longitude, isSalt: isSalt)
+        let cached = cachedWaterEstimate(latitude: latitude, longitude: longitude, isSalt: isSalt)
+        if cached != nil, let saved = (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date,
+           Date().timeIntervalSince(saved) < 12 * 3600 { return cached }
+        guard let baseURL else { return cached }
+        var components = URLComponents(url: baseURL.appendingPathComponent("water"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [
+            URLQueryItem(name: "gh", value: Geohash.encode(latitude: latitude, longitude: longitude, precision: 5)),
+            URLQueryItem(name: "kind", value: isSalt ? "salt" : "fresh"),
+        ]
+        guard let url = components?.url,
+              let result = try? await session.data(from: url),
+              (result.1 as? HTTPURLResponse)?.statusCode == 200,
+              let payload = try? JSONDecoder().decode(WaterPayload.self, from: result.0),
+              let temp = payload.tempC, let source = payload.source.flatMap(WaterEstimate.Source.init(rawValue:)),
+              (-3...40).contains(temp) else { return cached }
+        let estimate = WaterEstimate(tempC: temp, source: source)
+        if let data = try? JSONEncoder().encode(estimate) { try? data.write(to: file, options: .atomic) }
+        waterLock.lock()
+        waterMemo[file.path] = (estimate, Date())
+        waterLock.unlock()
+        return estimate
+    }
+
+    private static func waterFile(latitude: Double, longitude: Double, isSalt: Bool) -> URL {
+        let gh = Geohash.encode(latitude: latitude, longitude: longitude, precision: 5)
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("water-\(isSalt ? "salt" : "fresh")-\(gh).json")
     }
 
     private struct TidePayload: Codable {

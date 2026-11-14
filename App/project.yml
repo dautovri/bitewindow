@@ -44,6 +44,7 @@ targets:
         BGTaskSchedulerPermittedIdentifiers:
           - com.dautovri.bitecurve.refresh
         NSMotionUsageDescription: Reads your phone's barometer to track the live pressure trend at your spot.
+        NSLocationWhenInUseUsageDescription: Centres the map on where you are when you tap the location button. Your location stays on your iPhone.
         # Weather cache worker (see backend/). Set to a URL containing REPLACE to run on sample weather.
         BiteAPIBase: https://bitewindow-wx.dautov.workers.dev
     settings:

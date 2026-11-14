@@ -441,7 +441,8 @@ final class BiteCoreTests: XCTestCase {
         let now = utc(2026, 7, 1, 12)
         let context = SpotContext(latitude: 52.5, longitude: 13.4, water: .warmFreshwater, species: .northernPike)
         let ranked = Forecaster.speciesNow(context: context, hours: hoursAt(airTempC: 24, around: now), now: now, waterTempC: 24)
-        XCTAssertEqual(ranked.count, Species.allCases.count)
+        XCTAssertEqual(ranked.count, 8)
+        XCTAssertTrue(ranked.allSatisfy { $0.species.habitat == .fresh })
         XCTAssertEqual(ranked.first?.species, .crucianCarp)
         XCTAssertEqual(ranked.last?.species, .rainbowTrout)
         // One-pass re-weighting gives the same index as scoring each species in full.
@@ -456,11 +457,51 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertEqual(cold.first?.species, .rainbowTrout)
     }
 
-    func testNoSpeciesRankingWithoutWaterTempOrInSaltwater() {
+    func testNoSpeciesRankingWithoutWaterTemp() {
         let now = utc(2026, 7, 1, 12)
         let fresh = SpotContext(latitude: 52.5, longitude: 13.4, water: .warmFreshwater, species: .walleye)
         XCTAssertTrue(Forecaster.speciesNow(context: fresh, hours: hoursAt(airTempC: 24, around: now), now: now, waterTempC: nil).isEmpty)
-        let salt = SpotContext(latitude: 52.5, longitude: 13.4, water: .inshoreSalt, species: .walleye)
-        XCTAssertTrue(Forecaster.speciesNow(context: salt, hours: hoursAt(airTempC: 24, around: now), now: now, waterTempC: 24).isEmpty)
+    }
+
+    func testSeaSpotsRankSaltwaterFishOnly() {
+        let now = utc(2026, 7, 1, 12)
+        let salt = SpotContext(latitude: 54.4, longitude: 10.2, water: .inshoreSalt, species: .general)
+        let cold = Forecaster.speciesNow(context: salt, hours: hoursAt(airTempC: 10, around: now), now: now, waterTempC: 10)
+        XCTAssertEqual(cold.count, 7)
+        XCTAssertTrue(cold.allSatisfy { $0.species.habitat == .salt })
+        XCTAssertEqual(cold.first?.species, .atlanticCod)
+        let warm = Forecaster.speciesNow(context: salt, hours: hoursAt(airTempC: 24, around: now), now: now, waterTempC: 24)
+        XCTAssertEqual(warm.first?.species, .redDrum)
+    }
+
+    func testSpeciesChoicesFollowTheWater() {
+        XCTAssertEqual(Species.choices(for: .offshore).first, .general)
+        XCTAssertFalse(Species.choices(for: .offshore).contains(.walleye))
+        XCTAssertFalse(Species.choices(for: .warmFreshwater).contains(.atlanticCod))
+        XCTAssertTrue(Species.choices(for: .coldFreshwater).contains(.rainbowTrout))
+        XCTAssertEqual(Species.defaultSpecies(forRegion: "DE", water: .inshoreSalt), .general)
+        XCTAssertEqual(Species.defaultSpecies(forRegion: "US", water: .warmFreshwater), .walleye)
+        // "Any fish" has no preferred temperature.
+        XCTAssertEqual(Terms.thermal(waterTempC: 2, species: .general), 0)
+    }
+
+    // MARK: Tide engine against NOAA's own predictions
+
+    func testTideEngineTracksNOAAPredictions() {
+        let start = utc(2026, 11, 20)
+        for fixture in tideFixtures {
+            let errors = fixture.noaa.enumerated().map { hour, noaa in
+                fixture.station.height(at: start.addingTimeInterval(Double(hour) * 3600)) - noaa
+            }
+            let rms = (errors.map { $0 * $0 }.reduce(0, +) / Double(errors.count)).squareRoot()
+            let worst = errors.map(abs).max() ?? 0
+            let bias = errors.reduce(0, +) / Double(errors.count)
+            let range = (fixture.noaa.max() ?? 0) - (fixture.noaa.min() ?? 0)
+            print("TIDECHECK \(fixture.station.name): rms \(String(format: "%.3f", rms)) m, worst \(String(format: "%.3f", worst)) m, bias \(String(format: "%+.3f", bias)) m, range \(String(format: "%.2f", range)) m")
+            // Ten constituents against NOAA's 37: within 4 % of the tidal range (3 cm at least),
+            // and no standing offset.
+            XCTAssertLessThan(rms, max(0.03, 0.04 * range), fixture.station.name)
+            XCTAssertLessThan(abs(bias), 0.02, fixture.station.name)
+        }
     }
 }

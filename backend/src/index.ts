@@ -1,4 +1,5 @@
 import { cacheKey, decodeGeohash, importPrivateKey, isGeohash5, slim, weatherKitJwt, weatherKitUrl } from "./lib.ts";
+import { airHistoryUrls, dailyAirMeans, mergeHours, isWaterKind, lakeTemp, nearestSst, sstUrl, type WaterAnswer, type WaterKind } from "./water.ts";
 import {
   datumsUrl,
   harconUrl,
@@ -65,11 +66,7 @@ async function weather(gh: string, req: Request, env: Env): Promise<Response> {
   if (cached) return json(cached, 200, { "x-cache": "hit", "cache-control": "public, max-age=900" });
   if (!(await allowUpstream(req, env))) return tooMany();
 
-  const privateKey = await importPrivateKey(env.WEATHERKIT_PRIVATE_KEY);
-  const token = await weatherKitJwt(
-    { teamId: env.WEATHERKIT_TEAM_ID, serviceId: env.WEATHERKIT_SERVICE_ID, keyId: env.WEATHERKIT_KEY_ID, privateKey },
-    now,
-  );
+  const token = await weatherKitToken(env, now);
   const upstream = await fetch(weatherKitUrl(gh, now), { headers: { authorization: `Bearer ${token}` } });
   if (!upstream.ok) return json({ error: "upstream", status: upstream.status }, 502);
 
@@ -126,16 +123,70 @@ async function tide(gh: string, req: Request, env: Env): Promise<Response> {
   return json(body, 200, { ...headers, "x-cache": "miss" });
 }
 
+async function weatherKitToken(env: Env, now: Date): Promise<string> {
+  const privateKey = await importPrivateKey(env.WEATHERKIT_PRIVATE_KEY);
+  return weatherKitJwt(
+    { teamId: env.WEATHERKIT_TEAM_ID, serviceId: env.WEATHERKIT_SERVICE_ID, keyId: env.WEATHERKIT_KEY_ID, privateKey },
+    now,
+  );
+}
+
+/** Lake model: 30 days of air temperature from WeatherKit. Null when there is too little history. */
+async function modelledFromAir(gh: string, env: Env, now: Date): Promise<number | null> {
+  const headers = { authorization: `Bearer ${await weatherKitToken(env, now)}` };
+  const answers = await Promise.all(airHistoryUrls(gh, now).map((u) => fetch(u, { headers })));
+  // A missing stretch would bias the model towards the days that did arrive.
+  if (answers.some((r) => !r.ok)) return null;
+  return lakeTemp(dailyAirMeans(mergeHours(await Promise.all(answers.map((r) => r.json())))));
+}
+
+/**
+ * Estimated water temperature for a cell (see water.ts). Sea cells use the satellite
+ * analysis and fall back to the air model when no sea cell is in reach or NOAA does not
+ * answer, so one free upstream is never the only source. Changes by tenths of a degree a
+ * day: cached 24 hours, 2 hours when there is no estimate.
+ */
+async function water(gh: string, kind: WaterKind, req: Request, env: Env): Promise<Response> {
+  const key = `water:${kind}:${gh}`;
+  const headers = { "cache-control": "public, max-age=3600" };
+  const cached = await env.WX_CACHE.get(key);
+  if (cached) return json(cached, 200, { ...headers, "x-cache": "hit" });
+  if (!(await allowUpstream(req, env))) return tooMany();
+
+  const now = new Date();
+  const answer: WaterAnswer = { gh, kind, tempC: null, source: null, asOf: now.toISOString() };
+  if (kind === "salt") {
+    try {
+      const res = await fetch(sstUrl(gh), { signal: AbortSignal.timeout(8000) });
+      const { lat, lon } = decodeGeohash(gh);
+      const sst = res.ok ? nearestSst(await res.json(), lat, lon) : null;
+      if (sst) Object.assign(answer, { tempC: sst.tempC, source: "sst", asOf: sst.asOf });
+    } catch {
+      // NOAA slow or down: the air model below stands in.
+    }
+  }
+  if (answer.tempC === null) {
+    const modelled = await modelledFromAir(gh, env, now);
+    if (modelled !== null) Object.assign(answer, { tempC: modelled, source: "air" });
+  }
+  const body = JSON.stringify(answer);
+  await env.WX_CACHE.put(key, body, { expirationTtl: answer.tempC === null ? 2 * 3600 : 24 * 3600 });
+  return json(body, 200, { ...headers, "x-cache": "miss" });
+}
+
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     if (url.pathname === "/health") return json({ ok: true });
-    if (req.method !== "GET" || (url.pathname !== "/wx" && url.pathname !== "/tide")) {
+    if (req.method !== "GET" || !["/wx", "/tide", "/water"].includes(url.pathname)) {
       return json({ error: "not found" }, 404);
     }
     const gh = url.searchParams.get("gh");
     if (!isGeohash5(gh)) return json({ error: "gh must be a 5-character geohash" }, 400);
+    const kind = url.searchParams.get("kind");
+    if (url.pathname === "/water" && !isWaterKind(kind)) return json({ error: "kind must be salt or fresh" }, 400);
     try {
+      if (url.pathname === "/water") return await water(gh, kind as WaterKind, req, env);
       return await (url.pathname === "/wx" ? weather(gh, req, env) : tide(gh, req, env));
     } catch {
       // Upstream reset, timed out or sent something that is not JSON.

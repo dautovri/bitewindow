@@ -85,6 +85,8 @@ public enum Terms {
 
     /// Asymmetric thermal performance curve on water temperature (°C).
     public static func thermal(waterTempC t: Double, species: Species) -> Double {
+        // "Any fish" has no preferred temperature.
+        if species == .general { return 0 }
         let p = species.thermal
         let f: Double
         if t <= p.optimum {

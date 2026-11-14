@@ -30,6 +30,14 @@ final class Spot {
         self.speciesRaw = Species.defaultSpecies().rawValue
     }
 
+    /// The fish in the picker for this spot's water; a species that does not live in it
+    /// (after the water was changed) falls back to the default for that water.
+    func alignSpeciesWithWater(regionCode: String? = Locale.current.region?.identifier) {
+        if !species.lives(in: water) {
+            species = Species.defaultSpecies(forRegion: regionCode, water: water)
+        }
+    }
+
     var water: WaterType {
         get { WaterType(rawValue: waterRaw) ?? .warmFreshwater }
         set { waterRaw = newValue.rawValue }
@@ -40,12 +48,34 @@ final class Spot {
         set { speciesRaw = newValue.rawValue }
     }
 
-    var context: SpotContext {
-        SpotContext(latitude: latitude, longitude: longitude, water: water, species: species,
-                    bankBearingDeg: bankBearingDeg, waterTempC: waterTempC)
+    /// The water temperature the score uses, and where it came from: the angler's own reading
+    /// when there is one, else the saved estimate (satellite at sea, modelled from air inland).
+    enum WaterReading: Equatable {
+        case measured(Double), satellite(Double), modelled(Double)
+
+        var tempC: Double {
+            switch self {
+            case .measured(let t), .satellite(let t), .modelled(let t): return t
+            }
+        }
+
+        var isMeasured: Bool { if case .measured = self { return true } else { return false } }
     }
 
-    var isSalt: Bool { water == .inshoreSalt || water == .offshore }
+    var waterReading: WaterReading? {
+        if let waterTempC { return .measured(waterTempC) }
+        guard let estimate = ForecastService.shared.cachedWaterEstimate(latitude: latitude, longitude: longitude, isSalt: isSalt) else {
+            return nil
+        }
+        return estimate.source == .sst ? .satellite(estimate.tempC) : .modelled(estimate.tempC)
+    }
+
+    var context: SpotContext {
+        SpotContext(latitude: latitude, longitude: longitude, water: water, species: species,
+                    bankBearingDeg: bankBearingDeg, waterTempC: waterReading?.tempC)
+    }
+
+    var isSalt: Bool { water.isSalt }
 
     /// Times at a spot are shown in the spot's zone, not the phone's: a window at a lake two
     /// zones away is planned on that lake's clock. The phone's zone until the lookup answers.

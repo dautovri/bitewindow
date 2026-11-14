@@ -13,9 +13,22 @@
 
 Stratification drives depth advice only, never the timing score.
 
+## Water temperature
+
+The thermal term uses the angler's own reading when there is one. Otherwise the backend (`/water`) estimates it, and the app says so:
+
+- Sea: NOAA OISST near-real-time sea-surface analysis (0.25°, daily), nearest sea cell within 0.75°.
+- Lakes and rivers, and sea cells out of reach: first-order lag of the last 30 days of daily mean air temperature, `T ← T + (air − T)/8` per day, kept to 1–32 °C. No ice, no depth, no inflow: a rough figure, a few degrees off in spring and autumn.
+
+"Any fish" has no thermal term. Saltwater species (sea bass, cod, mackerel, sea trout, flounder, striped bass, red drum) carry placeholder thermal curves like the freshwater ones.
+
+## Tide engine check
+
+`testTideEngineTracksNOAAPredictions` compares the engine with NOAA's own hourly predictions at Boston, San Francisco and Key West (fixture from 2026-11-14): RMS error 7 cm of a 2.9 m range, 3 cm of 1.8 m, 2 cm of 0.5 m. The yearly and half-yearly constituents (SA, SSA) were added after Key West showed a 9 cm standing offset without them. Outside the US there are no station constants yet; the moon phase stands in for spring and neap tides.
+
 ## Fish for the conditions (map)
 
-Species differ only in the thermal term, so the map ranks them by thermal fit at the measured water temperature, or at an estimate (mean air temperature of the last 72 h, 1–30 °C) labelled as such. Freshwater spots only. It says which fish the conditions suit, not which live in the water.
+Species differ only in the thermal term, so the map ranks them by thermal fit at the measured water temperature, or at an estimate (mean air temperature of the last 72 h, 1–30 °C) labelled as such. Fresh and salt water each rank their own species. It says which fish the conditions suit, not which live in the water.
 
 ## Heuristic, to be replaced
 

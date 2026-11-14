@@ -12,6 +12,33 @@ public enum Species: String, CaseIterable, Codable, Sendable {
     // Raw values are stored on each spot (SwiftData): never rename a case, only add.
     case largemouthBass, walleye, northernPike, rainbowTrout
     case crucianCarp, commonCarp, europeanPerch, commonBream
+    /// No particular fish: the thermal term stays neutral. The default at sea.
+    case general
+    case europeanSeaBass, atlanticCod, atlanticMackerel, seaTrout, flounder, stripedBass, redDrum
+
+    public enum Habitat: Sendable { case fresh, salt, any }
+
+    public var habitat: Habitat {
+        switch self {
+        case .general: return .any
+        case .europeanSeaBass, .atlanticCod, .atlanticMackerel, .seaTrout, .flounder, .stripedBass, .redDrum: return .salt
+        default: return .fresh
+        }
+    }
+
+    /// Whether the species belongs on a spot with this water.
+    public func lives(in water: WaterType) -> Bool {
+        switch habitat {
+        case .any: return true
+        case .salt: return water.isSalt
+        case .fresh: return !water.isSalt
+        }
+    }
+
+    /// The fish a spot offers for its water, the general profile first.
+    public static func choices(for water: WaterType) -> [Species] {
+        [.general] + allCases.filter { $0 != .general && $0.lives(in: water) }
+    }
 
     public var displayName: String {
         switch self {
@@ -23,6 +50,14 @@ public enum Species: String, CaseIterable, Codable, Sendable {
         case .commonCarp: return "Common carp"
         case .europeanPerch: return "Perch"
         case .commonBream: return "Bream"
+        case .general: return "Any fish"
+        case .europeanSeaBass: return "Sea bass"
+        case .atlanticCod: return "Cod"
+        case .atlanticMackerel: return "Mackerel"
+        case .seaTrout: return "Sea trout"
+        case .flounder: return "Flounder"
+        case .stripedBass: return "Striped bass"
+        case .redDrum: return "Red drum"
         }
     }
 
@@ -36,6 +71,15 @@ public enum Species: String, CaseIterable, Codable, Sendable {
         case .commonCarp: return .init(optimum: 26, sigmaLow: 6, criticalMax: 35)
         case .europeanPerch: return .init(optimum: 19, sigmaLow: 7, criticalMax: 28)
         case .commonBream: return .init(optimum: 21, sigmaLow: 6, criticalMax: 30)
+        // Not used for scoring (`Terms.thermal` is neutral for it); a mild curve for depth advice.
+        case .general: return .init(optimum: 20, sigmaLow: 10, criticalMax: 32)
+        case .europeanSeaBass: return .init(optimum: 18, sigmaLow: 6, criticalMax: 28)
+        case .atlanticCod: return .init(optimum: 10, sigmaLow: 5, criticalMax: 18)
+        case .atlanticMackerel: return .init(optimum: 14, sigmaLow: 5, criticalMax: 22)
+        case .seaTrout: return .init(optimum: 13, sigmaLow: 6, criticalMax: 22)
+        case .flounder: return .init(optimum: 15, sigmaLow: 6, criticalMax: 25)
+        case .stripedBass: return .init(optimum: 18, sigmaLow: 6, criticalMax: 27)
+        case .redDrum: return .init(optimum: 24, sigmaLow: 7, criticalMax: 33)
         }
     }
 
@@ -45,7 +89,8 @@ public enum Species: String, CaseIterable, Codable, Sendable {
     }
 
     public var defaultWater: WaterType {
-        self == .rainbowTrout ? .coldFreshwater : .warmFreshwater
+        if habitat == .salt { return .inshoreSalt }
+        return self == .rainbowTrout ? .coldFreshwater : .warmFreshwater
     }
 
     private static let northAmericanRegions: Set<String> = [
@@ -54,6 +99,12 @@ public enum Species: String, CaseIterable, Codable, Sendable {
         "LC", "MF", "MQ", "MS", "MX", "NI", "PA", "PM", "PR", "SV", "SX", "TC",
         "TT", "US", "VC", "VG", "VI",
     ]
+
+    /// The fish a new spot starts with: the general profile at sea, else by the region the
+    /// spot is in (see `defaultSpecies(forRegion:)`).
+    public static func defaultSpecies(forRegion regionCode: String?, water: WaterType) -> Species {
+        water.isSalt ? .general : defaultSpecies(forRegion: regionCode)
+    }
 
     /// North America defaults to walleye; everywhere else to northern pike.
     public static func defaultSpecies(forRegion regionCode: String? = Locale.current.region?.identifier) -> Species {
@@ -66,6 +117,8 @@ public enum Species: String, CaseIterable, Codable, Sendable {
 
 public enum WaterType: String, CaseIterable, Codable, Sendable {
     case warmFreshwater, coldFreshwater, inshoreSalt, offshore
+
+    public var isSalt: Bool { self == .inshoreSalt || self == .offshore }
 }
 
 /// Prior factor weights. The ordering is evidence-informed; the numbers are heuristic.

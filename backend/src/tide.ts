@@ -7,7 +7,7 @@
 const MDAPI = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi";
 
 /** Constituents BiteCore's tide engine evaluates. Others are dropped. */
-export const SUPPORTED = ["M2", "S2", "N2", "K2", "K1", "O1", "P1", "Q1"] as const;
+export const SUPPORTED = ["M2", "S2", "N2", "K2", "K1", "O1", "P1", "Q1", "SA", "SSA"] as const;
 
 /** Spots farther than this from every harmonic station get no tide. */
 export const MAX_STATION_KM = 40;

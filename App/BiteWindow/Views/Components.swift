@@ -14,6 +14,14 @@ extension Species {
         case .commonCarp: return String(localized: "Common carp")
         case .europeanPerch: return String(localized: "Perch")
         case .commonBream: return String(localized: "Bream")
+        case .general: return String(localized: "Any fish")
+        case .europeanSeaBass: return String(localized: "Sea bass")
+        case .atlanticCod: return String(localized: "Cod")
+        case .atlanticMackerel: return String(localized: "Mackerel")
+        case .seaTrout: return String(localized: "Sea trout")
+        case .flounder: return String(localized: "Flounder")
+        case .stripedBass: return String(localized: "Striped bass")
+        case .redDrum: return String(localized: "Red drum")
         }
     }
 

@@ -113,6 +113,119 @@
           }
         }
       }
+    },
+    "NSLocationWhenInUseUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centrerer kortet på din position, når du trykker på lokalitetsknappen. Din lokalitet bliver på din iPhone."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zentriert die Karte auf deine Position, wenn du auf die Standorttaste tippst. Dein Standort bleibt auf deinem iPhone."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centres the map on where you are when you tap the location button. Your location stays on your iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centra el mapa donde estás al tocar el botón de ubicación. Tu ubicación no sale de tu iPhone."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keskittää kartan sijaintiisi, kun napautat sijaintipainiketta. Sijaintitietosi pysyvät iPhonessasi."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centre la carte sur votre position lorsque vous touchez le bouton de localisation. Votre position reste sur votre iPhone."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centra la mappa su dove ti trovi quando tocchi il pulsante della posizione. La tua posizione resta sul tuo iPhone."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在地ボタンをタップしたときに、地図を現在地に合わせます。位置情報はiPhone内にのみ保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위치 버튼을 탭할 때 지도를 현재 위치로 이동합니다. 위치 정보는 사용자의 iPhone에만 보관됩니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentrerer kartet der du er når du trykker på posisjonsknappen. Posisjonen din forblir på iPhonen din."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centreert de kaart op waar je bent wanneer je op de locatieknop tikt. Je locatie blijft op je iPhone."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyśrodkowuje mapę na Twojej pozycji po stuknięciu przycisku lokalizacji. Twoja lokalizacja pozostaje na iPhonie."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centraliza o mapa onde você está ao tocar no botão de localização. Sua localização permanece no seu iPhone."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Центрирует карту по вашему местоположению при нажатии кнопки геопозиции. Данные о геопозиции остаются на вашем iPhone."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centrerar kartan på din position när du trycker på platsknappen. Din platsinformation stannar på din iPhone."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konum düğmesine dokunduğunuzda haritayı bulunduğunuz yere ortalar. Konumunuz iPhone’unuzda kalır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Центрує карту на вашому місцезнаходженні після натискання кнопки геопозиції. Ваша геопозиція залишається на вашому iPhone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "轻点定位按钮时将地图居中到您的当前位置。您的位置信息仅保留在您的 iPhone 上。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
