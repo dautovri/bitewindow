@@ -214,11 +214,7 @@ struct FactorBreakdown: View {
                         }
                     }
                     Spacer(minLength: 8)
-                    bar(factor.value)
-                    Image(systemName: factor.value > 0.02 ? "arrow.up" : factor.value < -0.02 ? "arrow.down" : "minus")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(color(factor.value))
-                        .frame(width: 16)
+                    effect(factor.value)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text(verbatim: [factor.name, factor.reading].compactMap { $0 }.joined(separator: ", ")))
@@ -231,16 +227,29 @@ struct FactorBreakdown: View {
         value > 0.02 ? Self.positive : value < -0.02 ? Self.negative : .secondary
     }
 
-    private func bar(_ value: Double) -> some View {
-        let half: CGFloat = 44
-        let magnitude = CGFloat(min(1, abs(value) / 0.25))
-        return ZStack {
-            Capsule().fill(Theme.well).frame(width: half * 2, height: 8)
-            Capsule().fill(color(value))
-                .frame(width: max(3, half * magnitude), height: 8)
-                .offset(x: (value < 0 ? -1 : 1) * half * magnitude / 2)
-            Rectangle().fill(Color.secondary).frame(width: 1.5, height: 12)
+    /// Says in words which way the factor pushes, with up to three dots for how hard
+    /// (about ±0.25 is the most a factor gives).
+    private func effect(_ value: Double) -> some View {
+        let tint = color(value)
+        let strength = abs(value) <= 0.02 ? 0 : abs(value) < 0.08 ? 1 : abs(value) < 0.16 ? 2 : 3
+        return HStack(spacing: 5) {
+            Image(systemName: value > 0.02 ? "arrow.up" : value < -0.02 ? "arrow.down" : "minus")
+                .font(.caption2.weight(.heavy))
+            Text(value > 0.02 ? "Helps" : value < -0.02 ? "Hurts" : "Neutral")
+                .font(.caption.weight(.semibold))
+            if strength > 0 {
+                HStack(spacing: 2) {
+                    ForEach(0..<3, id: \.self) { i in
+                        Circle().fill(i < strength ? tint : tint.opacity(0.25)).frame(width: 4, height: 4)
+                    }
+                }
+            }
         }
+        .foregroundStyle(tint)
+        .padding(.vertical, 5)
+        .padding(.horizontal, 9)
+        .background(tint.opacity(0.13), in: .capsule)
+        .fixedSize()
     }
 }
 

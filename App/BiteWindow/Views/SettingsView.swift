@@ -213,9 +213,14 @@ struct PaywallView: View {
                         // Resolved here, in the app's language: inside the store view the locale is
                         // the App Store storefront's, so a plain key came out in English.
                         Text(verbatim: String(localized: "BiteCurve Pro")).font(.title2.bold())
-                        Text(verbatim: String(localized: "Hourly bite curve, tide curve, expected catch tuned to your log, 10-day outlook and unlimited spots."))
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(.secondary)
+                        // Scannable rows instead of a paragraph.
+                        VStack(alignment: .leading, spacing: 10) {
+                            ProBenefit(symbol: "chart.xyaxis.line", text: String(localized: "Hourly bite and tide curves"))
+                            ProBenefit(symbol: "calendar", text: String(localized: "10-day outlook for every spot"))
+                            ProBenefit(symbol: "fish.fill", text: String(localized: "Expected catch tuned to your log"))
+                            ProBenefit(symbol: "mappin.and.ellipse", text: String(localized: "Unlimited spots"))
+                        }
+                        .padding(.top, 6)
                     }
                     .padding()
                     .frame(maxWidth: Theme.readableWidth)
@@ -268,6 +273,26 @@ struct PaywallView: View {
     }
 }
 
+/// One line of what Pro adds, on the paywall. Text is resolved by the caller (see PaywallView).
+private struct ProBenefit: View {
+    let symbol: String
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Theme.accent)
+                .frame(width: 26)
+                .accessibilityHidden(true)
+            Text(verbatim: text)
+                .font(.body.weight(.medium))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 struct HowItWorksView: View {
     var body: some View {
         List {
@@ -292,6 +317,7 @@ struct HowItWorksView: View {
         .frame(maxWidth: .infinity)
         .screenBackground()
         .navigationTitle("How the score works")
+        .toolbar(.hidden, for: .tabBar)
     }
 }
 

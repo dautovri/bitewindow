@@ -126,39 +126,31 @@ private struct SpotCard: View {
                     .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
-                IndexGauge(index: snapshot.today?.meanIndex, size: 54)
+                IndexGauge(index: snapshot.today?.meanIndex, size: 60)
             }
 
+            // The verdict first: today's window, with the day's shape (Pro) or tomorrow (free) beside it.
             ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) {
-                    windowPill
+                HStack(alignment: .center, spacing: 12) {
+                    windowPill.fixedSize()
                     Spacer(minLength: 0)
                     trailingPreview
                 }
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 10) {
                     windowPill
                     trailingPreview
                 }
             }
 
             if let conditions = snapshot.conditions {
-                Divider().overlay(Theme.stroke)
                 if conditions.hour != nil {
                     Text("Now")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .padding(.top, 2)
                 }
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 14) {
-                        WeatherStrip(conditions: conditions)
-                        Spacer(minLength: 0)
-                        SunMoonStrip(conditions: conditions)
-                    }
-                    VStack(alignment: .leading, spacing: 6) {
-                        WeatherStrip(conditions: conditions)
-                        SunMoonStrip(conditions: conditions)
-                    }
-                }
+                ConditionsGrid(conditions: conditions)
                 if snapshot.isOffline {
                     Label("Offline", systemImage: "wifi.slash")
                         .font(.caption)
@@ -182,11 +174,11 @@ private struct SpotCard: View {
             } icon: {
                 Image(systemName: "clock.fill")
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.callout.weight(.bold))
             .foregroundStyle(color)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 10)
-            .background(color.opacity(0.13), in: .capsule)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(color.opacity(0.14), in: .capsule)
             .accessibilityLabel(Text("Best today \(window.start.clock(in: spot.timeZone)) – \(window.end.clock(in: spot.timeZone))"))
         } else {
             // Sun and moon fill any gap in the weather, so a missing window means the day is nearly over.
@@ -201,7 +193,8 @@ private struct SpotCard: View {
         if entitlements.isPro {
             if snapshot.points.count > 1 {
                 MiniCurve(points: snapshot.points, color: BiteScale.color(snapshot.today?.meanIndex))
-                    .frame(width: 96, height: 30)
+                    .frame(minWidth: 96, maxWidth: .infinity)
+                    .frame(height: 36)
             }
         } else if let tomorrow = snapshot.tomorrow {
             HStack(spacing: 6) {
@@ -212,9 +205,10 @@ private struct SpotCard: View {
                     .monospacedDigit()
             }
             .font(.subheadline)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
             .background(Theme.well, in: .capsule)
+            .fixedSize()
         }
     }
 
@@ -345,6 +339,19 @@ struct SpotDetailView: View {
 
     private var tripCount: Int { spot.fittedTrips.count }
 
+    /// The unit the forecast shows temperatures in (°F in the US), so the field matches it.
+    private var temperatureUnit: UnitTemperature { UnitTemperature(forLocale: .current, usage: .weather) }
+
+    /// The water temperature in that unit; stored in °C either way.
+    private var waterTemperature: Binding<Double?> {
+        let unit = temperatureUnit
+        return Binding {
+            spot.waterTempC.map { Measurement(value: $0, unit: UnitTemperature.celsius).converted(to: unit).value }
+        } set: { value in
+            spot.waterTempC = value.map { Measurement(value: $0, unit: unit).converted(to: .celsius).value }
+        }
+    }
+
     private func timeRange(_ window: BiteWindow) -> String {
         "\(window.start.clock(in: spot.timeZone)) – \(window.end.clock(in: spot.timeZone))"
     }
@@ -379,8 +386,9 @@ struct SpotDetailView: View {
             .init(name: String(localized: "Light"), value: mean { $0.light }, symbol: conditions.cloudSymbol, reading: conditions.cloud)
         ]
         if let water = spot.waterTempC {
+            // In the same unit as the field it was typed into (°F in the US).
             let reading = Measurement(value: water, unit: UnitTemperature.celsius)
-                .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
+                .formatted(.measurement(width: .abbreviated, usage: .weather, numberFormatStyle: .number.precision(.fractionLength(0))))
             out.append(.init(name: String(localized: "Water temperature"), value: mean { $0.thermal }, symbol: "thermometer.medium", reading: reading))
         }
         if !day.weatherless {
@@ -420,7 +428,7 @@ struct SpotDetailView: View {
                 if let day {
                     let conditions = conditions(day)
                     heroCard(day, conditions)
-                    chartCard(day, conditions)
+                    conditionsCard(day, conditions)
                     if entitlements.isPro, let window = day.window {
                         FactorBreakdown(factors: factors(day, window, conditions)).card()
                     }
@@ -439,6 +447,8 @@ struct SpotDetailView: View {
         .screenBackground()
         .navigationTitle(spot.name)
         .navigationBarTitleDisplayMode(.inline)
+        // A pushed screen gets the full height; the tab bar comes back with the list.
+        .toolbar(.hidden, for: .tabBar)
         // Also when forecasts are downloaded again while this screen is open.
         .task(id: lastPrefetch) {
             // Saved forecast first, so the screen fills at once with weak or no signal.
@@ -503,7 +513,7 @@ struct SpotDetailView: View {
                 .foregroundStyle(.secondary)
             if let window = day.window {
                 HStack(spacing: 16) {
-                    IndexGauge(index: window.meanIndex, size: 84)
+                    IndexGauge(index: window.meanIndex, size: 76)
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Best window").font(.subheadline).foregroundStyle(.secondary)
                         Text(verbatim: timeRange(window))
@@ -522,11 +532,6 @@ struct SpotDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
-            if let window = day.window {
-                Divider().overlay(Theme.stroke)
-                expectedCatchRow(day, window)
-            }
-
             // The banner at the top already says so when there is no weather at all.
             if day.weatherless, forecast?.hours.isEmpty == false {
                 Label("No weather data — sun, moon and tide only", systemImage: "moon.stars")
@@ -534,21 +539,30 @@ struct SpotDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                if conditions.hour != nil {
-                    // The readings are for the middle of the window, not for now.
-                    Label {
-                        Text(verbatim: moment(day).clock(in: spot.timeZone))
-                    } icon: {
-                        Image(systemName: "clock")
-                    }
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                }
-                WeatherStrip(conditions: conditions)
-                SunMoonStrip(conditions: conditions)
+            chart(day, conditions)
+
+            if let window = day.window {
+                Divider().overlay(Theme.stroke)
+                expectedCatchRow(day, window)
             }
-            .well()
+        }
+        .card()
+    }
+
+    /// The weather, sun and moon in the middle of the best window (now, without one).
+    private func conditionsCard(_ day: DaySummary, _ conditions: Conditions) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if conditions.hour != nil {
+                // The readings are for the middle of the window, not for now.
+                Label {
+                    Text(verbatim: moment(day).clock(in: spot.timeZone))
+                } icon: {
+                    Image(systemName: "clock")
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            }
+            ConditionsGrid(conditions: conditions)
         }
         .card()
     }
@@ -594,7 +608,7 @@ struct SpotDetailView: View {
     /// Pro: the day's curve, with the tide under it at saltwater spots. Free: the day's real
     /// frame (daylight, best window) with the curve withheld, never a made-up one.
     @ViewBuilder
-    private func chartCard(_ day: DaySummary, _ conditions: Conditions) -> some View {
+    private func chart(_ day: DaySummary, _ conditions: Conditions) -> some View {
         let dayEnd = spot.calendar.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
         if entitlements.isPro {
             VStack(alignment: .leading, spacing: 10) {
@@ -606,7 +620,6 @@ struct SpotDetailView: View {
                         .frame(height: 84)
                 }
             }
-            .card()
         } else {
             Button {
                 showPaywall = true
@@ -624,7 +637,6 @@ struct SpotDetailView: View {
                             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.stroke, lineWidth: 1))
                             .padding(.horizontal, 24)
                     }
-                    .card()
             }
             .buttonStyle(.plain)
         }
@@ -703,9 +715,22 @@ struct SpotDetailView: View {
                     .fixedSize()
                 }
                 Divider().overlay(Theme.stroke)
-                TextField("Water temperature °C (optional)", value: $spot.waterTempC, format: .number)
-                    .keyboardType(.decimalPad)
-                    .padding(.vertical, 8)
+                LabeledContent("Water temperature") {
+                    HStack(spacing: 4) {
+                        TextField("Optional", value: waterTemperature, format: .number.precision(.fractionLength(0...1)))
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .foregroundStyle(Theme.accent)
+                            .frame(maxWidth: 80)
+                        Text(verbatim: temperatureUnit.symbol)
+                            .foregroundStyle(.secondary)
+                    }
+                    // Looks like a field to type in, next to the two pickers above it.
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Theme.well, in: .rect(cornerRadius: 10, style: .continuous))
+                }
+                .padding(.vertical, 6)
             }
             .tint(Theme.accent)
             .card()
@@ -767,17 +792,18 @@ struct DayStrip: View {
     var body: some View {
         let best = days.compactMap(\.index).max()
         ScrollView(.horizontal) {
-            HStack(spacing: 8) {
+            HStack(spacing: 4) {
                 ForEach(days) { day in
                     Button {
                         onTap(day)
                     } label: {
                         VStack(spacing: 5) {
                             Text(verbatim: day.date.formatted(.dateTime.weekday(.abbreviated), in: timeZone))
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.secondary)
+                                .font(.caption2.weight(.semibold))
+                                .textCase(.uppercase)
+                                .foregroundStyle(day.date == selected ? Theme.accent : .secondary)
                             Text(verbatim: day.date.formatted(.dateTime.day(), in: timeZone))
-                                .font(.subheadline.weight(.semibold))
+                                .font(.callout.weight(.bold))
                                 .monospacedDigit()
                             if day.isLocked {
                                 Image(systemName: "lock.fill")
@@ -794,13 +820,18 @@ struct DayStrip: View {
                                 .frame(width: 5, height: 5)
                                 .accessibilityHidden(true)
                         }
-                        .frame(minWidth: 52)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 6)
-                        .background(day.date == selected ? Theme.card : Theme.well.opacity(0.6),
-                                    in: .rect(cornerRadius: 14, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .strokeBorder(day.date == selected ? Theme.accent : Theme.stroke, lineWidth: day.date == selected ? 2 : 1))
+                        .frame(minWidth: 48)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 4)
+                        // Only the chosen day is marked; the rest sit on the background unboxed.
+                        .background(day.date == selected ? Theme.accent.opacity(0.14) : .clear,
+                                    in: .rect(cornerRadius: 16, style: .continuous))
+                        .overlay {
+                            if day.date == selected {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Theme.accent, lineWidth: 1.5)
+                            }
+                        }
+                        .contentShape(.rect(cornerRadius: 16))
                     }
                     .buttonStyle(.plain)
                     .accessibilityElement(children: .ignore)

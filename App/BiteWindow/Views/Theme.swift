@@ -147,8 +147,12 @@ struct Conditions {
 
     var temperature: String? {
         hour.map {
-            Measurement(value: $0.airTempC, unit: UnitTemperature.celsius)
-                .formatted(.measurement(width: .abbreviated, usage: .weather, numberFormatStyle: .number.precision(.fractionLength(0))))
+            // -0.3 °C would print as "-0 °C"; the + 0 turns a negative zero into a plain one.
+            Measurement(value: $0.airTempC, unit: UnitTemperature.celsius).converted(to: UnitTemperature(forLocale: .current, usage: .weather))
+                .value.rounded() + 0
+        }.map { (value: Double) in
+            Measurement(value: value, unit: UnitTemperature(forLocale: .current, usage: .weather))
+                .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
         }
     }
 
@@ -247,20 +251,106 @@ struct WeatherStrip: View {
     }
 }
 
+/// Wind, pressure, temperature and cloud as four even cells (symbol over value), with sunrise,
+/// sunset and the moon in a quiet row under them. Two rows of two at large text sizes.
+/// Shows only the sun row when there is no forecast for that moment.
+struct ConditionsGrid: View {
+    let conditions: Conditions
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if conditions.hour != nil {
+                ViewThatFits(in: .horizontal) {
+                    // Natural widths with even gaps: a long pressure reading never runs into the next cell.
+                    HStack(alignment: .top, spacing: 0) {
+                        wind; Spacer(minLength: 10); pressure; Spacer(minLength: 10); temperature; Spacer(minLength: 10); cloud
+                    }
+                    Grid(alignment: .leading, horizontalSpacing: 28, verticalSpacing: 10) {
+                        GridRow { wind; pressure }
+                        GridRow { temperature; cloud }
+                    }
+                    // The largest text sizes: one reading per line.
+                    VStack(alignment: .leading, spacing: 10) { wind; pressure; temperature; cloud }
+                }
+            }
+            SunMoonStrip(conditions: conditions)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder private var wind: some View {
+        if let text = conditions.wind {
+            Cell(symbol: conditions.windArrowDegrees == nil ? "wind" : "location.north.fill",
+                 rotation: conditions.windArrowDegrees, text: text)
+        }
+    }
+
+    @ViewBuilder private var pressure: some View {
+        if let text = conditions.pressure {
+            Cell(symbol: "barometer", text: text, trailingSymbol: conditions.pressureTrendSymbol)
+        }
+    }
+
+    @ViewBuilder private var temperature: some View {
+        if let text = conditions.temperature { Cell(symbol: "thermometer.medium", text: text) }
+    }
+
+    @ViewBuilder private var cloud: some View {
+        if let text = conditions.cloud { Cell(symbol: conditions.cloudSymbol, text: text) }
+    }
+
+    private struct Cell: View {
+        let symbol: String
+        var rotation: Double? = nil
+        let text: String
+        var trailingSymbol: String? = nil
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 4) {
+                Image(systemName: symbol)
+                    .font(.body)
+                    .symbolRenderingMode(.hierarchical)
+                    .rotationEffect(.degrees(rotation ?? 0))
+                    .foregroundStyle(Theme.accent)
+                    .frame(height: 20)
+                    .accessibilityHidden(true)
+                HStack(spacing: 2) {
+                    Text(verbatim: text).monospacedDigit()
+                    if let trailingSymbol {
+                        Image(systemName: trailingSymbol).font(.caption2.weight(.bold)).foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+            }
+            .fixedSize()
+        }
+    }
+}
+
 /// Sunrise, sunset and the moon's phase in one row. Sun times are missing in polar day or night.
 struct SunMoonStrip: View {
     let conditions: Conditions
 
+    @ViewBuilder private var items: some View {
+        if let rise = conditions.clock(conditions.sunrise) { Reading(symbol: "sunrise.fill", text: rise) }
+        if let set = conditions.clock(conditions.sunset) { Reading(symbol: "sunset.fill", text: set) }
+        Image(systemName: conditions.moonSymbol)
+            .font(.footnote)
+            .symbolRenderingMode(.hierarchical)
+            .foregroundStyle(Theme.accent)
+            .accessibilityLabel("Moon")
+    }
+
     var body: some View {
-        HStack(spacing: 14) {
-            if let rise = conditions.clock(conditions.sunrise) { Reading(symbol: "sunrise.fill", text: rise) }
-            if let set = conditions.clock(conditions.sunset) { Reading(symbol: "sunset.fill", text: set) }
-            Image(systemName: conditions.moonSymbol)
-                .font(.footnote)
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(Theme.accent)
-                .accessibilityLabel("Moon")
+        // Stacked at the largest text sizes, so the times are never cut off.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) { items }
+            VStack(alignment: .leading, spacing: 6) { items }
         }
+        .foregroundStyle(.secondary)
         .accessibilityElement(children: .combine)
     }
 }

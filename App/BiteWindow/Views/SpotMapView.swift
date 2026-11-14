@@ -51,7 +51,9 @@ struct SpotMapView: View {
                 center = context.region.center
             }
             .overlay {
+                // Hidden while a spot's card is open: adding is off then, and it would sit on the pin.
                 CrosshairReticle(center: center)
+                    .opacity(selectedSpotID == nil ? 1 : 0)
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
@@ -155,8 +157,11 @@ struct SpotMapView: View {
                 }
                 .frame(maxWidth: Theme.readableWidth)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+            } else {
+                // Out of the way while a spot's card is open, so the map stays visible.
+                addSpotButton
+                    .transition(.scale(scale: 0.9).combined(with: .opacity))
             }
-            addSpotButton
         }
         .padding()
     }
@@ -170,18 +175,18 @@ struct SpotMapView: View {
                 showNamePrompt = true
             }
         } label: {
-            Label("Add spot at crosshair", systemImage: "mappin.and.ellipse")
+            Label("Add spot at crosshair", systemImage: "plus")
                 .font(.headline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
         }
         .buttonStyle(.borderedProminent)
-        .buttonBorderShape(.roundedRectangle(radius: 16))
+        .buttonBorderShape(.capsule)
         .tint(Theme.accent)
         .controlSize(.large)
+        .shadow(color: .black.opacity(0.2), radius: 8, y: 3)
         // The crosshair position is known once the map has reported its camera.
         .disabled(center == nil)
-        .frame(maxWidth: Theme.readableWidth)
     }
 
     private func flyTo(_ spot: Spot) {
@@ -497,17 +502,25 @@ private struct SpeciesNowRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
+            // A light tile, so dark fish (perch, pike) still read in dark mode.
             item.species.image
                 .resizable()
                 .scaledToFit()
-                .frame(width: 64, height: 34)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+                .frame(width: 72, height: 44)
+                .background(Color(light: 0xEEF3F6, dark: 0xDCE6EC), in: .rect(cornerRadius: 10, style: .continuous))
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(verbatim: item.species.localizedName)
                     .font(.subheadline.weight(.semibold))
                 Text(verbatim: BiteScale.label(item.index))
-                    .font(.caption)
+                    .font(.caption2.weight(.bold))
                     .foregroundStyle(BiteScale.color(item.index))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(BiteScale.color(item.index).opacity(0.18), in: .capsule)
+                    .overlay(Capsule().strokeBorder(BiteScale.color(item.index).opacity(0.35), lineWidth: 0.5))
             }
             Spacer()
             IndexGauge(index: item.index, size: 36)

@@ -247,12 +247,17 @@ private struct TripHistoryCard: View {
     @ViewBuilder
     private var badge: some View {
         if trip.catchCount == 0 {
-            Text("Blank")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Theme.well, in: .capsule)
+            // Same shape as a catch badge, outlined: a blank trip counts too.
+            Label {
+                Text("Blank")
+            } icon: {
+                Image(systemName: "fish")
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .overlay(Capsule().strokeBorder(Color.secondary.opacity(0.45), style: StrokeStyle(lineWidth: 1.2, dash: [4, 3])))
         } else {
             Label {
                 Text(verbatim: "\(trip.catchCount)")
