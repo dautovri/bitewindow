@@ -129,7 +129,9 @@ struct Conditions {
     var pressure: String? {
         hour.map {
             Measurement(value: $0.pressureHPa, unit: UnitPressure.hectopascals)
-                .formatted(.measurement(width: .abbreviated, usage: .barometric, numberFormatStyle: .number.precision(.fractionLength(0))))
+                // Inches of mercury move in hundredths; hectopascals in whole numbers.
+                .formatted(.measurement(width: .abbreviated, usage: .barometric,
+                                        numberFormatStyle: .number.precision(.fractionLength(Locale.current.measurementSystem == .us ? 2 : 0))))
         }
     }
 

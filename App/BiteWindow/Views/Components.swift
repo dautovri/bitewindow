@@ -62,31 +62,56 @@ struct IndexGauge: View {
     }
 }
 
-/// One day's bite curve with the best window shaded and a marker at the current time.
+/// One day's bite curve with night shaded, the best window marked and a line at the current
+/// time. With no points it draws the day's frame only (the free tier shows that, never a
+/// made-up curve); `domain` then gives the day.
 struct BiteCurveChart: View {
     let points: [ScorePoint]
     let window: BiteWindow?
+    var sunrise: Date? = nil
+    var sunset: Date? = nil
+    var domain: ClosedRange<Date>? = nil
+
+    private var span: ClosedRange<Date>? {
+        if let domain { return domain }
+        guard let first = points.first, let last = points.last, first.time < last.time else { return nil }
+        return first.time...last.time
+    }
 
     private var now: Date? {
         let t = Date()
-        guard let first = points.first, let last = points.last, t >= first.time, t <= last.time else { return nil }
+        guard let span, span.contains(t) else { return nil }
         return t
     }
 
     var body: some View {
+        let color = BiteScale.color(window?.meanIndex)
+        let night = Color(light: 0x0B1522, dark: 0x000000, lightOpacity: 0.07, darkOpacity: 0.32)
         Chart {
+            if let span {
+                // Before sunrise and after sunset, so dawn and dusk peaks read at a glance.
+                if let sunrise, sunrise > span.lowerBound {
+                    RectangleMark(xStart: .value("Night start", span.lowerBound), xEnd: .value("Sunrise", min(sunrise, span.upperBound)))
+                        .foregroundStyle(night)
+                }
+                if let sunset, sunset < span.upperBound {
+                    RectangleMark(xStart: .value("Sunset", max(sunset, span.lowerBound)), xEnd: .value("Night end", span.upperBound))
+                        .foregroundStyle(night)
+                }
+            }
             if let window {
                 RectangleMark(xStart: .value("Window start", window.start), xEnd: .value("Window end", window.end))
-                    .foregroundStyle(Color.green.opacity(0.16))
+                    .foregroundStyle(color.opacity(0.18))
             }
             ForEach(points, id: \.time) { point in
                 AreaMark(x: .value("Time", point.time), y: .value("Index", point.index))
                     .interpolationMethod(.monotone)
-                    .foregroundStyle(LinearGradient(colors: [Color.teal.opacity(0.35), Color.teal.opacity(0.02)],
+                    .foregroundStyle(LinearGradient(colors: [color.opacity(0.32), color.opacity(0.02)],
                                                     startPoint: .top, endPoint: .bottom))
                 LineMark(x: .value("Time", point.time), y: .value("Index", point.index))
                     .interpolationMethod(.monotone)
-                    .foregroundStyle(Color.teal)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                    .foregroundStyle(color)
             }
             RuleMark(y: .value("Neutral", 50))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
@@ -98,6 +123,7 @@ struct BiteCurveChart: View {
             }
         }
         .chartYScale(domain: 0...100)
+        .chartXScale(domain: span ?? Date()...Date().addingTimeInterval(86_400))
         .chartYAxis { AxisMarks(values: [0, 50, 100]) }
         .chartXAxis {
             AxisMarks(values: .stride(by: .hour, count: 6)) { _ in
@@ -116,11 +142,11 @@ struct TideChart: View {
         Chart(samples, id: \.time) { sample in
             AreaMark(x: .value("Time", sample.time), y: .value("Tide (m)", sample.height))
                 .interpolationMethod(.catmullRom)
-                .foregroundStyle(LinearGradient(colors: [Color.blue.opacity(0.3), Color.blue.opacity(0.03)],
+                .foregroundStyle(LinearGradient(colors: [Theme.tide.opacity(0.3), Theme.tide.opacity(0.03)],
                                                 startPoint: .top, endPoint: .bottom))
             LineMark(x: .value("Time", sample.time), y: .value("Tide (m)", sample.height))
                 .interpolationMethod(.catmullRom)
-                .foregroundStyle(Color.blue)
+                .foregroundStyle(Theme.tide)
         }
         .chartXAxis {
             AxisMarks(values: .stride(by: .hour, count: 6)) { _ in
@@ -132,26 +158,49 @@ struct TideChart: View {
     }
 }
 
-/// How much each factor pushes the index up or down, as diverging bars.
+/// How much each factor pushes the index up or down, as diverging bars, with the reading
+/// behind each factor so the bar is not an abstract number.
 struct FactorBreakdown: View {
     struct Factor: Identifiable {
         let name: String
         /// Weighted contribution w·z; about ±0.25 at the extremes.
         let value: Double
+        var symbol: String = "circle"
+        /// The measurement the factor rests on in this window, already formatted; nil when it has none to show.
+        var reading: String? = nil
+        var readingSymbol: String? = nil
         var id: String { name }
     }
 
     let factors: [Factor]
 
+    private static let positive = Color(light: 0x059669, dark: 0x34D399)
+    private static let negative = Color(light: 0xD97706, dark: 0xFBBF24)
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("What drives this window")
-                .font(.footnote)
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
             ForEach(factors) { factor in
-                HStack {
-                    Text(verbatim: factor.name).font(.subheadline)
-                    Spacer()
+                HStack(spacing: 10) {
+                    Image(systemName: factor.symbol)
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(Theme.accent)
+                        .frame(width: 22)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(verbatim: factor.name).font(.subheadline.weight(.medium))
+                        if let reading = factor.reading {
+                            HStack(spacing: 3) {
+                                Text(verbatim: reading).monospacedDigit()
+                                if let symbol = factor.readingSymbol { Image(systemName: symbol).font(.caption2.weight(.bold)) }
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer(minLength: 8)
                     bar(factor.value)
                     Image(systemName: factor.value > 0.02 ? "arrow.up" : factor.value < -0.02 ? "arrow.down" : "minus")
                         .font(.caption.weight(.bold))
@@ -159,26 +208,25 @@ struct FactorBreakdown: View {
                         .frame(width: 16)
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Text(verbatim: factor.name))
+                .accessibilityLabel(Text(verbatim: [factor.name, factor.reading].compactMap { $0 }.joined(separator: ", ")))
                 .accessibilityValue(factor.value > 0.02 ? String(localized: "helps") : factor.value < -0.02 ? String(localized: "hurts") : String(localized: "neutral"))
             }
         }
-        .padding(.vertical, 4)
     }
 
     private func color(_ value: Double) -> Color {
-        value > 0.02 ? .green : value < -0.02 ? .red : .secondary
+        value > 0.02 ? Self.positive : value < -0.02 ? Self.negative : .secondary
     }
 
     private func bar(_ value: Double) -> some View {
-        let half: CGFloat = 50
+        let half: CGFloat = 44
         let magnitude = CGFloat(min(1, abs(value) / 0.25))
         return ZStack {
-            Capsule().fill(Color.secondary.opacity(0.15)).frame(width: half * 2, height: 6)
+            Capsule().fill(Theme.well).frame(width: half * 2, height: 8)
             Capsule().fill(color(value))
-                .frame(width: max(2, half * magnitude), height: 6)
+                .frame(width: max(3, half * magnitude), height: 8)
                 .offset(x: (value < 0 ? -1 : 1) * half * magnitude / 2)
-            Rectangle().fill(Color.secondary).frame(width: 1, height: 10)
+            Rectangle().fill(Color.secondary).frame(width: 1.5, height: 12)
         }
     }
 }

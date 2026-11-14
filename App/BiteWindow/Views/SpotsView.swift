@@ -3,10 +3,23 @@ import Charts
 import SwiftData
 import SwiftUI
 
+extension WaterType {
+    var localizedName: String {
+        switch self {
+        case .warmFreshwater: return String(localized: "Warm freshwater")
+        case .coldFreshwater: return String(localized: "Cold freshwater")
+        case .inshoreSalt: return String(localized: "Inshore saltwater")
+        case .offshore: return String(localized: "Offshore")
+        }
+    }
+}
+
+/// The Forecast tab: one card per saved spot with today's index, best window and the weather now.
 struct SpotsView: View {
     var onAddSpot: () -> Void = {}
     @Query(sort: \Spot.createdAt) private var spots: [Spot]
     @Environment(\.modelContext) private var modelContext
+    @State private var opened: Spot?
 
     var body: some View {
         NavigationStack {
@@ -20,81 +33,234 @@ struct SpotsView: View {
                         Button("Add your first spot", action: onAddSpot)
                             .buttonStyle(.borderedProminent)
                     }
+                    .background(Theme.background.ignoresSafeArea())
                 } else {
-                    List {
-                        ForEach(spots) { spot in
-                            NavigationLink {
-                                SpotDetailView(spot: spot)
-                            } label: {
-                                SpotRow(spot: spot)
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 320, maximum: Theme.readableWidth), spacing: Theme.gap)],
+                                  spacing: Theme.gap) {
+                            ForEach(spots) { spot in
+                                Button {
+                                    opened = spot
+                                } label: {
+                                    SpotCard(spot: spot)
+                                }
+                                .buttonStyle(.plain)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        modelContext.delete(spot)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
+                                .accessibilityAction(named: Text("Delete")) { modelContext.delete(spot) }
                             }
                         }
-                        .onDelete { offsets in
-                            for index in offsets { modelContext.delete(spots[index]) }
-                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
                     }
+                    .screenBackground()
                 }
             }
             .navigationTitle("Forecast")
+            .navigationDestination(item: $opened) { spot in
+                SpotDetailView(spot: spot)
+            }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: onAddSpot) {
+                        Label("Add spot", systemImage: "plus")
+                    }
+                }
+            }
         }
     }
 }
 
-/// List row: today's best window and its index for one spot.
-private struct SpotRow: View {
+/// What a spot card shows, worked out from one forecast.
+private struct SpotSnapshot {
+    var today: BiteWindow?
+    var tomorrow: BiteWindow?
+    /// Today's curve, for the small chart.
+    var points: [ScorePoint] = []
+    var conditions: Conditions?
+    var isOffline = false
+
+    init() {}
+
+    init(spot: Spot, context: SpotContext, forecast: Forecast, now: Date = Date(), calendar: Calendar = .current) {
+        let today = calendar.startOfDay(for: now)
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: today),
+              let end = calendar.date(byAdding: .day, value: 2, to: today) else { return }
+        let all = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end, fillMissingWeather: true)
+        points = all.filter { $0.time < tomorrow }
+        // Windows that already started more than one 15-minute step ago are over for today.
+        self.today = Forecaster.bestWindow(in: points, notBefore: now.addingTimeInterval(-900))
+        self.tomorrow = Forecaster.bestWindow(in: all.filter { $0.time >= tomorrow && $0.time < end })
+        conditions = Conditions(at: now, hours: forecast.hours, latitude: spot.latitude, longitude: spot.longitude)
+        isOffline = forecast.source == .cached
+    }
+}
+
+/// One spot on the Forecast tab.
+private struct SpotCard: View {
     let spot: Spot
-    @State private var window: BiteWindow?
+    @Environment(EntitlementManager.self) private var entitlements
+    @State private var snapshot = SpotSnapshot()
     @State private var loaded = false
-    /// Changes when forecasts are downloaded again, so the row reloads.
+    /// Changes when forecasts are downloaded again, so the card reloads.
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
 
-    private var subtitle: String {
-        if let window {
-            let start = window.start.formatted(date: .omitted, time: .shortened)
-            let end = window.end.formatted(date: .omitted, time: .shortened)
-            return String(localized: "Best today \(start) – \(end)")
-        }
-        // Sun and moon fill any gap in the weather, so a missing window means the day is nearly over.
-        return loaded ? String(localized: "Not enough forecast left for today.") : String(localized: "Loading…")
-    }
-
     var body: some View {
-        HStack(spacing: 12) {
-            IndexGauge(index: window?.meanIndex, size: 46)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: spot.name).font(.headline)
-                Text(verbatim: subtitle).font(.subheadline).foregroundStyle(.secondary)
-                Text(verbatim: spot.species.localizedName).font(.caption).foregroundStyle(.tertiary)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(verbatim: spot.name)
+                        .font(.headline)
+                        .multilineTextAlignment(.leading)
+                    Label {
+                        Text(verbatim: "\(spot.species.localizedName) · \(spot.water.localizedName)")
+                    } icon: {
+                        Image(systemName: spot.isSalt ? "water.waves" : "drop.fill")
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 8)
+                IndexGauge(index: snapshot.today?.meanIndex, size: 54)
+            }
+
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    windowPill
+                    Spacer(minLength: 0)
+                    trailingPreview
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    windowPill
+                    trailingPreview
+                }
+            }
+
+            if let conditions = snapshot.conditions {
+                Divider().overlay(Theme.stroke)
+                if conditions.hour != nil {
+                    Text("Now")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 14) {
+                        WeatherStrip(conditions: conditions)
+                        Spacer(minLength: 0)
+                        SunMoonStrip(conditions: conditions)
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        WeatherStrip(conditions: conditions)
+                        SunMoonStrip(conditions: conditions)
+                    }
+                }
+                if snapshot.isOffline {
+                    Label("Offline", systemImage: "wifi.slash")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
-        .padding(.vertical, 2)
+        .card()
+        .contentShape(.rect(cornerRadius: Theme.cardRadius))
+        .accessibilityElement(children: .combine)
         .task(id: "\(spot.waterRaw)|\(spot.speciesRaw)|\(spot.waterTempC ?? -999)|\(lastPrefetch)") { await load() }
+    }
+
+    /// Today's best window, or why there is none.
+    @ViewBuilder private var windowPill: some View {
+        if let window = snapshot.today {
+            let color = BiteScale.color(window.meanIndex)
+            Label {
+                Text(verbatim: "\(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))")
+                    .monospacedDigit()
+            } icon: {
+                Image(systemName: "clock.fill")
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(color)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .background(color.opacity(0.13), in: .capsule)
+            .accessibilityLabel(Text("Best today \(window.start.formatted(date: .omitted, time: .shortened)) – \(window.end.formatted(date: .omitted, time: .shortened))"))
+        } else {
+            // Sun and moon fill any gap in the weather, so a missing window means the day is nearly over.
+            Text(loaded ? "Not enough forecast left for today." : "Loading…")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// Pro: today's curve in small. Free: tomorrow's index, which the free tier includes.
+    @ViewBuilder private var trailingPreview: some View {
+        if entitlements.isPro {
+            if snapshot.points.count > 1 {
+                MiniCurve(points: snapshot.points, color: BiteScale.color(snapshot.today?.meanIndex))
+                    .frame(width: 96, height: 30)
+            }
+        } else if let tomorrow = snapshot.tomorrow {
+            HStack(spacing: 6) {
+                Text("Tomorrow").foregroundStyle(.secondary)
+                Circle().fill(BiteScale.color(tomorrow.meanIndex)).frame(width: 8, height: 8).accessibilityHidden(true)
+                Text(verbatim: "\(Int(tomorrow.meanIndex.rounded()))")
+                    .fontWeight(.semibold)
+                    .monospacedDigit()
+            }
+            .font(.subheadline)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .background(Theme.well, in: .capsule)
+        }
     }
 
     private func load() async {
         var context = spot.context
-        // Saved forecast first, so the row fills at once with weak or no signal;
+        // Saved forecast first, so the card fills at once with weak or no signal;
         // the network result (up to the 10 s timeout) replaces it.
         if let saved = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude) {
-            window = bestToday(context: context, hours: saved.hours)
+            snapshot = SpotSnapshot(spot: spot, context: context, forecast: saved)
             loaded = true
         }
         if spot.isSalt {
             context.tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
         }
         let forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude)
-        window = bestToday(context: context, hours: forecast.hours)
+        snapshot = SpotSnapshot(spot: spot, context: context, forecast: forecast)
         loaded = true
     }
+}
 
-    private func bestToday(context: SpotContext, hours: [HourConditions]) -> BiteWindow? {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        guard let end = calendar.date(byAdding: .day, value: 1, to: today) else { return nil }
-        let points = Forecaster.curve(context: context, hours: hours, from: today, to: end, fillMissingWeather: true)
-            .filter { $0.time < end }
-        // Windows that already started more than one 15-minute step ago are over for today.
-        return Forecaster.bestWindow(in: points, notBefore: Date().addingTimeInterval(-900))
+/// Today's curve without axes, with a dot at the current time.
+private struct MiniCurve: View {
+    let points: [ScorePoint]
+    let color: Color
+
+    var body: some View {
+        let now = Date()
+        let current = points.min { abs($0.time.timeIntervalSince(now)) < abs($1.time.timeIntervalSince(now)) }
+        Chart {
+            ForEach(points, id: \.time) { point in
+                LineMark(x: .value("Time", point.time), y: .value("Index", point.index))
+                    .interpolationMethod(.monotone)
+                    .foregroundStyle(color)
+                    .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round))
+            }
+            if let current, abs(current.time.timeIntervalSince(now)) < 3600 {
+                PointMark(x: .value("Time", current.time), y: .value("Index", current.index))
+                    .symbolSize(36)
+                    .foregroundStyle(color)
+            }
+        }
+        .chartYScale(domain: 0...100)
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartLegend(.hidden)
+        .accessibilityHidden(true)
     }
 }
 
@@ -102,6 +268,8 @@ private struct DaySummary: Identifiable {
     let id: Date
     let window: BiteWindow?
     let points: [ScorePoint]
+    /// A day past the free horizon: the date is real, the forecast is not shown.
+    var isLocked = false
 
     /// No weather covered any part of the day: the score is sun, moon and tide only.
     var weatherless: Bool { !points.contains { $0.hasWeather } }
@@ -114,6 +282,13 @@ struct SpotDetailView: View {
     @State private var forecast: Forecast?
     @State private var tide: TideStation?
     @State private var showPaywall = false
+    /// The day the screen explains; nil means today.
+    @State private var selectedDay: Date?
+
+    /// How far the day strip reaches.
+    private static let horizonDays = 10
+    /// Free: today and tomorrow.
+    private static let freeDays = 2
 
     private var isSalt: Bool { spot.isSalt }
 
@@ -124,18 +299,18 @@ struct SpotDetailView: View {
         return c
     }
 
-    /// Free: today and tomorrow. Pro: the full 10-day horizon.
+    /// Free: today and tomorrow, then locked dates. Pro: the full 10-day horizon.
     private func computeDays(pressure: Terms.PressureSeries?) -> [DaySummary] {
         guard let forecast else { return [] }
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let count = entitlements.isPro ? 10 : 2
+        let count = entitlements.isPro ? Self.horizonDays : Self.freeDays
         guard let end = calendar.date(byAdding: .day, value: count, to: today) else { return [] }
         let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
                                       pressure: pressure, fillMissingWeather: true)
         // Today's window starts no earlier than now; the curve still covers the whole day.
         let cutoff = Date().addingTimeInterval(-900)
-        return Dictionary(grouping: points) { calendar.startOfDay(for: $0.time) }
+        var days = Dictionary(grouping: points) { calendar.startOfDay(for: $0.time) }
             .filter { $0.key < end }
             .map { day in
                 DaySummary(id: day.key,
@@ -143,6 +318,14 @@ struct SpotDetailView: View {
                            points: day.value)
             }
             .sorted { $0.id < $1.id }
+        if !entitlements.isPro {
+            for offset in Self.freeDays..<Self.horizonDays {
+                if let date = calendar.date(byAdding: .day, value: offset, to: today) {
+                    days.append(DaySummary(id: date, window: nil, points: [], isLocked: true))
+                }
+            }
+        }
+        return days
     }
 
     /// Phone barometer readings can stand in for the forecast only while a trip
@@ -169,131 +352,86 @@ struct SpotDetailView: View {
         return fish.formatted(.number.precision(.fractionLength(1)))
     }
 
-    /// Mean weighted contribution of each active factor over the window.
-    private func factors(_ day: DaySummary, _ window: BiteWindow) -> [FactorBreakdown.Factor] {
+    /// The moment a day's readings describe: the middle of its best window, now for today
+    /// without one, otherwise midday.
+    private func moment(_ day: DaySummary) -> Date {
+        if let window = day.window { return window.start.addingTimeInterval(window.end.timeIntervalSince(window.start) / 2) }
+        return Calendar.current.isDateInToday(day.id) ? Date() : day.id.addingTimeInterval(12 * 3600)
+    }
+
+    private func conditions(_ day: DaySummary) -> Conditions {
+        Conditions(at: moment(day), hours: forecast?.hours ?? [], latitude: spot.latitude, longitude: spot.longitude)
+    }
+
+    /// Mean weighted contribution of each active factor over the window, with the reading behind it.
+    private func factors(_ day: DaySummary, _ window: BiteWindow, _ conditions: Conditions) -> [FactorBreakdown.Factor] {
         let inside = day.points.filter { $0.time >= window.start && $0.time <= window.end }
         guard !inside.isEmpty else { return [] }
         let n = Double(inside.count)
         func mean(_ pick: (Contributions) -> Double) -> Double {
             inside.reduce(0) { $0 + pick($1.contributions) } / n
         }
-        var out: [FactorBreakdown.Factor] = [.init(name: String(localized: "Light"), value: mean { $0.light })]
-        if spot.waterTempC != nil { out.append(.init(name: String(localized: "Water temperature"), value: mean { $0.thermal })) }
-        if !day.weatherless {
-            out.append(.init(name: String(localized: "Wind"), value: mean { $0.wind }))
-            out.append(.init(name: String(localized: "Pressure trend"), value: mean { $0.pressure }))
+        var out: [FactorBreakdown.Factor] = [
+            .init(name: String(localized: "Light"), value: mean { $0.light }, symbol: conditions.cloudSymbol, reading: conditions.cloud)
+        ]
+        if let water = spot.waterTempC {
+            let reading = Measurement(value: water, unit: UnitTemperature.celsius)
+                .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
+            out.append(.init(name: String(localized: "Water temperature"), value: mean { $0.thermal }, symbol: "thermometer.medium", reading: reading))
         }
-        out.append(.init(name: String(localized: "Moon"), value: mean { $0.solunar }))
-        if isSalt, tide != nil { out.append(.init(name: String(localized: "Tide"), value: mean { $0.tide })) }
+        if !day.weatherless {
+            out.append(.init(name: String(localized: "Wind"), value: mean { $0.wind }, symbol: "wind", reading: conditions.wind))
+            out.append(.init(name: String(localized: "Pressure trend"), value: mean { $0.pressure }, symbol: "barometer",
+                             reading: conditions.pressure, readingSymbol: conditions.pressureTrendSymbol))
+        }
+        out.append(.init(name: String(localized: "Moon"), value: mean { $0.solunar }, symbol: conditions.moonSymbol, reading: nil))
+        if isSalt, tide != nil {
+            out.append(.init(name: String(localized: "Tide"), value: mean { $0.tide }, symbol: "water.waves", reading: nil))
+        }
         return out
     }
 
     var body: some View {
         let pressure = livePressure
         let days = computeDays(pressure: pressure)
-        List {
-            statusSection(livePressure: pressure != nil)
+        let today = days.first
+        let day = days.first { !$0.isLocked && $0.id == selectedDay } ?? today
+        ScrollView {
+            VStack(alignment: .leading, spacing: Theme.gap) {
+                statusBanner(livePressure: pressure != nil)
 
-            if let today = days.first {
-                Section {
-                    if let window = today.window {
-                        HStack(spacing: 16) {
-                            IndexGauge(index: window.meanIndex, size: 78)
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Best window").font(.subheadline).foregroundStyle(.secondary)
-                                Text(verbatim: timeRange(window)).font(.title2.weight(.semibold)).monospacedDigit()
-                                Text(BiteScale.label(window.meanIndex))
-                                    .font(.subheadline.weight(.medium))
-                                    .foregroundStyle(BiteScale.color(window.meanIndex))
-                            }
-                        }
-                        .padding(.vertical, 6)
-                    } else {
-                        Text("Not enough forecast left for today.").foregroundStyle(.secondary)
-                    }
-                    dayDetail(today)
-                } header: {
-                    Text(today.id.formatted(.dateTime.weekday(.wide).month().day()))
-                }
-            }
-
-            if days.count > 1 {
-                Section("Coming up") {
-                    ForEach(Array(days.dropFirst())) { day in
-                        if entitlements.isPro {
-                            DisclosureGroup {
-                                dayDetail(day)
-                            } label: {
-                                dayLabel(day)
-                            }
+                if !days.isEmpty {
+                    DayStrip(days: days.map { .init(date: $0.id, index: $0.window?.meanIndex, isLocked: $0.isLocked) },
+                             selected: day?.id) { tapped in
+                        if tapped.isLocked {
+                            showPaywall = true
                         } else {
-                            dayLabel(day)
+                            withAnimation(.snappy) { selectedDay = tapped.date }
                         }
                     }
+                    .padding(.horizontal, -16)
                 }
-            }
 
-            if !entitlements.isPro {
-                Section {
-                    Button {
-                        showPaywall = true
-                    } label: {
-                        Label("Unlock hourly curve, tide curve, expected catch and 10-day outlook", systemImage: "lock")
+                if let day {
+                    let conditions = conditions(day)
+                    heroCard(day, conditions)
+                    chartCard(day, conditions)
+                    if entitlements.isPro, let window = day.window {
+                        FactorBreakdown(factors: factors(day, window, conditions)).card()
                     }
+                    tideCard(day)
                 }
-            }
 
-            Section {
-                LabeledContent("Trips logged here", value: "\(tripCount)")
-                if tripCount > 0 {
-                    LabeledContent("Your catch rate here",
-                                   value: "×\(spot.catchMultiplier.mean.formatted(.number.precision(.fractionLength(2))))")
-                }
-            } header: {
-                Text("Your record")
-            } footer: {
-                if tripCount == 0 {
-                    Text("Log trips here, blank ones included, and the expected catch adapts to you.")
-                } else {
-                    Text("Relative to the starting estimate. It moves slowly until about 20 trips are logged.")
-                }
+                recordCard
+                spotCard
+                footer
             }
-
-            Section("Spot") {
-                Picker("Target species", selection: $spot.species) {
-                    ForEach(Species.allCases, id: \.self) { Text(verbatim: $0.localizedName).tag($0) }
-                }
-                Picker("Water", selection: $spot.water) {
-                    Text("Warm freshwater").tag(WaterType.warmFreshwater)
-                    Text("Cold freshwater").tag(WaterType.coldFreshwater)
-                    Text("Inshore saltwater").tag(WaterType.inshoreSalt)
-                    Text("Offshore").tag(WaterType.offshore)
-                }
-                TextField("Water temperature °C (optional)", value: $spot.waterTempC, format: .number)
-                    .keyboardType(.decimalPad)
-            }
-
-            if isSalt {
-                Section {
-                    if let tide {
-                        LabeledContent("Tide station", value: tide.name)
-                    } else {
-                        Text("No tide station found near this spot. The score runs without tide.")
-                            .foregroundStyle(.secondary)
-                    }
-                } footer: {
-                    Text("Tide predictions from NOAA harmonic constants. Not for navigation.")
-                }
-            }
-
-            Section {
-                Link("Weather data: Apple Weather — legal attribution",
-                     destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
-                    .font(.footnote)
-            } footer: {
-                Text("Bite windows are estimates from weather, sun, moon and tide. Fish don't read forecasts.")
-            }
+            .frame(maxWidth: Theme.readableWidth)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
         }
+        .screenBackground()
         .navigationTitle(spot.name)
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -310,84 +448,358 @@ struct SpotDetailView: View {
         .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 
+    // MARK: Cards
+
     @ViewBuilder
-    private func statusSection(livePressure: Bool) -> some View {
+    private func statusBanner(livePressure: Bool) -> some View {
         if let forecast {
-            if forecast.source == .sample {
-                Label("Sample weather — backend not configured", systemImage: "exclamationmark.triangle")
-                    .foregroundStyle(.orange)
-            } else if forecast.source == .cached {
-                Group {
-                    if let saved = forecast.fetchedAt, !forecast.hours.isEmpty {
-                        Label("Offline — forecast saved \(saved.formatted(.relative(presentation: .named)))",
-                              systemImage: "wifi.slash")
-                    } else {
-                        Label("No weather data — sun, moon and tide only", systemImage: "wifi.slash")
+            VStack(alignment: .leading, spacing: 6) {
+                if forecast.source == .sample {
+                    Label("Sample weather — backend not configured", systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                } else if forecast.source == .cached {
+                    Group {
+                        if let saved = forecast.fetchedAt, !forecast.hours.isEmpty {
+                            Label("Offline — forecast saved \(saved.formatted(.relative(presentation: .named)))",
+                                  systemImage: "wifi.slash")
+                        } else {
+                            Label("No weather data — sun, moon and tide only", systemImage: "wifi.slash")
+                        }
                     }
-                }
-                .foregroundStyle(.secondary)
-            }
-            if livePressure {
-                Label("Pressure trend from your phone's barometer", systemImage: "barometer")
                     .foregroundStyle(.secondary)
+                }
+                if livePressure {
+                    Label("Pressure trend from your phone's barometer", systemImage: "barometer")
+                        .foregroundStyle(.secondary)
+                }
             }
+            .font(.footnote)
+            .padding(.horizontal, 4)
         } else {
             HStack {
                 ProgressView()
                 Text("Loading forecast…").foregroundStyle(.secondary)
             }
+            .padding(.horizontal, 4)
         }
     }
 
-    private func dayLabel(_ day: DaySummary) -> some View {
-        HStack(spacing: 12) {
-            IndexGauge(index: day.window?.meanIndex, size: 38)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(day.id.formatted(.dateTime.weekday(.wide).month().day()))
-                    .foregroundStyle(day.weatherless ? .secondary : .primary)
-                Text(verbatim: day.window.map(timeRange) ?? String(localized: "No forecast"))
-                    .font(.subheadline)
-                    .monospacedDigit()
+    /// The day's index and best window, the expected catch, and the weather in that window.
+    private func heroCard(_ day: DaySummary, _ conditions: Conditions) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(day.id.formatted(.dateTime.weekday(.wide).month().day()))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+            if let window = day.window {
+                HStack(spacing: 16) {
+                    IndexGauge(index: window.meanIndex, size: 84)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Best window").font(.subheadline).foregroundStyle(.secondary)
+                        Text(verbatim: timeRange(window))
+                            .font(.title2.weight(.bold))
+                            .monospacedDigit()
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
+                        Text(BiteScale.label(window.meanIndex))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(BiteScale.color(window.meanIndex))
+                    }
+                }
+                .accessibilityElement(children: .combine)
+            } else {
+                Text(Calendar.current.isDateInToday(day.id) ? "Not enough forecast left for today." : "No forecast")
                     .foregroundStyle(.secondary)
             }
+
+            if let window = day.window {
+                Divider().overlay(Theme.stroke)
+                expectedCatchRow(day, window)
+            }
+
+            // The banner at the top already says so when there is no weather at all.
+            if day.weatherless, forecast?.hours.isEmpty == false {
+                Label("No weather data — sun, moon and tide only", systemImage: "moon.stars")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                if conditions.hour != nil {
+                    // The readings are for the middle of the window, not for now.
+                    Label {
+                        Text(moment(day), format: .dateTime.hour().minute())
+                    } icon: {
+                        Image(systemName: "clock")
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                }
+                WeatherStrip(conditions: conditions)
+                SunMoonStrip(conditions: conditions)
+            }
+            .well()
+        }
+        .card()
+    }
+
+    /// Pro: the number, with the personal multiplier it includes. Free: the label and a lock, no number.
+    private func expectedCatchRow(_ day: DaySummary, _ window: BiteWindow) -> some View {
+        HStack(spacing: 8) {
+            Label("Expected fish in window", systemImage: "fish.fill")
+                .font(.subheadline)
+                .labelStyle(.titleAndIcon)
+                .foregroundStyle(.primary)
+            Spacer(minLength: 8)
+            if entitlements.isPro {
+                if tripCount > 0 {
+                    Text(verbatim: "×\(spot.catchMultiplier.mean.formatted(.number.precision(.fractionLength(2))))")
+                        .font(.caption.weight(.semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                        .padding(.vertical, 3)
+                        .padding(.horizontal, 7)
+                        .background(Theme.well, in: .capsule)
+                        .accessibilityLabel(Text("Your catch rate here"))
+                        .accessibilityValue(Text(verbatim: spot.catchMultiplier.mean.formatted(.number.precision(.fractionLength(2)))))
+                }
+                Text(verbatim: expectedCatchText(day, window))
+                    .font(.title3.weight(.bold))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+            } else {
+                Button {
+                    showPaywall = true
+                } label: {
+                    Image(systemName: "lock.fill")
+                        .font(.footnote.weight(.semibold))
+                        .padding(8)
+                        .background(Theme.well, in: .circle)
+                }
+                .accessibilityLabel(Text("See Pro plans"))
+            }
         }
     }
 
-    /// Pro: expected catch, hourly curve and factor breakdown. Everyone: tide times.
+    /// Pro: the day's curve, with the tide under it at saltwater spots. Free: the day's real
+    /// frame (daylight, best window) with the curve withheld, never a made-up one.
     @ViewBuilder
-    private func dayDetail(_ day: DaySummary) -> some View {
-        // The banner at the top already says so when there is no weather at all.
-        if day.weatherless, forecast?.hours.isEmpty == false {
-            Label("No weather data — sun, moon and tide only", systemImage: "moon.stars")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-        }
+    private func chartCard(_ day: DaySummary, _ conditions: Conditions) -> some View {
+        let dayEnd = Calendar.current.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
         if entitlements.isPro {
-            if let window = day.window {
-                LabeledContent("Expected fish in window", value: expectedCatchText(day, window))
-            }
-            BiteCurveChart(points: day.points, window: day.window)
-                .frame(height: 150)
-                .padding(.vertical, 4)
-            if let window = day.window {
-                FactorBreakdown(factors: factors(day, window))
-            }
-        }
-        if isSalt, let tide {
-            let end = Calendar.current.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86400)
-            let extremes = tide.extremes(from: day.id, to: end)
-            if !extremes.isEmpty {
-                LabeledContent("Tides") {
-                    Text(verbatim: extremes.map { "\($0.isHigh ? "▲" : "▼") \($0.time.formatted(date: .omitted, time: .shortened))" }
-                        .joined(separator: "  "))
-                        .font(.footnote.monospacedDigit())
+            VStack(alignment: .leading, spacing: 10) {
+                BiteCurveChart(points: day.points, window: day.window, sunrise: conditions.sunrise, sunset: conditions.sunset)
+                    .frame(height: 190)
+                if isSalt, let tide {
+                    TideChart(samples: tide.curve(from: day.id, to: dayEnd))
+                        .frame(height: 84)
                 }
             }
-            if entitlements.isPro {
-                TideChart(samples: tide.curve(from: day.id, to: end))
-                    .frame(height: 100)
-                    .padding(.vertical, 4)
+            .card()
+        } else {
+            Button {
+                showPaywall = true
+            } label: {
+                BiteCurveChart(points: [], window: day.window, sunrise: conditions.sunrise, sunset: conditions.sunset,
+                               domain: day.id...dayEnd)
+                    .frame(height: 170)
+                    .overlay {
+                        Label("Unlock hourly curve, tide curve, expected catch and 10-day outlook", systemImage: "lock.fill")
+                            .font(.footnote.weight(.semibold))
+                            .multilineTextAlignment(.leading)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                            .background(.ultraThinMaterial, in: .rect(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.stroke, lineWidth: 1))
+                            .padding(.horizontal, 24)
+                    }
+                    .card()
             }
+            .buttonStyle(.plain)
         }
+    }
+
+    /// Everyone: tide times at saltwater spots, and where they come from.
+    @ViewBuilder
+    private func tideCard(_ day: DaySummary) -> some View {
+        if isSalt {
+            VStack(alignment: .leading, spacing: 10) {
+                if let tide {
+                    let end = Calendar.current.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
+                    let extremes = tide.extremes(from: day.id, to: end)
+                    if !extremes.isEmpty {
+                        LabeledContent("Tides") {
+                            Text(verbatim: extremes.map { "\($0.isHigh ? "▲" : "▼") \($0.time.formatted(date: .omitted, time: .shortened))" }
+                                .joined(separator: "  "))
+                                .font(.footnote.monospacedDigit())
+                        }
+                    }
+                    LabeledContent("Tide station", value: tide.name)
+                } else {
+                    Text("No tide station found near this spot. The score runs without tide.")
+                        .foregroundStyle(.secondary)
+                }
+                Text("Tide predictions from NOAA harmonic constants. Not for navigation.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .font(.subheadline)
+            .card()
+        }
+    }
+
+    private var recordCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            CardHeader(title: "Your record")
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 10) {
+                    RecordTile(symbol: "flag.checkered", value: "\(tripCount)", label: "Trips logged here")
+                    if tripCount > 0 {
+                        RecordTile(symbol: "fish.fill",
+                                   value: "×\(spot.catchMultiplier.mean.formatted(.number.precision(.fractionLength(2))))",
+                                   label: "Your catch rate here")
+                    }
+                }
+                Text(tripCount == 0
+                     ? "Log trips here, blank ones included, and the expected catch adapts to you."
+                     : "Relative to the starting estimate. It moves slowly until about 20 trips are logged.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .card()
+        }
+    }
+
+    private var spotCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            CardHeader(title: "Spot")
+            VStack(spacing: 6) {
+                LabeledContent("Target species") {
+                    Picker("Target species", selection: $spot.species) {
+                        ForEach(Species.allCases, id: \.self) { Text(verbatim: $0.localizedName).tag($0) }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                }
+                Divider().overlay(Theme.stroke)
+                LabeledContent("Water") {
+                    Picker("Water", selection: $spot.water) {
+                        ForEach(WaterType.allCases, id: \.self) { Text(verbatim: $0.localizedName).tag($0) }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                }
+                Divider().overlay(Theme.stroke)
+                TextField("Water temperature °C (optional)", value: $spot.waterTempC, format: .number)
+                    .keyboardType(.decimalPad)
+                    .padding(.vertical, 8)
+            }
+            .tint(Theme.accent)
+            .card()
+        }
+    }
+
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Link("Weather data: Apple Weather — legal attribution",
+                 destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
+            Text("Bite windows are estimates from weather, sun, moon and tide. Fish don't read forecasts.")
+                .foregroundStyle(.secondary)
+        }
+        .font(.footnote)
+        .tint(Theme.accent)
+        .padding(.horizontal, 4)
+    }
+}
+
+/// A number with its label on a recessed tile.
+private struct RecordTile: View {
+    let symbol: String
+    let value: String
+    let label: LocalizedStringKey
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Image(systemName: symbol)
+                .foregroundStyle(Theme.accent)
+                .accessibilityHidden(true)
+            Text(verbatim: value)
+                .font(.system(.title2, design: .rounded).weight(.bold))
+                .monospacedDigit()
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .well()
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// The days ahead as a row of capsules: weekday, date and the day's index. Days past the free
+/// horizon show their real date and a lock, never a number.
+struct DayStrip: View {
+    struct Day: Identifiable, Equatable {
+        let date: Date
+        let index: Double?
+        let isLocked: Bool
+        var id: Date { date }
+    }
+
+    let days: [Day]
+    let selected: Date?
+    let onTap: (Day) -> Void
+
+    var body: some View {
+        let best = days.compactMap(\.index).max()
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ForEach(days) { day in
+                    Button {
+                        onTap(day)
+                    } label: {
+                        VStack(spacing: 5) {
+                            Text(day.date.formatted(.dateTime.weekday(.abbreviated)))
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Text(day.date.formatted(.dateTime.day()))
+                                .font(.subheadline.weight(.semibold))
+                                .monospacedDigit()
+                            if day.isLocked {
+                                Image(systemName: "lock.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 36, height: 36)
+                                    .overlay(Circle().strokeBorder(Color.secondary.opacity(0.3), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+                            } else {
+                                IndexGauge(index: day.index, size: 36)
+                            }
+                            // The best day in view.
+                            Circle()
+                                .fill(day.index != nil && day.index == best ? BiteScale.color(day.index) : .clear)
+                                .frame(width: 5, height: 5)
+                                .accessibilityHidden(true)
+                        }
+                        .frame(minWidth: 52)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 6)
+                        .background(day.date == selected ? Theme.card : Theme.well.opacity(0.6),
+                                    in: .rect(cornerRadius: 14, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .strokeBorder(day.date == selected ? Theme.accent : Theme.stroke, lineWidth: day.date == selected ? 2 : 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(Text(day.date.formatted(.dateTime.weekday(.wide).month().day())))
+                    .accessibilityValue(day.isLocked
+                                        ? Text("BiteCurve Pro")
+                                        : Text(verbatim: day.index.map { "\(Int($0.rounded()))" } ?? "–"))
+                    .accessibilityAddTraits(day.date == selected ? .isSelected : [])
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+        .scrollIndicators(.hidden)
     }
 }

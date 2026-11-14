@@ -14,70 +14,74 @@ struct LogView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                if let trip = active {
-                    Section("Current trip") {
-                        ActiveTripRow(trip: trip)
-                    }
-                } else {
-                    Section {
-                        Menu {
-                            ForEach(spots) { spot in
-                                Button(spot.name) { modelContext.insert(Trip(spot: spot)) }
-                            }
-                            Button("No spot") { modelContext.insert(Trip(spot: nil)) }
-                        } label: {
-                            Label("Start trip", systemImage: "play.fill")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: Theme.gap) {
+                    if let trip = active {
+                        VStack(alignment: .leading, spacing: 8) {
+                            CardHeader(title: "Current trip")
+                            ActiveTripRow(trip: trip)
+                        }
+                    } else {
+                        StartTripMenu(spots: spots) { spot in
+                            modelContext.insert(Trip(spot: spot))
                         }
                     }
-                }
 
-                if !finished.isEmpty {
-                    Section("Totals") {
-                        let fish = finished.reduce(0) { $0 + $1.catchCount }
-                        let blanks = finished.filter { $0.catchCount == 0 }.count
-                        HStack {
-                            StatTile(value: "\(finished.count)", label: String(localized: "Trips"))
-                            StatTile(value: "\(fish)", label: String(localized: "Fish"))
-                            StatTile(value: "\(Int((Double(blanks) / Double(finished.count) * 100).rounded()))%", label: String(localized: "Blank trips"))
+                    if !finished.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            CardHeader(title: "Totals")
+                            TotalsGrid(finished: finished)
                         }
                     }
-                }
 
-                Section("History") {
-                    if finished.isEmpty {
-                        Text("No finished trips yet. Log every trip, blank ones included.")
-                            .foregroundStyle(.secondary)
-                    }
-                    ForEach(finished) { trip in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(verbatim: trip.spot?.name ?? String(localized: "No spot"))
-                                Text(verbatim: "\(trip.startedAt.formatted(date: .abbreviated, time: .shortened)) · \(Measurement(value: trip.hours, unit: UnitDuration.hours).formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(1)))))")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            if trip.catchCount == 0 {
-                                Text("Blank").font(.subheadline).foregroundStyle(.secondary)
-                            } else {
-                                Label { Text(verbatim: "\(trip.catchCount)") } icon: { Image(systemName: "fish.fill") }
-                                    .font(.headline)
-                                    .monospacedDigit()
-                                    .foregroundStyle(.teal)
+                    VStack(alignment: .leading, spacing: 8) {
+                        CardHeader(title: "History")
+                        if finished.isEmpty {
+                            Text("No finished trips yet. Log every trip, blank ones included.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .card()
+                        } else {
+                            LazyVStack(spacing: 10) {
+                                ForEach(finished) { trip in
+                                    TripHistoryCard(trip: trip) {
+                                        modelContext.delete(trip)
+                                    }
+                                }
                             }
                         }
-                        .accessibilityElement(children: .combine)
-                    }
-                    .onDelete { offsets in
-                        let rows = finished
-                        for index in offsets { modelContext.delete(rows[index]) }
                     }
                 }
+                .padding(.horizontal, Theme.cardPadding)
+                .padding(.top, 8)
+                .frame(maxWidth: Theme.readableWidth)
+                .frame(maxWidth: .infinity)
             }
+            .screenBackground()
             .navigationTitle("Log")
+        }
+    }
+}
+
+private struct StartTripMenu: View {
+    let spots: [Spot]
+    let onStart: (Spot?) -> Void
+
+    var body: some View {
+        Menu {
+            ForEach(spots) { spot in
+                Button(spot.name) { onStart(spot) }
+            }
+            Button("No spot") { onStart(nil) }
+        } label: {
+            Label("Start trip", systemImage: "play.fill")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity, minHeight: 56)
+                .background(Theme.accent, in: .rect(cornerRadius: Theme.cardRadius, style: .continuous))
+                .contentShape(.rect(cornerRadius: Theme.cardRadius, style: .continuous))
         }
     }
 }
@@ -86,31 +90,43 @@ private struct ActiveTripRow: View {
     @Bindable var trip: Trip
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(verbatim: trip.spot?.name ?? String(localized: "No spot")).font(.headline)
-            Text(trip.startedAt, style: .timer)
-                .font(.system(.largeTitle, design: .rounded).weight(.semibold))
-                .monospacedDigit()
-            Text("Started \(trip.startedAt.formatted(date: .omitted, time: .shortened))")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.vertical, 4)
-        Stepper(value: $trip.catchCount, in: 0...500) {
-            Label("Fish caught: \(trip.catchCount)", systemImage: "fish.fill")
-                .font(.title3.weight(.medium))
-                .monospacedDigit()
-        }
-        Button {
-            end()
-        } label: {
-            Group {
-                if trip.catchCount == 0 { Text("End trip — no fish") } else { Text("End trip") }
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(verbatim: trip.spot?.name ?? String(localized: "No spot"))
+                    .font(.headline)
+                Text(trip.startedAt, style: .timer)
+                    .font(.system(.largeTitle, design: .rounded).weight(.bold))
+                    .monospacedDigit()
+                    .foregroundStyle(Theme.accent)
+                Text("Started \(trip.startedAt.formatted(date: .omitted, time: .shortened))")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
-            .font(.headline)
-            .frame(maxWidth: .infinity)
+
+            Stepper(value: $trip.catchCount, in: 0...500) {
+                Label("Fish caught: \(trip.catchCount)", systemImage: "fish.fill")
+                    .font(.title3.weight(.medium))
+                    .monospacedDigit()
+                    .padding(.vertical, 4)
+            }
+            .controlSize(.large)
+            .well()
+
+            Button {
+                end()
+            } label: {
+                Group {
+                    if trip.catchCount == 0 { Text("End trip — no fish") } else { Text("End trip") }
+                }
+                .font(.headline)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .tint(Theme.accent)
         }
-        .buttonStyle(.borderedProminent)
+        .card()
     }
 
     /// Ends the trip and stores what the model expected for it, so the trip
@@ -132,3 +148,124 @@ private struct ActiveTripRow: View {
         }
     }
 }
+
+private struct TotalsGrid: View {
+    let finished: [Trip]
+
+    private let columns = Array(repeating: GridItem(.flexible(minimum: 80), spacing: 10), count: 3)
+
+    var body: some View {
+        let fish = finished.reduce(0) { $0 + $1.catchCount }
+        let blanks = finished.filter { $0.catchCount == 0 }.count
+        let blankPercent = Int((Double(blanks) / Double(finished.count) * 100).rounded())
+
+        LazyVGrid(columns: columns, spacing: 10) {
+            TotalStatCard(symbol: "figure.fishing", value: "\(finished.count)", label: String(localized: "Trips"))
+            TotalStatCard(symbol: "fish.fill", value: "\(fish)", label: String(localized: "Fish"))
+            TotalStatCard(symbol: "circle.dashed", value: "\(blankPercent)%", label: String(localized: "Blank trips"))
+        }
+    }
+}
+
+private struct TotalStatCard: View {
+    let symbol: String
+    let value: String
+    let label: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Image(systemName: symbol)
+                .font(.subheadline.weight(.semibold))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(Theme.accent)
+                .accessibilityHidden(true)
+            Text(verbatim: value)
+                .font(.system(.title2, design: .rounded).weight(.bold))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text(verbatim: label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .card(padding: 12)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct TripHistoryCard: View {
+    let trip: Trip
+    let onDelete: () -> Void
+
+    private var spotName: String {
+        trip.spot?.name ?? String(localized: "No spot")
+    }
+
+    private var dateAndDuration: String {
+        let dateText = trip.startedAt.formatted(date: .abbreviated, time: .shortened)
+        let durationText = Measurement(value: trip.hours, unit: UnitDuration.hours)
+            .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(1))))
+        return "\(dateText) · \(durationText)"
+    }
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .center, spacing: 12) {
+                details
+                Spacer(minLength: 8)
+                badge
+            }
+            VStack(alignment: .leading, spacing: 10) {
+                details
+                badge
+            }
+        }
+        .card()
+        .accessibilityElement(children: .combine)
+        .accessibilityAction(named: Text("Delete"), onDelete)
+        .contextMenu {
+            Button(role: .destructive, action: onDelete) {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+    }
+
+    private var details: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(verbatim: spotName)
+                .font(.headline)
+            Text(verbatim: dateAndDuration)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private var badge: some View {
+        if trip.catchCount == 0 {
+            Text("Blank")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Theme.well, in: .capsule)
+        } else {
+            Label {
+                Text(verbatim: "\(trip.catchCount)")
+            } icon: {
+                Image(systemName: "fish.fill")
+            }
+            .font(.headline)
+            .monospacedDigit()
+            .foregroundStyle(Theme.accent)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Theme.accent.opacity(0.15), in: .capsule)
+        }
+    }
+}
+
