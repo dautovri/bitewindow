@@ -9,7 +9,9 @@ public struct ThermalParameters: Sendable, Equatable {
 /// Species thermal parameters are PLACEHOLDERS (heuristic). Replace with values
 /// sourced from the bioenergetics literature before launch.
 public enum Species: String, CaseIterable, Codable, Sendable {
+    // Raw values are stored on each spot (SwiftData): never rename a case, only add.
     case largemouthBass, walleye, northernPike, rainbowTrout
+    case crucianCarp, commonCarp, europeanPerch, commonBream
 
     public var displayName: String {
         switch self {
@@ -17,6 +19,10 @@ public enum Species: String, CaseIterable, Codable, Sendable {
         case .walleye: return "Walleye"
         case .northernPike: return "Northern pike"
         case .rainbowTrout: return "Rainbow trout"
+        case .crucianCarp: return "Crucian carp"
+        case .commonCarp: return "Common carp"
+        case .europeanPerch: return "Perch"
+        case .commonBream: return "Bream"
         }
     }
 
@@ -26,7 +32,16 @@ public enum Species: String, CaseIterable, Codable, Sendable {
         case .walleye: return .init(optimum: 22, sigmaLow: 7, criticalMax: 31)
         case .northernPike: return .init(optimum: 20, sigmaLow: 7, criticalMax: 29)
         case .rainbowTrout: return .init(optimum: 16, sigmaLow: 6, criticalMax: 25)
+        case .crucianCarp: return .init(optimum: 24, sigmaLow: 6, criticalMax: 34)
+        case .commonCarp: return .init(optimum: 26, sigmaLow: 6, criticalMax: 35)
+        case .europeanPerch: return .init(optimum: 19, sigmaLow: 7, criticalMax: 28)
+        case .commonBream: return .init(optimum: 21, sigmaLow: 6, criticalMax: 30)
         }
+    }
+
+    /// Carp and their kin, for which no lunar effect is documented.
+    public var isCyprinid: Bool {
+        self == .crucianCarp || self == .commonCarp || self == .commonBream
     }
 
     public var defaultWater: WaterType {
@@ -70,8 +85,8 @@ public struct Weights: Sendable, Equatable {
     public static func prior(water: WaterType, species: Species? = nil) -> Weights {
         switch water {
         case .warmFreshwater:
-            // Lunar evidence exists for walleye/muskie, not for bass.
-            let solunar = species == .largemouthBass ? 0.05 : 0.10
+            // Lunar evidence exists for walleye/muskie, not for bass or carp.
+            let solunar = species == .largemouthBass || species?.isCyprinid == true ? 0.05 : 0.10
             return .init(light: 0.25, thermal: 0.20, wind: 0.20, pressure: 0.15, solunar: solunar, tide: 0)
         case .coldFreshwater:
             // Trout: solunar tables did not predict catch rate; keep near zero.

@@ -241,6 +241,36 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertEqual(Terms.tide(rate: 0, maxRateOfDay: 0.5), -1)
         XCTAssertEqual(Terms.tide(rate: -0.5, maxRateOfDay: 0.5), 1)
         XCTAssertEqual(Terms.tide(rate: 0.2, maxRateOfDay: 0), 0)
+        // Peak flow of a neap day scores below peak flow of a spring day.
+        XCTAssertEqual(Terms.tide(rate: 1, maxRateOfDay: 1, maxRateOfCycle: 1), 1, accuracy: 1e-12)
+        XCTAssertEqual(Terms.tide(rate: 0.5, maxRateOfDay: 0.5, maxRateOfCycle: 1), 0.7, accuracy: 1e-12)
+        XCTAssertEqual(Terms.springTide(phaseAngle: 0), 1, accuracy: 1e-12)
+        XCTAssertEqual(Terms.springTide(phaseAngle: 180), 1, accuracy: 1e-12)
+        XCTAssertEqual(Terms.springTide(phaseAngle: 90), -1, accuracy: 1e-12)
+    }
+
+    func testSpringTideDayOutscoresNeapTideDay() {
+        // M2 and S2 in phase at new moon (6 Jan 2000) and opposed at first quarter (14 Jan 2000).
+        let st = TideStation(id: "t", name: "t", meanLevel: 2,
+                             constituents: [.init(name: "M2", amplitude: 1, phase: 0), .init(name: "S2", amplitude: 0.45, phase: 0)])
+        func bestTide(_ day: Date) -> Double {
+            let c = SpotContext(latitude: 50, longitude: -4, water: .inshoreSalt, species: .walleye, tide: st)
+            return Forecaster.curve(context: c, hours: [], from: day, to: day.addingTimeInterval(86400), fillMissingWeather: true)
+                .map(\.contributions.tide).max() ?? 0
+        }
+        XCTAssertGreaterThan(bestTide(utc(2000, 1, 6)), bestTide(utc(2000, 1, 14)) + 0.05)
+    }
+
+    func testSaltSpotWithoutStationFollowsMoonPhase() {
+        let c = SpotContext(latitude: 50, longitude: -4, water: .inshoreSalt, species: .walleye)
+        func tide(_ t: Date) -> Double {
+            Forecaster.curve(context: c, hours: [], from: t, to: t, fillMissingWeather: true).first?.contributions.tide ?? 0
+        }
+        XCTAssertGreaterThan(tide(utc(2000, 1, 6, 18)), 0.15)
+        XCTAssertLessThan(tide(utc(2000, 1, 14, 13)), -0.15)
+        let fresh = SpotContext(latitude: 50, longitude: -4, water: .warmFreshwater, species: .walleye)
+        XCTAssertEqual(Forecaster.curve(context: fresh, hours: [], from: utc(2000, 1, 6, 18), to: utc(2000, 1, 6, 18),
+                                        fillMissingWeather: true).first?.contributions.tide ?? 1, 0)
     }
 
     // MARK: Support
@@ -389,5 +419,48 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertEqual(Terms.light(at: noon, sunrise: nil, sunset: nil, cloudCover: nil), 0, accuracy: 1e-9)
         // One event still counts.
         XCTAssertGreaterThan(Terms.light(at: noon, sunrise: noon, sunset: nil, cloudCover: nil), 0.5)
+    }
+
+    // MARK: Species now
+
+    func hoursAt(airTempC: Double, around t: Date) -> [HourConditions] {
+        (-48...24).map { h in
+            HourConditions(time: t.addingTimeInterval(Double(h) * 3600), pressureHPa: 1015, cloudCover: 0.5,
+                           windSpeedKmh: 12, windFromDeg: 270, airTempC: airTempC)
+        }
+    }
+
+    func testEstimatedWaterTempNeedsADayOfHistory() {
+        let now = utc(2026, 7, 1, 12)
+        XCTAssertEqual(Terms.estimatedWaterTempC(hours: hoursAt(airTempC: 22, around: now), now: now)!, 22, accuracy: 1e-9)
+        XCTAssertEqual(Terms.estimatedWaterTempC(hours: hoursAt(airTempC: -10, around: now), now: now)!, 1, accuracy: 1e-9)
+        XCTAssertNil(Terms.estimatedWaterTempC(hours: hoursAt(airTempC: 22, around: now), now: now.addingTimeInterval(-40 * 3600)))
+    }
+
+    func testWarmWaterFavoursCrucianCarpOverTrout() {
+        let now = utc(2026, 7, 1, 12)
+        let context = SpotContext(latitude: 52.5, longitude: 13.4, water: .warmFreshwater, species: .northernPike)
+        let ranked = Forecaster.speciesNow(context: context, hours: hoursAt(airTempC: 24, around: now), now: now, waterTempC: 24)
+        XCTAssertEqual(ranked.count, Species.allCases.count)
+        XCTAssertEqual(ranked.first?.species, .crucianCarp)
+        XCTAssertEqual(ranked.last?.species, .rainbowTrout)
+        // One-pass re-weighting gives the same index as scoring each species in full.
+        for item in ranked {
+            var c = context
+            c.species = item.species
+            c.waterTempC = 24
+            let full = Forecaster.curve(context: c, hours: hoursAt(airTempC: 24, around: now), from: now, to: now).first!.index
+            XCTAssertEqual(item.index, full, accuracy: 1e-9)
+        }
+        let cold = Forecaster.speciesNow(context: context, hours: hoursAt(airTempC: 12, around: now), now: now, waterTempC: 12)
+        XCTAssertEqual(cold.first?.species, .rainbowTrout)
+    }
+
+    func testNoSpeciesRankingWithoutWaterTempOrInSaltwater() {
+        let now = utc(2026, 7, 1, 12)
+        let fresh = SpotContext(latitude: 52.5, longitude: 13.4, water: .warmFreshwater, species: .walleye)
+        XCTAssertTrue(Forecaster.speciesNow(context: fresh, hours: hoursAt(airTempC: 24, around: now), now: now, waterTempC: nil).isEmpty)
+        let salt = SpotContext(latitude: 52.5, longitude: 13.4, water: .inshoreSalt, species: .walleye)
+        XCTAssertTrue(Forecaster.speciesNow(context: salt, hours: hoursAt(airTempC: 24, around: now), now: now, waterTempC: 24).isEmpty)
     }
 }

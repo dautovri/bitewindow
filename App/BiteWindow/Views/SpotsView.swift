@@ -389,7 +389,8 @@ struct SpotDetailView: View {
                              reading: conditions.pressure, readingSymbol: conditions.pressureTrendSymbol))
         }
         out.append(.init(name: String(localized: "Moon"), value: mean { $0.solunar }, symbol: conditions.moonSymbol, reading: nil))
-        if isSalt, tide != nil {
+        // Without a station the tide term still counts: the moon phase stands in for spring and neap tides.
+        if isSalt {
             out.append(.init(name: String(localized: "Tide"), value: mean { $0.tide }, symbol: "water.waves", reading: nil))
         }
         return out
@@ -646,7 +647,7 @@ struct SpotDetailView: View {
                     }
                     LabeledContent("Tide station", value: tide.name)
                 } else {
-                    Text("No tide station found near this spot. The score runs without tide.")
+                    Text("No tide station found near this spot. The score estimates tide strength from the moon phase: spring tides at new and full moon.")
                         .foregroundStyle(.secondary)
                 }
                 Text("Tide predictions from NOAA harmonic constants. Not for navigation.")

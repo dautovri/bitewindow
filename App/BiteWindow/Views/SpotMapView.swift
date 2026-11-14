@@ -21,22 +21,28 @@ struct SpotMapView: View {
     /// Today's best-window index per spot, worked out once per forecast download rather than
     /// on every frame of a map pan.
     @State private var indices: [UUID: Double] = [:]
+    /// Which fish the water suits right now, per spot, worked out with the indices.
+    @State private var outlooks: [UUID: SpotOutlook] = [:]
+    @State private var selectedSpotID: UUID?
     @State private var appearances = 0
     @State private var searchCompleter = PlaceSearchCompleter()
     @FocusState private var searchFocused: Bool
 
     var body: some View {
         NavigationStack {
-            Map(position: $position) {
+            Map(position: $position, selection: $selectedSpotID) {
                 ForEach(spots) { spot in
                     let index = indices[spot.id]
                     Annotation(spot.name, coordinate: CLLocationCoordinate2D(latitude: spot.latitude, longitude: spot.longitude)) {
-                        SpotAnnotationPin(name: spot.name, index: index)
+                        SpotAnnotationPin(name: spot.name, index: index, best: outlooks[spot.id]?.ranked.first)
                     }
                     .annotationTitles(.hidden)
+                    .tag(spot.id)
                 }
             }
             .mapStyle(isHybrid ? .hybrid : .standard)
+            .animation(.snappy, value: selectedSpotID)
+            .onChange(of: selectedSpotID) { if selectedSpotID != nil { searchFocused = false } }
             .mapControls {
                 MapCompass()
                 MapScaleView()
@@ -60,13 +66,16 @@ struct SpotMapView: View {
             .onAppear { appearances += 1 }
             .task(id: "\(appearances)|\(lastPrefetch)|\(spots.map { "\($0.id)\($0.waterRaw)\($0.speciesRaw)\($0.waterTempC ?? -999)\($0.timeZoneID ?? "")" }.joined())") {
                 var fresh: [UUID: Double] = [:]
+                var freshOutlooks: [UUID: SpotOutlook] = [:]
                 for spot in spots {
                     // The tide counts at saltwater spots, as on the Forecast tab (saved station first).
                     let tide = spot.isSalt
                         ? await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude) : nil
                     fresh[spot.id] = currentIndex(for: spot, tide: tide)
+                    freshOutlooks[spot.id] = outlook(for: spot)
                 }
                 indices = fresh
+                outlooks = freshOutlooks
             }
             .navigationTitle("Map")
             .navigationBarTitleDisplayMode(.inline)
@@ -113,6 +122,7 @@ struct SpotMapView: View {
                             SpotPill(name: spot.name, index: indices[spot.id]) {
                                 searchFocused = false
                                 flyTo(spot)
+                                selectedSpotID = spot.id
                             }
                         }
                     }
@@ -138,6 +148,20 @@ struct SpotMapView: View {
     }
 
     private var bottomBar: some View {
+        VStack(spacing: 10) {
+            if let id = selectedSpotID, let spot = spots.first(where: { $0.id == id }) {
+                SpeciesNowCard(name: spot.name, isSalt: spot.isSalt, outlook: outlooks[id]) {
+                    selectedSpotID = nil
+                }
+                .frame(maxWidth: Theme.readableWidth)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+            addSpotButton
+        }
+        .padding()
+    }
+
+    private var addSpotButton: some View {
         Button {
             if !entitlements.isPro && spots.count >= EntitlementManager.freeSpotLimit {
                 showPaywall = true
@@ -158,7 +182,6 @@ struct SpotMapView: View {
         // The crosshair position is known once the map has reported its camera.
         .disabled(center == nil)
         .frame(maxWidth: Theme.readableWidth)
-        .padding()
     }
 
     private func flyTo(_ spot: Spot) {
@@ -184,6 +207,19 @@ struct SpotMapView: View {
         let points = Forecaster.curve(context: context, hours: saved.hours, from: today, to: end, fillMissingWeather: true)
             .filter { $0.time < end }
         return Forecaster.bestWindow(in: points, notBefore: now.addingTimeInterval(-900))?.meanIndex
+    }
+
+    /// Fish ranked by how well the water suits them now, from the saved forecast only. The
+    /// measured water temperature when there is one, else an estimate from the last days' air.
+    private func outlook(for spot: Spot) -> SpotOutlook? {
+        guard let saved = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude) else {
+            return nil
+        }
+        let now = Date()
+        let measured = spot.waterTempC
+        let waterTemp = measured ?? Terms.estimatedWaterTempC(hours: saved.hours, now: now)
+        let ranked = Forecaster.speciesNow(context: spot.context, hours: saved.hours, now: now, waterTempC: waterTemp)
+        return SpotOutlook(waterTempC: waterTemp, isMeasured: measured != nil, ranked: ranked)
     }
 
     private func addSpot() {
@@ -319,10 +355,20 @@ private struct SpotPill: View {
     }
 }
 
+/// Which fish the water at a spot suits right now.
+struct SpotOutlook: Equatable {
+    var waterTempC: Double?
+    var isMeasured: Bool
+    /// Best first; empty without a water temperature or at a saltwater spot.
+    var ranked: [SpeciesOutlook]
+}
+
 /// Custom annotation pin for a saved spot on the map.
 private struct SpotAnnotationPin: View {
     let name: String
     let index: Double?
+    /// The fish the water suits best now; shown under the name when it is biting above average.
+    var best: SpeciesOutlook?
 
     var body: some View {
         VStack(spacing: 4) {
@@ -352,6 +398,118 @@ private struct SpotAnnotationPin: View {
                 .padding(.vertical, 3)
                 .background(.regularMaterial, in: .capsule)
                 .overlay(Capsule().strokeBorder(Theme.stroke, lineWidth: 0.5))
+
+            if let best, best.index >= 50 {
+                HStack(spacing: 4) {
+                    best.species.image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 16)
+                    Text(verbatim: best.species.localizedName)
+                        .font(.caption2.weight(.bold))
+                        .lineLimit(1)
+                }
+                .foregroundStyle(.white)
+                .padding(.leading, 4)
+                .padding(.trailing, 8)
+                .padding(.vertical, 2)
+                .background(BiteScale.color(best.index), in: .capsule)
+                .overlay(Capsule().strokeBorder(.white.opacity(0.8), lineWidth: 1))
+                .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: name))
+        .accessibilityValue(accessibilityValue)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var accessibilityValue: Text {
+        let score = index.map { Text("Bite index") + Text(verbatim: " \(Int($0.rounded()))") } ?? Text(verbatim: "")
+        guard let best, best.index >= 50 else { return score }
+        return score + Text(verbatim: ", ") + Text("Best match right now") + Text(verbatim: ": \(best.species.localizedName)")
+    }
+}
+
+/// Card for a tapped spot: the fish the water suits right now, with their bite index.
+private struct SpeciesNowCard: View {
+    let name: String
+    let isSalt: Bool
+    let outlook: SpotOutlook?
+    let onClose: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: name)
+                        .font(.headline)
+                        .lineLimit(1)
+                    if let temp = outlook?.waterTempC, !isSalt {
+                        let degrees = Measurement(value: temp, unit: UnitTemperature.celsius)
+                            .formatted(.measurement(width: .abbreviated, usage: .asProvided,
+                                                    numberFormatStyle: .number.precision(.fractionLength(0))))
+                        Text(outlook?.isMeasured == true ? "Water \(degrees) · measured" : "Water about \(degrees) · estimated from air")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Close"))
+            }
+
+            if isSalt {
+                message("Fish suggestions are for freshwater spots.")
+            } else if let ranked = outlook?.ranked, !ranked.isEmpty {
+                Text("Best match right now")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                ForEach(ranked.prefix(3), id: \.species) { item in
+                    SpeciesNowRow(item: item)
+                }
+                Text("Conditions that suit each fish, not a survey of this water.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            } else {
+                message("Open this spot on the Forecast tab to download weather.")
+            }
+        }
+        .card(padding: 14)
+    }
+
+    private func message(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+    }
+}
+
+private struct SpeciesNowRow: View {
+    let item: SpeciesOutlook
+
+    var body: some View {
+        HStack(spacing: 12) {
+            item.species.image
+                .resizable()
+                .scaledToFit()
+                .frame(width: 64, height: 34)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(verbatim: item.species.localizedName)
+                    .font(.subheadline.weight(.semibold))
+                Text(verbatim: BiteScale.label(item.index))
+                    .font(.caption)
+                    .foregroundStyle(BiteScale.color(item.index))
+            }
+            Spacer()
+            IndexGauge(index: item.index, size: 36)
         }
         .accessibilityElement(children: .combine)
     }

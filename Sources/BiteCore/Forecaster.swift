@@ -64,6 +64,12 @@ public struct BiteWindow: Sendable, Equatable {
     public let meanIndex: Double
 }
 
+/// How one species is biting at a spot at one instant.
+public struct SpeciesOutlook: Sendable, Equatable {
+    public let species: Species
+    public let index: Double
+}
+
 public enum Forecaster {
     /// Logistic gain. With k = 3 a fully favourable day (Σ w·z ≈ 0.9) scores ~94.
     public static let gain = 3.0
@@ -121,6 +127,18 @@ public enum Forecaster {
 
         let tideRates: [Double]? = context.tide.map { station in times.map { station.rate(at: $0) } }
         let halfDaySteps = max(1, Int((12.5 * 3600) / step))
+        // Strongest flow of the spring-neap cycle (14.8 days) around the scored range, hourly.
+        let cyclePeak: Double? = context.tide.map { station in
+            let half: TimeInterval = 7.4 * 86400
+            var peak = 0.0
+            var u = from.addingTimeInterval(-half)
+            while u <= to.addingTimeInterval(half) {
+                peak = max(peak, abs(station.rate(at: u)))
+                u = u.addingTimeInterval(3600)
+            }
+            return peak
+        }
+        let isSalt = context.water == .inshoreSalt || context.water == .offshore
 
         var out: [ScorePoint] = []
         for (i, time) in times.enumerated() {
@@ -143,7 +161,11 @@ public enum Forecaster {
             if let rates = tideRates, w.tide > 0 {
                 let lo = max(0, i - halfDaySteps), hi = min(rates.count - 1, i + halfDaySteps)
                 let peak = rates[lo...hi].map { abs($0) }.max() ?? 0
-                c.tide = w.tide * Terms.tide(rate: rates[i], maxRateOfDay: peak)
+                c.tide = w.tide * Terms.tide(rate: rates[i], maxRateOfDay: peak, maxRateOfCycle: cyclePeak)
+            } else if isSalt, w.tide > 0 {
+                // No station: the moon phase stands in for spring and neap tides, at half weight
+                // because the timing of the flow within the day is unknown.
+                c.tide = w.tide * 0.5 * Terms.springTide(phaseAngle: Astro.moonPhaseAngle(time))
             }
             out.append(ScorePoint(time: time, index: index(for: c), contributions: c, hasWeather: weather != nil))
         }
@@ -174,6 +196,39 @@ public enum Forecaster {
             }
         }
         return best
+    }
+
+    /// Every freshwater species scored at `now`, ordered by how well the water temperature suits
+    /// it (then by index). Ordered by temperature, not index: the other species difference, the
+    /// solunar weight, says how much evidence there is for the moon, not how active the fish are.
+    /// Without a water temperature there is no ranking and this is empty.
+    /// Saltwater spots get none either: the profiles are freshwater fish. Says which species the
+    /// conditions suit, not which live in the water.
+    public static func speciesNow(context: SpotContext, hours: [HourConditions], now: Date,
+                                  waterTempC: Double?) -> [SpeciesOutlook] {
+        guard let waterTempC, context.water == .warmFreshwater || context.water == .coldFreshwater else { return [] }
+        // Sun, moon and weather are scored once; species change only the thermal term and the
+        // solunar weight, so each species re-weights that one point (no tide in fresh water).
+        var base = context
+        base.waterTempC = nil
+        base.tide = nil
+        guard let point = curve(context: base, hours: hours, from: now, to: now, fillMissingWeather: true).first else {
+            return []
+        }
+        let c = point.contributions
+        let baseSolunarWeight = Weights.prior(water: context.water, species: context.species).solunar
+        let solunarZ = baseSolunarWeight > 0 ? c.solunar / baseSolunarWeight : 0
+        var scored: [(outlook: SpeciesOutlook, fit: Double)] = []
+        for species in Species.allCases {
+            let w = Weights.prior(water: context.water, species: species)
+            let fit = Terms.thermal(waterTempC: waterTempC, species: species)
+            var sc = c
+            sc.thermal = w.thermal * fit
+            sc.solunar = w.solunar * solunarZ
+            scored.append((SpeciesOutlook(species: species, index: index(for: sc)), fit))
+        }
+        scored.sort { $0.fit != $1.fit ? $0.fit > $1.fit : $0.outlook.index > $1.outlook.index }
+        return scored.map(\.outlook)
     }
 
     /// Summer depth guidance for stratified lakes. Location advice only —

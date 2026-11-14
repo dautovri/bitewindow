@@ -10,8 +10,15 @@ extension Species {
         case .walleye: return String(localized: "Walleye")
         case .northernPike: return String(localized: "Northern pike")
         case .rainbowTrout: return String(localized: "Rainbow trout")
+        case .crucianCarp: return String(localized: "Crucian carp")
+        case .commonCarp: return String(localized: "Common carp")
+        case .europeanPerch: return String(localized: "Perch")
+        case .commonBream: return String(localized: "Bream")
         }
     }
+
+    /// Side-view illustration in Assets.xcassets/Fish (360 px wide, about 18 KB each).
+    var image: Image { Image("Fish/\(rawValue)") }
 }
 
 /// Colour and wording for a bite index. 50 is neutral.

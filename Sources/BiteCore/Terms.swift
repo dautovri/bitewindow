@@ -95,6 +95,16 @@ public enum Terms {
         return 2 * f - 1
     }
 
+    /// Rough surface water temperature when none was measured: the mean air temperature of the
+    /// last 72 h before `now`, kept to 1...30 °C. Needs at least 24 hours of that history.
+    /// Water lags the air, so this runs low in autumn and high in spring; it is shown as an estimate.
+    public static func estimatedWaterTempC(hours: [HourConditions], now: Date) -> Double? {
+        let past = hours.filter { $0.time <= now && $0.time > now.addingTimeInterval(-72 * 3600) }
+        guard past.count >= 24 else { return nil }
+        let mean = past.map(\.airTempC).reduce(0, +) / Double(past.count)
+        return min(30, max(1, mean))
+    }
+
     /// One daily step of the air-to-water lag model.
     public static func waterTempStep(previousC: Double, airMean7dC: Double, tauDays: Double = 8) -> Double {
         previousC + (airMean7dC - previousC) / tauDays
@@ -123,9 +133,22 @@ public enum Terms {
 
     // MARK: Tide
 
-    /// Scores current strength: fast-moving water scores high, slack scores low.
-    public static func tide(rate: Double, maxRateOfDay: Double) -> Double {
+    /// Moving water fishes better than slack. Within the day the rate is scaled to the day's
+    /// strongest flow. With `maxRateOfCycle` (the strongest flow of the surrounding spring-neap
+    /// cycle) 30 % of the term says how strong the day's tides are: spring tides around new and
+    /// full moon run harder than neap tides at the quarter moons.
+    public static func tide(rate: Double, maxRateOfDay: Double, maxRateOfCycle: Double? = nil) -> Double {
         guard maxRateOfDay > 0 else { return 0 }
-        return 2 * min(1, abs(rate) / maxRateOfDay) - 1
+        let withinDay = 2 * min(1, abs(rate) / maxRateOfDay) - 1
+        guard let cycle = maxRateOfCycle, cycle > 0 else { return withinDay }
+        let dayStrength = 2 * min(1, maxRateOfDay / cycle) - 1
+        return 0.7 * withinDay + 0.3 * dayStrength
+    }
+
+    /// Spring-neap proxy from the moon phase alone, for saltwater spots without a tide station:
+    /// 1 at new and full moon (spring tides), −1 at the quarters (neap tides). Ignores the one-to-
+    /// two-day lag of the real springs behind the phase, and seas with almost no tide.
+    public static func springTide(phaseAngle: Double) -> Double {
+        cos(2 * phaseAngle * .pi / 180)
     }
 }

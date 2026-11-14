@@ -743,6 +743,112 @@
         }
       }
     },
+    "Best match right now": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedst lige nu"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passt jetzt am besten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo mejor ahora"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paras juuri nyt"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le mieux en ce moment"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il meglio adesso"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今いちばん合う魚"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금 가장 잘 맞는 어종"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best akkurat nå"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nu het best"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teraz najlepiej"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melhor agora"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лучше всего сейчас"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bäst just nu"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şu an en uygun"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найкраще зараз"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前最适合"
+          }
+        }
+      }
+    },
     "Best today %@ – %@": {
       "localizations": {
         "da": {
@@ -1485,6 +1591,112 @@
         }
       }
     },
+    "Bream": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brasen"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brachse"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brema"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lahna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brème"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abramide"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ブリーム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "브림"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brasme"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brasem"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leszcz"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brema"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лещ"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Braxen"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çapak balığı"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лящ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欧鳊"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "da": {
@@ -1587,6 +1799,112 @@
           "stringUnit": {
             "state": "translated",
             "value": "取消"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luk"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrar"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sulje"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiudi"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉じる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "닫기"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lukk"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sluiten"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamknij"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stäng"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapat"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрити"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
           }
         }
       }
@@ -1803,6 +2121,218 @@
         }
       }
     },
+    "Common carp": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karpe"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karpfen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carpa común"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karppi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carpe commune"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carpa comune"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コイ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잉어"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karpe"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karper"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karp"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carpa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Карп"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karp"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sazan"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Короп"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鲤鱼"
+          }
+        }
+      }
+    },
+    "Conditions that suit each fish, not a survey of this water.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forhold, der passer til hver fisk – ikke en opgørelse over dette vand."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedingungen, die zu jedem Fisch passen – keine Bestandsaufnahme dieses Gewässers."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condiciones que convienen a cada pez, no un censo de esta agua."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olosuhteet, jotka sopivat kullekin kalalle – ei tämän vesistön kalakartoitus."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conditions favorables à chaque poisson, pas un inventaire de ce plan d’eau."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condizioni adatte a ciascun pesce, non un censimento di quest’acqua."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各魚に合う条件であり、この水域の生息調査ではありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "각 어종에 맞는 조건이며, 이 수역의 서식 조사가 아닙니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forhold som passer hver fisk – ikke en kartlegging av dette vannet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omstandigheden die bij elke vis passen, geen inventarisatie van dit water."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warunki sprzyjające każdej rybie, a nie spis ryb w tym łowisku."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condições que favorecem cada peixe, não um levantamento desta água."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Условия, подходящие каждой рыбе, а не данные о том, кто живёт в этом водоёме."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Förhållanden som passar varje fisk – inte en inventering av vattnet."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Her balığa uygun koşullar; bu suyun balık envanteri değildir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Умови, що підходять кожній рибі, а не дані про те, хто живе в цій водоймі."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "适合各鱼种的条件，并非该水域的鱼类调查。"
+          }
+        }
+      }
+    },
     "Could not load subscription plans.": {
       "localizations": {
         "da": {
@@ -1905,6 +2435,112 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法加载订阅方案。"
+          }
+        }
+      }
+    },
+    "Crucian carp": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karuds"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karausche"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carpín"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ruutana"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carassin"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carassio"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "フナ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "붕어"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karuss"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kroeskarper"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karaś"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carássio"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Карась"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ruda"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Havuz balığı"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Карась"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鲫鱼"
           }
         }
       }
@@ -2753,6 +3389,112 @@
           "stringUnit": {
             "state": "translated",
             "value": "鱼获数：%lld"
+          }
+        }
+      }
+    },
+    "Fish suggestions are for freshwater spots.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fiskeforslag gælder ferskvandspladser."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fischvorschläge gibt es für Süßwasser-Spots."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las sugerencias de peces son para puntos de agua dulce."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalaehdotukset koskevat makean veden paikkoja."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les suggestions de poissons concernent les spots d’eau douce."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I suggerimenti sui pesci valgono per gli spot d’acqua dolce."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魚の提案は淡水のスポットのみです。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어종 추천은 민물 포인트에만 해당됩니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fiskeforslag gjelder ferskvannsplasser."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vissuggesties gelden voor zoetwaterstekken."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podpowiedzi ryb dotyczą łowisk słodkowodnych."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As sugestões de peixes são para pontos de água doce."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подсказки по рыбе — только для пресных водоёмов."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fiskförslag gäller sötvattensplatser."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balık önerileri tatlı su noktaları içindir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підказки щодо риби — лише для прісних водойм."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鱼种建议仅适用于淡水钓点。"
           }
         }
       }
@@ -5513,108 +6255,108 @@
         }
       }
     },
-    "No tide station found near this spot. The score runs without tide.": {
+    "No tide station found near this spot. The score estimates tide strength from the moon phase: spring tides at new and full moon.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ingen tidevandsstation fundet nær denne plads. Scoren beregnes uden tidevand."
+            "value": "Ingen tidevandsstation fundet nær denne plads. Scoren anslår tidevandets styrke ud fra månefasen: springflod ved nymåne og fuldmåne."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Keine Gezeitenstation in der Nähe dieses Spots gefunden. Der Wert wird ohne Tide berechnet."
+            "value": "Keine Gezeitenstation in der Nähe gefunden. Die Bewertung schätzt die Gezeitenstärke aus der Mondphase: Springtide bei Neu- und Vollmond."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se encontró ninguna estación de mareas cerca de este lugar. La puntuación se calcula sin marea."
+            "value": "No se encontró ninguna estación de mareas cerca. La puntuación estima la fuerza de la marea por la fase lunar: mareas vivas con luna nueva y llena."
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tämän paikan läheltä ei löytynyt vuorovesiasemaa. Pisteet lasketaan ilman vuorovettä."
+            "value": "Lähistöltä ei löytynyt vuorovesiasemaa. Pisteet arvioivat vuoroveden voimakkuuden kuun vaiheesta: kevätvuorovesi uuden- ja täydenkuun aikaan."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucune station de marée trouvée près de ce spot. Le score est calculé sans la marée."
+            "value": "Aucune station de marée trouvée à proximité. Le score estime la force de la marée d’après la phase de la lune : vives-eaux à la nouvelle et à la pleine lune."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuna stazione di marea trovata vicino a questo spot. Il punteggio viene calcolato senza la marea."
+            "value": "Nessuna stazione di marea trovata nelle vicinanze. Il punteggio stima la forza della marea dalla fase lunare: maree sizigiali con luna nuova e piena."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "このポイントの近くに潮位観測所が見つかりません。スコアは潮汐なしで計算されます。"
+            "value": "近くに潮位観測点が見つかりません。スコアは月齢から潮の強さを推定します（新月と満月は大潮）。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이 포인트 근처에서 조위 관측소를 찾을 수 없습니다. 조석 없이 점수를 계산합니다."
+            "value": "근처에 조석 관측소가 없습니다. 점수는 달의 위상으로 조석 세기를 추정합니다(그믐과 보름에 사리)."
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fant ingen tidevannsstasjon nær denne plassen. Poengsummen beregnes uten tidevann."
+            "value": "Fant ingen tidevannsstasjon nær denne plassen. Poengsummen anslår tidevannets styrke ut fra månefasen: springflo ved nymåne og fullmåne."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geen getijdenstation gevonden bij deze stek. De score wordt zonder getij berekend."
+            "value": "Geen getijdenstation in de buurt gevonden. De score schat de getijsterkte uit de maanfase: springtij bij nieuwe en volle maan."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nie znaleziono stacji pływów w pobliżu tego łowiska. Ocena jest liczona bez pływów."
+            "value": "W pobliżu nie znaleziono stacji pływów. Ocena szacuje siłę pływu na podstawie fazy Księżyca: pływy syzygijne przy nowiu i pełni."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nenhuma estação de maré encontrada perto deste ponto. A pontuação é calculada sem a maré."
+            "value": "Nenhuma estação de maré encontrada perto deste ponto. A pontuação estima a força da maré pela fase da lua: marés de sizígia na lua nova e cheia."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Рядом с этим местом не найдено приливной станции. Оценка рассчитывается без прилива."
+            "value": "Рядом с этим местом нет приливной станции. Сила прилива оценивается по фазе Луны: сизигийные приливы в новолуние и полнолуние."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ingen tidvattenstation hittades nära den här platsen. Poängen beräknas utan tidvatten."
+            "value": "Ingen tidvattenstation hittades nära platsen. Poängen uppskattar tidvattnets styrka från månfasen: springflod vid nymåne och fullmåne."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bu meranın yakınında gelgit istasyonu bulunamadı. Puan gelgit olmadan hesaplanır."
+            "value": "Bu noktanın yakınında gelgit istasyonu bulunamadı. Puan, gelgit gücünü ay evresinden tahmin eder: yeni ay ve dolunayda büyük gelgit."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Поблизу цього місця не знайдено припливної станції. Оцінка розраховується без припливу."
+            "value": "Поблизу цього місця немає припливної станції. Сила припливу оцінюється за фазою Місяця: сизигійні припливи в молодик і повню."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "此钓点附近未找到验潮站。评分将不计入潮汐。"
+            "value": "附近未找到潮汐站。评分根据月相估算潮汐强度：新月和满月时为大潮。"
           }
         }
       }
@@ -6357,6 +7099,218 @@
           "stringUnit": {
             "state": "translated",
             "value": "远海"
+          }
+        }
+      }
+    },
+    "Open this spot on the Forecast tab to download weather.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn pladsen under Prognose for at hente vejret."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffne diesen Spot im Tab „Prognose“, um das Wetter zu laden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre este punto en la pestaña Pronóstico para descargar el tiempo."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avaa paikka Ennuste-välilehdellä ladataksesi sään."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez ce spot dans l’onglet Prévisions pour télécharger la météo."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apri questo spot nella scheda Previsioni per scaricare il meteo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報タブでこのスポットを開いて天気をダウンロードしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "예보 탭에서 이 포인트를 열어 날씨를 받으세요."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åpne plassen i Prognose-fanen for å laste ned været."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open deze stek op het tabblad Voorspelling om het weer te downloaden."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz to łowisko w karcie Prognoza, aby pobrać pogodę."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abra este ponto na aba Previsão para baixar o tempo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте это место на вкладке «Прогноз», чтобы загрузить погоду."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öppna platsen på fliken Prognos för att hämta vädret."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hava durumunu indirmek için bu noktayı Tahmin sekmesinde açın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрийте це місце на вкладці «Прогноз», щоб завантажити погоду."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在“预报”标签中打开此钓点以下载天气。"
+          }
+        }
+      }
+    },
+    "Perch": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aborre"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Barsch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perca"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahven"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perche"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Persico reale"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パーチ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "퍼치"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbor"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baars"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okoń"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perca"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Окунь"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abborre"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tatlı su levreği"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Окунь"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "河鲈"
           }
         }
       }
@@ -10809,6 +11763,218 @@
           "stringUnit": {
             "state": "translated",
             "value": "水域"
+          }
+        }
+      }
+    },
+    "Water %@ · measured": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vand %@ · målt"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wasser %@ · gemessen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agua %@ · medida"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vesi %@ · mitattu"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eau %@ · mesurée"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acqua %@ · misurata"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水温 %@ · 実測"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "수온 %@ · 측정값"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vann %@ · målt"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Water %@ · gemeten"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woda %@ · zmierzona"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Água %@ · medida"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вода %@ · измерено"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vatten %@ · uppmätt"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Su %@ · ölçülen"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вода %@ · виміряно"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水温 %@ · 实测"
+          }
+        }
+      }
+    },
+    "Water about %@ · estimated from air": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vand ca. %@ · anslået ud fra luften"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wasser etwa %@ · aus der Luft geschätzt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agua unos %@ · estimada por el aire"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vesi noin %@ · arvioitu ilmasta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eau environ %@ · estimée d’après l’air"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acqua circa %@ · stimata dall’aria"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水温 約%@ · 気温から推定"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "수온 약 %@ · 기온으로 추정"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vann ca. %@ · anslått fra lufta"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Water ongeveer %@ · geschat uit de lucht"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woda ok. %@ · szacunek z powietrza"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Água cerca de %@ · estimada pelo ar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вода около %@ · оценка по воздуху"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vatten ca %@ · uppskattat från luften"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Su yaklaşık %@ · havadan tahmin"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вода близько %@ · оцінка за повітрям"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水温约 %@ · 由气温估算"
           }
         }
       }
