@@ -21,6 +21,7 @@ struct SpotMapView: View {
     /// Today's best-window index per spot, worked out once per forecast download rather than
     /// on every frame of a map pan.
     @State private var indices: [UUID: Double] = [:]
+    @State private var appearances = 0
     @State private var searchCompleter = PlaceSearchCompleter()
     @FocusState private var searchFocused: Bool
 
@@ -54,9 +55,17 @@ struct SpotMapView: View {
             .safeAreaInset(edge: .bottom) {
                 bottomBar
             }
-            .task(id: "\(lastPrefetch)|\(spots.map { "\($0.id)\($0.waterRaw)\($0.speciesRaw)" }.joined())") {
+            // Again each time the tab comes forward: the Forecast tab may have saved a spot's
+            // first forecast in the meantime.
+            .onAppear { appearances += 1 }
+            .task(id: "\(appearances)|\(lastPrefetch)|\(spots.map { "\($0.id)\($0.waterRaw)\($0.speciesRaw)\($0.waterTempC ?? -999)" }.joined())") {
                 var fresh: [UUID: Double] = [:]
-                for spot in spots { fresh[spot.id] = currentIndex(for: spot) }
+                for spot in spots {
+                    // The tide counts at saltwater spots, as on the Forecast tab (saved station first).
+                    let tide = spot.isSalt
+                        ? await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude) : nil
+                    fresh[spot.id] = currentIndex(for: spot, tide: tide)
+                }
                 indices = fresh
             }
             .navigationTitle("Map")
@@ -162,7 +171,7 @@ struct SpotMapView: View {
 
     /// The index of today's best window, as the Forecast tab shows it, from the forecast saved
     /// on the phone only (no network from the map). Nil without a saved forecast or a window.
-    private func currentIndex(for spot: Spot) -> Double? {
+    private func currentIndex(for spot: Spot, tide: TideStation?) -> Double? {
         guard let saved = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude) else {
             return nil
         }
@@ -170,7 +179,9 @@ struct SpotMapView: View {
         let now = Date()
         let today = calendar.startOfDay(for: now)
         guard let end = calendar.date(byAdding: .day, value: 1, to: today) else { return nil }
-        let points = Forecaster.curve(context: spot.context, hours: saved.hours, from: today, to: end, fillMissingWeather: true)
+        var context = spot.context
+        context.tide = tide
+        let points = Forecaster.curve(context: context, hours: saved.hours, from: today, to: end, fillMissingWeather: true)
             .filter { $0.time < end }
         return Forecaster.bestWindow(in: points, notBefore: now.addingTimeInterval(-900))?.meanIndex
     }

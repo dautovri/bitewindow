@@ -284,6 +284,7 @@ struct SpotDetailView: View {
     @State private var showPaywall = false
     /// The day the screen explains; nil means today.
     @State private var selectedDay: Date?
+    @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
 
     /// How far the day strip reaches.
     private static let horizonDays = 10
@@ -434,7 +435,8 @@ struct SpotDetailView: View {
         .screenBackground()
         .navigationTitle(spot.name)
         .navigationBarTitleDisplayMode(.inline)
-        .task {
+        // Also when forecasts are downloaded again while this screen is open.
+        .task(id: lastPrefetch) {
             // Saved forecast first, so the screen fills at once with weak or no signal.
             if forecast == nil {
                 forecast = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude)
