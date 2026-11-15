@@ -316,6 +316,42 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertEqual(CatchRateMultiplier.fitted(to: []).mean, 1)
     }
 
+    func testScorecardFilesHoursAndFishByForecastBand() {
+        let t0 = utc(2026, 6, 21, 6)
+        // One hour at 70, then one hour at 30 (the step between them takes 15 minutes).
+        let points = (0...8).map {
+            ScorePoint(time: t0.addingTimeInterval(Double($0) * 900), index: $0 <= 4 ? 70 : 30, contributions: Contributions())
+        }
+        let end = t0.addingTimeInterval(7200)
+        let catches = [t0.addingTimeInterval(600), t0.addingTimeInterval(1800), t0.addingTimeInterval(6600)]
+        let record = Scorecard.record(points: points, from: t0, to: end, catchTimes: catches)
+        XCTAssertEqual(record?.catches, [1, 0, 0, 2])
+        XCTAssertEqual(record?.hours.reduce(0, +) ?? 0, 2, accuracy: 1e-9)
+        XCTAssertEqual(record?.hours[3] ?? 0, 1, accuracy: 0.1)
+        XCTAssertEqual(record?.hours[0] ?? 0, 0.75, accuracy: 0.1)
+        XCTAssertEqual(record?.meanIndex ?? 0, 50, accuracy: 3)
+        // Nothing is guessed: no forecast for part of the trip, or a fish outside it, gives no record.
+        XCTAssertNil(Scorecard.record(points: Array(points.prefix(4)), from: t0, to: end, catchTimes: []))
+        XCTAssertNil(Scorecard.record(points: points, from: t0, to: end, catchTimes: [end.addingTimeInterval(3600)]))
+        XCTAssertEqual(Scorecard.band(index: 64.9), 2)
+        XCTAssertEqual(Scorecard.band(index: 65), 3)
+    }
+
+    func testScorecardVerdictNeedsBothSides() {
+        let good = Scorecard.TripRecord(hours: [0, 0, 2, 2], catches: [0, 0, 3, 5], meanIndex: 66)
+        let slow = Scorecard.TripRecord(hours: [2, 2, 0, 0], catches: [1, 1, 0, 0], meanIndex: 34)
+        XCTAssertEqual(Scorecard.summary([good]).verdict, .notEnough)
+        let both = Scorecard.summary([good, slow])
+        XCTAssertEqual(both.verdict, .tracks)
+        XCTAssertEqual(both.goodRate ?? 0, 2, accuracy: 1e-9)
+        XCTAssertEqual(both.slowRate ?? 0, 0.5, accuracy: 1e-9)
+        XCTAssertEqual(both.rate(band: 3) ?? 0, 2.5, accuracy: 1e-9)
+        let reversed = Scorecard.TripRecord(hours: [2, 2, 0, 0], catches: [4, 5, 0, 0], meanIndex: 34)
+        XCTAssertEqual(Scorecard.summary([good, reversed]).verdict, .flat)
+        let blankGood = Scorecard.TripRecord(hours: [0, 0, 2, 2], catches: [0, 0, 1, 0], meanIndex: 66)
+        XCTAssertEqual(Scorecard.summary([blankGood, reversed]).verdict, .inverse)
+    }
+
     func testBarometerFusionKeepsForecastLevelAndDeviceTrend() {
         let t0 = utc(2026, 5, 1)
         let forecast: [Barometry.Sample] = (0...24).map { (t0.addingTimeInterval(Double($0) * 3600), 1015) }

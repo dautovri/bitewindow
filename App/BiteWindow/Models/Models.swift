@@ -117,6 +117,14 @@ final class Trip {
     /// Catch the global model expected for this trip, fixed when the trip ends
     /// (the weather for it is not available later). Nil for older trips.
     var expectedCatch: Double?
+    /// When each fish was caught, in order. Nil for trips logged before fish were timed.
+    var catchTimes: [Date]?
+    /// Hours fished and fish caught in each forecast band (see `Scorecard`), and the mean bite
+    /// index over the trip. Fixed when the trip ends, like `expectedCatch`; nil when the real
+    /// forecast did not cover the trip or the fish were not timed.
+    var bandHours: [Double]?
+    var bandCatches: [Int]?
+    var forecastIndex: Double?
     var spot: Spot?
 
     init(spot: Spot?) {
@@ -127,6 +135,33 @@ final class Trip {
 
     var hours: Double {
         (endedAt ?? Date()).timeIntervalSince(startedAt) / 3600
+    }
+
+    /// One more fish, stamped now.
+    func logCatch(at time: Date = Date()) {
+        // A trip that already has untimed fish stays untimed: half a record would mislead.
+        if catchCount == (catchTimes?.count ?? 0) { catchTimes = (catchTimes ?? []) + [time] }
+        catchCount += 1
+    }
+
+    /// Takes back the last fish.
+    func removeLastCatch() {
+        guard catchCount > 0 else { return }
+        if let times = catchTimes, times.count == catchCount { catchTimes = Array(times.dropLast()) }
+        catchCount -= 1
+    }
+
+    /// The catch times, when every fish of the trip has one.
+    var completeCatchTimes: [Date]? {
+        let times = catchTimes ?? []
+        return times.count == catchCount ? times : nil
+    }
+
+    /// This trip filed under the forecast bands, if it was stored when the trip ended.
+    var scoreRecord: Scorecard.TripRecord? {
+        guard let bandHours, let bandCatches, let forecastIndex,
+              bandHours.count == Scorecard.bandFloors.count, bandCatches.count == Scorecard.bandFloors.count else { return nil }
+        return Scorecard.TripRecord(hours: bandHours, catches: bandCatches, meanIndex: forecastIndex)
     }
 }
 

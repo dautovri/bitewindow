@@ -42,3 +42,7 @@ Species differ only in the thermal term, so the map ranks them by thermal fit at
 `E[catch] = m · b · ∫ index(t)/50 dt`, with `b = 0.5 fish/h` (heuristic) and `m` the per-spot Gamma–Poisson multiplier, prior Gamma(5, 5), updated with `(catches, b · ∫ index/50 dt)` per finished trip. The linear index-to-rate map is an assumption, not a fitted link.
 
 Refit plan: Poisson model of catch count with log(hours) offset, random intercepts per angler and per water, trained on logged trips including zero-catch trips.
+
+## Forecast check (trip log)
+
+Each fish is stamped with the time it was logged. When a trip ends, the bite curve from the real forecast is filed into four bands (below 35, 35–50, 50–65, 65 and up): hours fished and fish caught in each. A trip gets no record when the forecast did not cover all of it or some fish have no time, so nothing is guessed. The log then compares fish per hour above and below index 50. It gives a verdict only after 3 hours on each side and 5 fish, and calls a difference clear at a ratio of 1.25 (heuristic). Blank hours count. This is a check on one angler's own trips, not a validation of the model.

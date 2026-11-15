@@ -120,18 +120,14 @@ final class ForecastService {
         return saved
     }
 
-    /// Expected catch for a trip under the global model. Uses the real forecast
-    /// when there is one; sample weather and missing data count as neutral, so
-    /// the personal fit never learns from synthetic conditions.
-    func expectedCatch(context: SpotContext?, from: Date, to: Date) async -> Double {
-        var points: [ScorePoint] = []
-        if let context {
-            let forecast = await forecast(latitude: context.latitude, longitude: context.longitude)
-            if forecast.source != .sample {
-                points = Forecaster.curve(context: context, hours: forecast.hours, from: from, to: to)
-            }
-        }
-        return CatchModel.expectedCatch(points: points, from: from, to: to)
+    /// The bite curve over a finished trip from the real forecast. Empty with sample weather
+    /// or no spot, so the personal fit and the scorecard never learn from synthetic conditions.
+    func tripPoints(context: SpotContext?, from: Date, to: Date) async -> [ScorePoint] {
+        guard let context else { return [] }
+        let forecast = await forecast(latitude: context.latitude, longitude: context.longitude)
+        guard forecast.source != .sample else { return [] }
+        // One step past the end, so the curve brackets the whole trip however short it was.
+        return Forecaster.curve(context: context, hours: forecast.hours, from: from, to: to.addingTimeInterval(900))
     }
 
     // MARK: Water temperature

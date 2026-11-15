@@ -111,3 +111,131 @@ extension Barometry {
         return out
     }
 }
+
+/// Checks the forecast against what was caught: every fishing hour and every fish is filed
+/// under the bite index the forecast gave for that moment, so the catch rate can be compared
+/// between slow and good hours. Blank hours count as much as the fish do.
+public enum Scorecard {
+    /// Lower edges of the four index bands: slow, below average, above average, strong.
+    public static let bandFloors: [Double] = [0, 35, 50, 65]
+    /// The first band that counts as a good forecast (index 50 and up).
+    public static let firstGoodBand = 2
+
+    public static func band(index: Double) -> Int {
+        (bandFloors.lastIndex { index >= $0 }) ?? 0
+    }
+
+    /// One trip, split by the forecast band of each moment.
+    public struct TripRecord: Sendable, Equatable {
+        /// Hours fished in each band.
+        public var hours: [Double]
+        /// Fish caught in each band.
+        public var catches: [Int]
+        /// Time-weighted mean index over the trip.
+        public var meanIndex: Double
+
+        public init(hours: [Double], catches: [Int], meanIndex: Double) {
+            self.hours = hours; self.catches = catches; self.meanIndex = meanIndex
+        }
+    }
+
+    /// Files a trip under the forecast bands. Nil when the forecast does not cover the whole
+    /// trip (nothing is guessed), or a catch lies outside it.
+    public static func record(points: [ScorePoint], from: Date, to: Date, catchTimes: [Date]) -> TripRecord? {
+        let sorted = points.sorted { $0.time < $1.time }
+        let duration = to.timeIntervalSince(from)
+        // The curve is sampled every 15 minutes, so allow that much slack at each end.
+        guard duration > 0, sorted.count >= 2, let first = sorted.first, let last = sorted.last,
+              first.time <= from.addingTimeInterval(900), last.time >= to.addingTimeInterval(-900) else { return nil }
+
+        func index(at t: Date) -> Double {
+            if t <= first.time { return first.index }
+            if t >= last.time { return last.index }
+            var lo = 0, hi = sorted.count - 1
+            while hi - lo > 1 {
+                let mid = (lo + hi) / 2
+                if sorted[mid].time <= t { lo = mid } else { hi = mid }
+            }
+            let a = sorted[lo], b = sorted[hi]
+            let span = b.time.timeIntervalSince(a.time)
+            guard span > 0 else { return a.index }
+            return a.index + (b.index - a.index) * t.timeIntervalSince(a.time) / span
+        }
+
+        var hours = [Double](repeating: 0, count: bandFloors.count)
+        var catches = [Int](repeating: 0, count: bandFloors.count)
+        let n = max(1, Int((duration / 300).rounded(.up)))
+        let dt = duration / Double(n)
+        var weighted = 0.0
+        for k in 0..<n {
+            let value = index(at: from.addingTimeInterval((Double(k) + 0.5) * dt))
+            hours[band(index: value)] += dt / 3600
+            weighted += value * dt
+        }
+        for time in catchTimes {
+            guard time >= from.addingTimeInterval(-60), time <= to.addingTimeInterval(60) else { return nil }
+            catches[band(index: index(at: time))] += 1
+        }
+        return TripRecord(hours: hours, catches: catches, meanIndex: weighted / duration)
+    }
+
+    public enum Verdict: Sendable, Equatable {
+        /// Too little fishing on one side of the line to compare.
+        case notEnough
+        /// Fish came clearly faster in good hours.
+        case tracks
+        /// No clear difference.
+        case flat
+        /// Fish came clearly faster in slow hours.
+        case inverse
+    }
+
+    public struct Summary: Sendable, Equatable {
+        public var hours: [Double]
+        public var catches: [Int]
+        public var trips: Int
+        public var verdict: Verdict
+
+        /// Fish per hour in a band; nil with under half an hour fished in it.
+        public func rate(band: Int) -> Double? {
+            hours[band] >= 0.5 ? Double(catches[band]) / hours[band] : nil
+        }
+
+        public var goodHours: Double { hours[Scorecard.firstGoodBand...].reduce(0, +) }
+        public var slowHours: Double { hours[..<Scorecard.firstGoodBand].reduce(0, +) }
+        public var goodCatches: Int { catches[Scorecard.firstGoodBand...].reduce(0, +) }
+        public var slowCatches: Int { catches[..<Scorecard.firstGoodBand].reduce(0, +) }
+        public var goodRate: Double? { goodHours > 0 ? Double(goodCatches) / goodHours : nil }
+        public var slowRate: Double? { slowHours > 0 ? Double(slowCatches) / slowHours : nil }
+    }
+
+    /// Hours needed on each side of index 50 before a verdict is given.
+    public static let minHoursPerSide = 3.0
+    /// Fish needed in total before a verdict is given.
+    public static let minCatches = 5
+    /// How much faster one side must be to call it. PLACEHOLDER (heuristic).
+    public static let clearRatio = 1.25
+
+    public static func summary(_ records: [TripRecord]) -> Summary {
+        var hours = [Double](repeating: 0, count: bandFloors.count)
+        var catches = [Int](repeating: 0, count: bandFloors.count)
+        for record in records where record.hours.count == bandFloors.count && record.catches.count == bandFloors.count {
+            for band in bandFloors.indices {
+                hours[band] += record.hours[band]
+                catches[band] += record.catches[band]
+            }
+        }
+        var summary = Summary(hours: hours, catches: catches, trips: records.count, verdict: .notEnough)
+        guard summary.goodHours >= minHoursPerSide, summary.slowHours >= minHoursPerSide,
+              summary.goodCatches + summary.slowCatches >= minCatches,
+              let good = summary.goodRate, let slow = summary.slowRate else { return summary }
+        if good >= slow * clearRatio {
+            summary.verdict = .tracks
+        } else if slow >= good * clearRatio {
+            summary.verdict = .inverse
+        } else {
+            summary.verdict = .flat
+        }
+        return summary
+    }
+}

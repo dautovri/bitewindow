@@ -34,6 +34,13 @@ struct LogView: View {
                         }
                     }
 
+                    if !finished.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            CardHeader(title: "Was the forecast right?")
+                            ForecastCheckCard(summary: Scorecard.summary(finished.compactMap(\.scoreRecord)))
+                        }
+                    }
+
                     VStack(alignment: .leading, spacing: 8) {
                         CardHeader(title: "History")
                         if finished.isEmpty {
@@ -103,13 +110,23 @@ private struct ActiveTripRow: View {
                     .foregroundStyle(.secondary)
             }
 
-            Stepper(value: $trip.catchCount, in: 0...500) {
-                Label("Fish caught: \(trip.catchCount)", systemImage: "fish.fill")
-                    .font(.title3.weight(.medium))
-                    .monospacedDigit()
-                    .padding(.vertical, 4)
+            VStack(alignment: .leading, spacing: 8) {
+                // Each tap on plus stamps the fish with the time, for the forecast check.
+                Stepper {
+                    Label("Fish caught: \(trip.catchCount)", systemImage: "fish.fill")
+                        .font(.title3.weight(.medium))
+                        .monospacedDigit()
+                        .padding(.vertical, 4)
+                } onIncrement: {
+                    if trip.catchCount < 500 { trip.logCatch() }
+                } onDecrement: {
+                    trip.removeLastCatch()
+                }
+                .controlSize(.large)
+                if let times = trip.completeCatchTimes, !times.isEmpty {
+                    CatchTimesLine(times: times, timeZone: trip.spot?.timeZone ?? .current)
+                }
             }
-            .controlSize(.large)
             .well()
 
             Button {
@@ -141,11 +158,139 @@ private struct ActiveTripRow: View {
         let ended = trip
         Task { @MainActor in
             var context = base
-            if let c = base, c.water == .inshoreSalt || c.water == .offshore {
+            if let c = base, c.water.isSalt {
                 context?.tide = await ForecastService.shared.tideStation(latitude: c.latitude, longitude: c.longitude)
             }
-            ended.expectedCatch = await ForecastService.shared.expectedCatch(context: context, from: start, to: finish)
+            let points = await ForecastService.shared.tripPoints(context: context, from: start, to: finish)
+            ended.expectedCatch = CatchModel.expectedCatch(points: points, from: start, to: finish)
+            if let times = ended.completeCatchTimes,
+               let record = Scorecard.record(points: points, from: start, to: finish, catchTimes: times) {
+                ended.bandHours = record.hours
+                ended.bandCatches = record.catches
+                ended.forecastIndex = record.meanIndex
+            }
         }
+    }
+}
+
+/// The times the fish came, on the spot's clock.
+private struct CatchTimesLine: View {
+    let times: [Date]
+    let timeZone: TimeZone
+
+    var body: some View {
+        Text(verbatim: times.map { $0.clock(in: timeZone) }.joined(separator: " · "))
+            .font(.footnote)
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
+            .lineLimit(3)
+            .accessibilityLabel(Text("Fish caught at"))
+            .accessibilityValue(Text(verbatim: times.map { $0.clock(in: timeZone) }.joined(separator: ", ")))
+    }
+}
+
+/// Was the forecast right? Fishing hours and fish from the log, filed under the bite index the
+/// forecast gave for each moment.
+private struct ForecastCheckCard: View {
+    let summary: Scorecard.Summary
+
+    private func rate(_ value: Double?) -> String {
+        value.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "–"
+    }
+
+    private func hours(_ value: Double) -> String {
+        value.formatted(.number.precision(.fractionLength(value < 10 ? 1 : 0)))
+    }
+
+    private var verdict: String {
+        let good = rate(summary.goodRate), slow = rate(summary.slowRate)
+        switch summary.verdict {
+        case .notEnough:
+            return String(localized: "Tap plus each time you land a fish. After three hours in good forecasts and three in slow ones, this shows whether the forecast holds for you.")
+        case .tracks:
+            return String(localized: "The forecast holds for you: \(good) fish per hour when it was above 50, \(slow) when it was below.")
+        case .flat:
+            return String(localized: "No clear difference so far: \(good) fish per hour when the forecast was above 50, \(slow) when it was below.")
+        case .inverse:
+            return String(localized: "So far you catch more in slow forecasts: \(slow) fish per hour below 50, \(good) above.")
+        }
+    }
+
+    private var verdictSymbol: (name: String, color: Color) {
+        switch summary.verdict {
+        case .notEnough: return ("hourglass", .secondary)
+        case .tracks: return ("checkmark.seal.fill", BiteScale.color(70))
+        case .flat: return ("equal.circle.fill", .secondary)
+        case .inverse: return ("arrow.up.arrow.down.circle.fill", BiteScale.color(40))
+        }
+    }
+
+    var body: some View {
+        let peak = Scorecard.bandFloors.indices.compactMap { summary.rate(band: $0) }.max() ?? 0
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: verdictSymbol.name)
+                    .font(.title3)
+                    .foregroundStyle(verdictSymbol.color)
+                    .accessibilityHidden(true)
+                Text(verbatim: verdict)
+                    .font(.subheadline)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if summary.trips > 0 {
+                Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 8) {
+                    GridRow {
+                        Text("Forecast")
+                        Text("Hours").gridColumnAlignment(.trailing)
+                        Text("Fish").gridColumnAlignment(.trailing)
+                        Text("Per hour").gridColumnAlignment(.trailing)
+                    }
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+
+                    ForEach(Scorecard.bandFloors.indices.reversed(), id: \.self) { band in
+                        let sample = Scorecard.bandFloors[band] + 1
+                        GridRow {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 6) {
+                                    Circle().fill(BiteScale.color(sample)).frame(width: 8, height: 8)
+                                    Text(verbatim: BiteScale.label(sample))
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.7)
+                                }
+                                // The bar is the catch rate, so a forecast that holds reads as a staircase.
+                                GeometryReader { proxy in
+                                    let share = peak > 0 ? (summary.rate(band: band) ?? 0) / peak : 0
+                                    Capsule().fill(BiteScale.color(sample).opacity(0.85))
+                                        .frame(width: max(share > 0 ? 4 : 0, proxy.size.width * share))
+                                }
+                                .frame(height: 5)
+                                .accessibilityHidden(true)
+                            }
+                            Text(verbatim: hours(summary.hours[band]))
+                            Text(verbatim: "\(summary.catches[band])")
+                            Text(verbatim: rate(summary.rate(band: band)))
+                                .fontWeight(.semibold)
+                        }
+                        .font(.subheadline)
+                        .monospacedDigit()
+                        // Read as one row with its column names, which VoiceOver would otherwise skip.
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(Text(verbatim: BiteScale.label(sample)))
+                        .accessibilityValue(Text(verbatim: "\(String(localized: "Hours")) \(hours(summary.hours[band])), \(String(localized: "Fish")) \(summary.catches[band]), \(String(localized: "Per hour")) \(rate(summary.rate(band: band)))"))
+                    }
+                }
+
+                Text("Counts trips with timed fish and a saved forecast: \(summary.trips).")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .card()
     }
 }
 
@@ -241,6 +386,18 @@ private struct TripHistoryCard: View {
             Text(verbatim: dateAndDuration)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+            if let index = trip.forecastIndex {
+                HStack(spacing: 6) {
+                    Circle().fill(BiteScale.color(index)).frame(width: 8, height: 8)
+                        .accessibilityHidden(true)
+                    Text("Forecast \(Int(index.rounded())) · \(BiteScale.label(index))")
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            }
+            if let times = trip.completeCatchTimes, !times.isEmpty {
+                CatchTimesLine(times: times, timeZone: trip.spot?.timeZone ?? .current)
+            }
         }
     }
 

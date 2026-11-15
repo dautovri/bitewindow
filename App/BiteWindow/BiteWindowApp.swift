@@ -196,12 +196,18 @@ extension RootView {
         montauk.water = .coldFreshwater
         [minnetonka, fork, montauk].forEach(modelContext.insert)
         let day: TimeInterval = 86_400
-        for (spot, daysAgo, hours, fish) in [(minnetonka, 2.0, 3.0, 4), (minnetonka, 9.0, 2.5, 0),
+        for (spot, daysAgo, hours, fish) in [(minnetonka, 2.0, 3.0, 4), (minnetonka, 9.0, 2.5, 0), (fork, 16.0, 3.0, 0),
                                              (fork, 5.0, 4.0, 6), (montauk, 12.0, 3.5, 2)] {
             let trip = Trip(spot: spot)
             trip.startedAt = Date().addingTimeInterval(-daysAgo * day)
             trip.endedAt = trip.startedAt.addingTimeInterval(hours * 3600)
             trip.catchCount = fish
+            // Timed fish and a forecast record, so the forecast check has something to show.
+            trip.catchTimes = (0..<fish).map { trip.startedAt.addingTimeInterval((Double($0) + 0.5) / Double(max(1, fish)) * hours * 3600) }
+            let strong = fish > 0
+            trip.bandHours = strong ? [0, 0.5, hours * 0.4, hours * 0.6 - 0.5] : [hours * 0.6, hours * 0.4, 0, 0]
+            trip.bandCatches = strong ? [0, 0, fish / 3, fish - fish / 3] : [0, 0, 0, 0]
+            trip.forecastIndex = strong ? 64 : 31
             modelContext.insert(trip)
         }
         try? modelContext.save()

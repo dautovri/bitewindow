@@ -20246,6 +20246,1066 @@
           }
         }
       }
+    },
+    "Fish caught at": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fisk fanget kl."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fische gefangen um"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peces capturados a las"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalat saatu klo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poissons pris à"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pesci catturati alle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "釣れた時刻"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "물고기를 잡은 시각"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fisk tatt kl."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis gevangen om"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ryby złowione o"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peixes fisgados às"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рыба поймана в"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fisk fångad kl."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balık yakalanma saatleri"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рибу зловлено о"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中鱼时间"
+          }
+        }
+      }
+    },
+    "Tap plus each time you land a fish. After three hours in good forecasts and three in slow ones, this shows whether the forecast holds for you.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryk på plus, hver gang du lander en fisk. Efter tre timer med gode prognoser og tre med stille viser dette, om prognosen holder for dig."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippe bei jedem gelandeten Fisch auf Plus. Nach je drei Stunden bei guten und schwachen Vorhersagen siehst du hier, ob die Vorhersage für dich zutrifft."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca el signo más cada vez que saques un pez. Tras tres horas con buen pronóstico y tres con flojo, verás si el pronóstico se cumple para ti."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Napauta plus-painiketta aina, kun saat kalan. Kolmen tunnin kalastuksen jälkeen sekä hyvän että heikon ennusteen aikana näet, pitääkö ennuste kohdallasi paikkansa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuyez sur plus à chaque prise. Après trois heures par bonnes prévisions et trois par prévisions faibles, vous verrez si les prévisions se vérifient pour vous."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tocca il più ogni volta che salpi un pesce. Dopo tre ore con buone previsioni e tre con previsioni fiacche, vedrai se il pronostico funziona per te."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魚が釣れるたびに「＋」をタップしてください。好調な予報と渋い予報でそれぞれ3時間記録すると、予報が自分の釣果に当てはまるか分かります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "물고기를 낚을 때마다 더하기(+)를 탭하세요. 입질이 좋은 예보와 저조한 예보에서 각각 3시간씩 기록하면 예보가 나에게 맞는지 확인할 수 있습니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trykk på pluss hver gang du lander en fisk. Etter tre timer med gode prognoser og tre med trege ser du om prognosen stemmer for deg."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik op plus telkens als je een vis landt. Na drie uur bij goede en drie uur bij rustige voorspellingen zie je hier of de voorspelling voor jou klopt."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stuknij plus po każdej wyholowanej rybie. Po trzech godzinach przy dobrej prognozie i trzech przy słabej zobaczysz, czy prognoza sprawdza się u Ciebie."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toque no sinal de mais sempre que embarcar um peixe. Após três horas em previsões boas e três em fracas, você verá se a previsão funciona para você."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажимайте «плюс» при каждой пойманной рыбе. После трёх часов рыбалки при хорошем прогнозе и трёх при слабом здесь появится оценка точности прогноза для вас."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryck på plus varje gång du landar en fisk. Efter tre timmar i bra prognoser och tre i tröga ser du om prognosen stämmer för dig."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Her balık aldığınızda artı düğmesine dokunun. İyi ve durgun tahminlerde üçer saat avlandıktan sonra tahminlerin sizin için tutarlı olup olmadığı burada görünür."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Натискайте «плюс» щоразу, коли витягуєте рибу. Після трьох годин риболовлі за хорошого прогнозу і трьох за слабкого тут буде видно, чи справджується прогноз для вас."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每次上鱼后轻点加号。在好渔情和慢渔情预报下各作钓三小时后，这里会显示预报是否符合你的实际情况。"
+          }
+        }
+      }
+    },
+    "The forecast holds for you: %@ fish per hour when it was above 50, %@ when it was below.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognosen holder for dig: %@ fisk i timen, når den var over 50, %@ når den var under."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorhersage trifft für dich zu: %@ Fische pro Stunde über 50, %@ darunter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El pronóstico se cumple para ti: %@ peces por hora cuando estaba por encima de 50, %@ por debajo."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ennuste pitää kohdallasi paikkansa: %@ kalaa tunnissa, kun se oli yli 50, ja %@ kun se oli alle."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les prévisions se vérifient pour vous : %@ poissons par heure au-dessus de 50, %@ en dessous."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le previsioni funzionano per te: %@ pesci all'ora sopra 50, %@ sotto."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報は的中しています：指数50超で1時間あたり%@匹、50未満で%@匹。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "예보가 잘 맞습니다: 지수 50 초과일 때 시간당 %@마리, 50 미만일 때 %@마리."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognosen stemmer for deg: %@ fisk i timen når den var over 50, %@ når den var under."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De voorspelling klopt voor jou: %@ vissen per uur boven de 50, %@ eronder."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognoza sprawdza się u Ciebie: %@ ryb na godzinę powyżej 50, %@ poniżej."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A previsão funciona para você: %@ peixes por hora acima de 50, %@ abaixo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогноз работает для вас: %@ рыбы в час при индексе выше 50 и %@ — когда ниже."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognosen stämmer för dig: %@ fiskar i timmen när den var över 50, %@ när den var under."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tahmin sizin için tutuyor: 50'nin üzerindeyken saatte %@ balık, altındayken %@."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогноз справджується для вас: %@ риби на годину при індексі вище 50 і %@ — коли нижче."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预报符合你的情况：指数高于 50 时每小时 %@ 条，低于 50 时 %@ 条。"
+          }
+        }
+      }
+    },
+    "No clear difference so far: %@ fish per hour when the forecast was above 50, %@ when it was below.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen klar forskel indtil videre: %@ fisk i timen, når prognosen var over 50, %@ når den var under."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bisher kein klarer Unterschied: %@ Fische pro Stunde bei einer Vorhersage über 50, %@ darunter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin diferencia clara por ahora: %@ peces por hora con pronóstico por encima de 50, %@ por debajo."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ei vielä selkeää eroa: %@ kalaa tunnissa ennusteen ollessa yli 50, %@ sen ollessa alle."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de différence nette pour l'instant : %@ poissons par heure au-dessus de 50, %@ en dessous."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuna differenza netta finora: %@ pesci all'ora con previsione sopra 50, %@ sotto."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今のところ明確な差はありません：予報が50超のときは1時間あたり%@匹、50未満では%@匹。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아직 뚜렷한 차이가 없습니다: 예보 지수 50 초과일 때 시간당 %@마리, 50 미만일 때 %@마리."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen klar forskjell så langt: %@ fisk i timen når prognosen var over 50, %@ når den var under."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen duidelijk verschil: %@ vissen per uur bij een voorspelling boven de 50, %@ eronder."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na razie brak wyraźnej różnicy: %@ ryb na godzinę przy prognozie powyżej 50, %@ poniżej."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem diferença clara até agora: %@ peixes por hora com previsão acima de 50, %@ abaixo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока без явной разницы: %@ рыбы в час при прогнозе выше 50 и %@ — когда ниже."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen tydlig skillnad hittills: %@ fiskar i timmen när prognosen var över 50, %@ när den var under."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdilik belirgin bir fark yok: Tahmin 50'nin üzerindeyken saatte %@ balık, altındayken %@."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поки без відчутної різниці: %@ риби на годину при прогнозі вище 50 і %@ — коли нижче."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前尚无明显差异：预报高于 50 时每小时 %@ 条，低于 50 时 %@ 条。"
+          }
+        }
+      }
+    },
+    "So far you catch more in slow forecasts: %@ fish per hour below 50, %@ above.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indtil videre fanger du mere ved stille prognoser: %@ fisk i timen under 50, %@ over."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bisher fängst du bei schwachen Vorhersagen mehr: %@ Fische pro Stunde unter 50, %@ darüber."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por ahora pescas más con pronósticos flojos: %@ peces por hora por debajo de 50, %@ por encima."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toistaiseksi saat enemmän kalaa heikon ennusteen aikana: %@ kalaa tunnissa alle 50:n, %@ yli."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour l'instant, vous prenez plus de poissons quand les prévisions sont faibles : %@ par heure en dessous de 50, %@ au-dessus."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finora catturi di più con previsioni fiacche: %@ pesci all'ora sotto 50, %@ sopra."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今のところ渋い予報のほうが釣れています：50未満で1時間あたり%@匹、50超で%@匹。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금까지는 저조한 예보에서 더 많이 낚았습니다: 50 미만일 때 시간당 %@마리, 50 초과일 때 %@마리."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Så langt får du mer når prognosen er treg: %@ fisk i timen under 50, %@ over."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tot nu toe vang je meer bij rustige voorspellingen: %@ vissen per uur onder de 50, %@ erboven."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jak dotąd łowisz więcej przy słabych prognozach: %@ ryb na godzinę poniżej 50, %@ powyżej."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Até agora você pega mais em previsões fracas: %@ peixes por hora abaixo de 50, %@ acima."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока у вас клюёт лучше при слабом прогнозе: %@ рыбы в час ниже 50 и %@ — выше."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hittills får du mer vid tröga prognoser: %@ fiskar i timmen under 50, %@ över."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdilik durgun tahminlerde daha çok yakalıyorsunuz: 50'nin altında saatte %@ balık, üzerinde %@."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поки що ви ловите більше за слабкого прогнозу: %@ риби на годину нижче 50 і %@ — вище."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前你在慢渔情预报下收获更多：低于 50 时每小时 %@ 条，高于 50 时 %@ 条。"
+          }
+        }
+      }
+    },
+    "Hours": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Std."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Horas"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tunnit"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heures"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ore"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시간"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uren"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Godz."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Horas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Часы"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timmar"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Години"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "时长"
+          }
+        }
+      }
+    },
+    "Per hour": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pr. time"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pro Std."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por hora"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tunnissa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Par heure"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All'ora"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匹/時間"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시간당"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per uur"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na godz."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por hora"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В час"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per timme"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saatlik"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "За год"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每小时"
+          }
+        }
+      }
+    },
+    "Counts trips with timed fish and a saved forecast: %lld.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tæller ture med tidsregistrerede fisk og gemt prognose: %lld."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gezählt werden Touren mit zeitlich erfassten Fängen und gespeicherter Vorhersage: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incluye salidas con capturas con hora y pronóstico guardado: %lld."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mukana reissut, joissa on kellotetut kalat ja tallennettu ennuste: %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sorties prises en compte (prises horodatées et prévisions enregistrées) : %lld."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conta le uscite con catture registrate con orario e previsione salvata: %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "釣果時刻と保存済み予報がある釣行を集計：%lld。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잡은 시각이 기록된 물고기와 저장된 예보가 있는 출조 수: %lld."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teller turer med tidsregistrert fisk og lagret prognose: %lld."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telt sessies met tijdgeregistreerde vangsten en een opgeslagen voorspelling: %lld."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uwzględnione wyprawy z czasem połowu i zapisaną prognozą: %lld."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Considera pescarias com horário das capturas e previsão salva: %lld."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Учтено рыбалок с временем поимки и сохранённым прогнозом: %lld."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Räknar pass med tidsregistrerad fångst och sparad prognos: %lld."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saati kaydedilmiş balık ve kayıtlı tahmin içeren avların sayısı: %lld."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Враховано риболовель із часом вилову та збереженим прогнозом: %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包含有中鱼时间记录及已保存预报的出钓次数：%lld。"
+          }
+        }
+      }
+    },
+    "Was the forecast right?": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Holdt prognosen?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lag die Vorhersage richtig?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Acertó el pronóstico?"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Osuiko ennuste oikeaan?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les prévisions étaient-elles bonnes ?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le previsioni ci hanno preso?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報は当たりましたか？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "예보가 맞았나요?"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stemte prognosen?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klopte de voorspelling?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czy prognoza się sprawdziła?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A previsão acertou?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбылся ли прогноз?"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stämde prognosen?"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tahmin tuttu mu?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чи справдився прогноз?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预报准吗？"
+          }
+        }
+      }
+    },
+    "Forecast %lld · %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognose %lld · %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorhersage %lld · %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico %lld · %@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ennuste %lld · %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévisions %lld · %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previsioni %lld · %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報 %lld · %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "예보 %lld · %@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognose %lld · %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorspelling %lld · %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognoza %lld · %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previsão %lld · %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогноз %lld · %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognos %lld · %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tahmin %lld · %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогноз %lld · %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预报 %lld · %@"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
