@@ -15,7 +15,6 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
-import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -82,6 +81,7 @@ class Entitlements(context: Context, private val scope: CoroutineScope) : Purcha
         try {
             client.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(result: BillingResult) {
+                    Log.i("BiteCurve", "billing setup: code ${result.responseCode} \"${result.debugMessage}\"")
                     done.complete(result.responseCode == BillingClient.BillingResponseCode.OK)
                 }
 
@@ -128,10 +128,22 @@ class Entitlements(context: Context, private val scope: CoroutineScope) : Purcha
                     .setProductId(productId).setProductType(BillingClient.ProductType.SUBS).build(),
             ),
         ).build()
-        val result = client.queryProductDetails(params)
-        if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) return null
-        val details = result.productDetailsList?.firstOrNull() ?: return null
+        // The callback form rather than the coroutine one: only it says why a product was left out.
+        val answer = CompletableDeferred<Pair<BillingResult, com.android.billingclient.api.QueryProductDetailsResult>>()
+        client.queryProductDetailsAsync(params) { billing, products -> answer.complete(billing to products) }
+        val (billing, products) = withTimeoutOrNull(15_000) { answer.await() } ?: return null
+        // Why a paywall stays empty is otherwise invisible: Play's own answer goes to the log.
+        // Status 3 is "product not found": no such product for this account (not a tester yet,
+        // or a new product that Play has not started serving).
+        Log.i(
+            "BiteCurve",
+            "billing products: code ${billing.responseCode} \"${billing.debugMessage}\", ${products.productDetailsList.size} found, " +
+                "left out: ${products.unfetchedProductList.joinToString { "${it.productId} status ${it.statusCode}" }.ifEmpty { "none" }}",
+        )
+        if (billing.responseCode != BillingClient.BillingResponseCode.OK) return null
+        val details = products.productDetailsList.firstOrNull() ?: return null
         val offers = details.subscriptionOfferDetails ?: return null
+        Log.i("BiteCurve", "billing offers: ${offers.joinToString { "${it.basePlanId}/${it.offerId ?: "-"}" }}")
         // Per base plan, the offer with a free phase when this account may have it, else the plain plan.
         val plans = offers.groupBy { it.basePlanId }.map { (_, list) ->
             Plan(details, list.firstOrNull { o -> o.pricingPhases.pricingPhaseList.any { it.priceAmountMicros == 0L } } ?: list.first())
