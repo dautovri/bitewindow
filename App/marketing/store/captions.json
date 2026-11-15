@@ -1,0 +1,758 @@
+{
+ "da": [
+  [
+   "Vejr, sol, måne og tidevand",
+   "Kend dagens bedste\ntimer at fiske i"
+  ],
+  [
+   "Alle de pladser, du fisker",
+   "Ét hugindeks\nfor hver plads"
+  ],
+  [
+   "Alle dine pladser, dage frem",
+   "Planlæg ugen,\nikke kun dagen"
+  ],
+  [
+   "Vind, lufttryk, lys, måne",
+   "Se, hvad der\nstyrer hugget"
+  ],
+  [
+   "Gedde, aborre, karpe, torsk m.fl.",
+   "Se, hvilke fisk\nvandet passer til nu"
+  ],
+  [
+   "Tidevand og havtemperatur",
+   "Også lavet\ntil kysten"
+  ],
+  [
+   "Hjemmeskærm og låseskærm",
+   "Dit bedste vindue\nmed et blik"
+  ],
+  [
+   "Søg på enhver sø eller å",
+   "Sæt en nål,\nhvor du fisker"
+  ],
+  [
+   "Nulture tæller også",
+   "En logbog, der\nlærer dit vand"
+  ],
+  [
+   "Dine fangster mod prognosen",
+   "Holdt\nprognosen?"
+  ]
+ ],
+ "de-DE": [
+  [
+   "Wetter, Sonne, Mond und Gezeiten",
+   "Die besten Stunden\nzum Angeln heute"
+  ],
+  [
+   "Jeder Spot, an dem du angelst",
+   "Ein Beißindex\nfür jeden Spot"
+  ],
+  [
+   "Alle Spots, die nächsten Tage",
+   "Plane die Woche,\nnicht nur den Tag"
+  ],
+  [
+   "Wind, Luftdruck, Licht, Mond",
+   "Sieh, was den Biss\nbestimmt"
+  ],
+  [
+   "Hecht, Karpfen, Dorsch und mehr",
+   "Welcher Fisch passt\njetzt zum Wasser"
+  ],
+  [
+   "Gezeiten und Meerestemperatur",
+   "Auch für die Küste\ngemacht"
+  ],
+  [
+   "Home- und Sperrbildschirm",
+   "Dein bestes Fenster\nauf einen Blick"
+  ],
+  [
+   "Jeden See oder Fluss suchen",
+   "Setz den Pin dort,\nwo du angelst"
+  ],
+  [
+   "Auch Schneidertage zählen",
+   "Ein Fangbuch, das\ndein Gewässer lernt"
+  ],
+  [
+   "Deine Fänge gegen die Vorhersage",
+   "Lag die Vorhersage\nrichtig?"
+  ]
+ ],
+ "en-US": [
+  [
+   "Weather, sun, moon and tide",
+   "Know the best hours\nto fish today"
+  ],
+  [
+   "Every spot you fish",
+   "One bite index\nfor each spot"
+  ],
+  [
+   "All your spots, days ahead",
+   "Plan the week,\nnot just the day"
+  ],
+  [
+   "Wind, pressure, light, moon",
+   "See what drives\nthe bite"
+  ],
+  [
+   "Bass, pike, carp, cod and more",
+   "See which fish\nsuit the water now"
+  ],
+  [
+   "Tides and sea temperature",
+   "Made for the coast\nas well"
+  ],
+  [
+   "Home and Lock Screen",
+   "Your best window\nat a glance"
+  ],
+  [
+   "Search any lake or river",
+   "Drop a pin\nwhere you fish"
+  ],
+  [
+   "Blank trips count too",
+   "A log that learns\nyour water"
+  ],
+  [
+   "Your catches against the forecast",
+   "Was the forecast\nright?"
+  ]
+ ],
+ "es-ES": [
+  [
+   "Tiempo, sol, luna y marea",
+   "Las mejores horas\npara pescar hoy"
+  ],
+  [
+   "Todos tus lugares de pesca",
+   "Un índice de picada\npara cada lugar"
+  ],
+  [
+   "Todos tus lugares, día a día",
+   "Planifica la semana,\nno solo el día"
+  ],
+  [
+   "Viento, presión, luz, luna",
+   "Mira qué mueve\nla picada"
+  ],
+  [
+   "Lubina, lucio, carpa y más",
+   "Qué peces le van\nal agua ahora"
+  ],
+  [
+   "Mareas y temperatura del mar",
+   "Hecha también\npara la costa"
+  ],
+  [
+   "Pantalla de inicio y de bloqueo",
+   "Tu mejor ventana\nde un vistazo"
+  ],
+  [
+   "Busca cualquier lago o río",
+   "Pon una marca\ndonde pescas"
+  ],
+  [
+   "Sin capturas también cuenta",
+   "Un diario que aprende\nde tus aguas"
+  ],
+  [
+   "Tus capturas frente al pronóstico",
+   "¿Acertó\nel pronóstico?"
+  ]
+ ],
+ "fi": [
+  [
+   "Sää, aurinko, kuu ja vuorovesi",
+   "Päivän parhaat\nkalastustunnit"
+  ],
+  [
+   "Jokainen kalapaikkasi",
+   "Oma syönti-indeksi\njoka paikalle"
+  ],
+  [
+   "Kaikki paikat, tulevat päivät",
+   "Suunnittele viikko,\nei vain päivää"
+  ],
+  [
+   "Tuuli, ilmanpaine, valo, kuu",
+   "Näe, mikä syöntiin\nvaikuttaa"
+  ],
+  [
+   "Hauki, ahven, turska ja muut",
+   "Mille kalalle vesi\nsopii juuri nyt"
+  ],
+  [
+   "Vuorovesi ja meriveden lämpötila",
+   "Toimii myös\nrannikolla"
+  ],
+  [
+   "Koti-valikko ja lukittu näyttö",
+   "Paras ikkuna\nyhdellä silmäyksellä"
+  ],
+  [
+   "Hae mikä tahansa järvi tai joki",
+   "Pudota merkki\nkalapaikkaasi"
+  ],
+  [
+   "Tyhjätkin reissut lasketaan",
+   "Päiväkirja, joka\noppii vetesi"
+  ],
+  [
+   "Saaliisi vastaan ennuste",
+   "Osuiko ennuste\noikeaan?"
+  ]
+ ],
+ "fr-FR": [
+  [
+   "Météo, soleil, lune et marée",
+   "Les meilleures heures\nde pêche du jour"
+  ],
+  [
+   "Tous les spots où vous pêchez",
+   "Un indice d’activité\npour chaque spot"
+  ],
+  [
+   "Tous vos spots, les jours à venir",
+   "Planifiez la semaine,\npas juste la journée"
+  ],
+  [
+   "Vent, pression, lumière, lune",
+   "Voyez ce qui fait\nmordre le poisson"
+  ],
+  [
+   "Brochet, carpe, bar et bien plus",
+   "Les poissons adaptés\nà l’eau du moment"
+  ],
+  [
+   "Marées et température de la mer",
+   "Pensé aussi\npour le bord de mer"
+  ],
+  [
+   "Accueil et écran verrouillé",
+   "Votre meilleur créneau\nen un coup d’œil"
+  ],
+  [
+   "Cherchez un lac ou une rivière",
+   "Posez un repère\nlà où vous pêchez"
+  ],
+  [
+   "Les bredouilles comptent aussi",
+   "Un carnet qui apprend\nvotre plan d’eau"
+  ],
+  [
+   "Vos prises face aux prévisions",
+   "Les prévisions\nétaient-elles bonnes ?"
+  ]
+ ],
+ "it": [
+  [
+   "Meteo, sole, luna e marea",
+   "Le ore migliori\nper pescare oggi"
+  ],
+  [
+   "Ogni spot in cui peschi",
+   "Un indice di attività\nper ogni spot"
+  ],
+  [
+   "Tutti gli spot, giorno per giorno",
+   "Pianifica la settimana\nnon solo la giornata"
+  ],
+  [
+   "Vento, pressione, luce, luna",
+   "Guarda cosa muove\nl’attività dei pesci"
+  ],
+  [
+   "Luccio, carpa, spigola e altri",
+   "I pesci giusti\nper l’acqua di adesso"
+  ],
+  [
+   "Maree e temperatura del mare",
+   "Fatta anche\nper la costa"
+  ],
+  [
+   "Schermata Home e di blocco",
+   "La finestra migliore\na colpo d’occhio"
+  ],
+  [
+   "Cerca qualsiasi lago o fiume",
+   "Metti un segnaposto\ndove peschi"
+  ],
+  [
+   "Contano anche i cappotti",
+   "Un diario che impara\nle tue acque"
+  ],
+  [
+   "Le tue catture e le previsioni",
+   "Le previsioni\nci hanno preso?"
+  ]
+ ],
+ "ja": [
+  [
+   "天気・太陽・月・潮汐",
+   "今日釣れる時間が\nひと目でわかる"
+  ],
+  [
+   "あなたが通う全ポイント",
+   "ポイントごとに\n活性指数を表示"
+  ],
+  [
+   "全ポイントを数日先まで",
+   "今日だけでなく\n一週間を計画"
+  ],
+  [
+   "風・気圧・光・月",
+   "食いを左右する\n要因が見える"
+  ],
+  [
+   "バス、パイク、コイ、タラなど",
+   "今の水に合う\n魚がわかる"
+  ],
+  [
+   "潮汐と海水温",
+   "海釣りにも\nしっかり対応"
+  ],
+  [
+   "ホーム画面とロック画面",
+   "ベストな時合いを\nひと目で"
+  ],
+  [
+   "湖や川を検索",
+   "釣り場に\nピンを置くだけ"
+  ],
+  [
+   "ボウズの日も大事な記録",
+   "あなたの水辺を\n学ぶ釣行記録"
+  ],
+  [
+   "釣果と予報を見比べる",
+   "予報は\n当たりましたか？"
+  ]
+ ],
+ "ko": [
+  [
+   "날씨, 해, 달, 조석",
+   "오늘 낚시하기\n가장 좋은 시간"
+  ],
+  [
+   "내가 다니는 모든 포인트",
+   "포인트마다\n입질 지수 하나"
+  ],
+  [
+   "모든 포인트, 며칠 앞까지",
+   "하루가 아니라\n한 주를 계획"
+  ],
+  [
+   "바람, 기압, 빛, 달",
+   "입질을 좌우하는\n조건을 한눈에"
+  ],
+  [
+   "배스, 파이크, 잉어, 대구 등",
+   "지금 물에 맞는\n어종을 확인"
+  ],
+  [
+   "조석과 바다 수온",
+   "바다낚시에도\n잘 맞습니다"
+  ],
+  [
+   "홈 화면과 잠금 화면",
+   "최적 시간대를\n한눈에"
+  ],
+  [
+   "호수와 강 어디든 검색",
+   "낚시하는 곳에\n핀을 꽂으세요"
+  ],
+  [
+   "꽝 친 날도 기록입니다",
+   "내 물가를 배우는\n출조 기록"
+  ],
+  [
+   "내 조과와 예보 비교",
+   "예보가\n맞았나요?"
+  ]
+ ],
+ "nl-NL": [
+  [
+   "Weer, zon, maan en getij",
+   "De beste uren om\nvandaag te vissen"
+  ],
+  [
+   "Elke stek waar je vist",
+   "Eén bijtindex\nvoor elke stek"
+  ],
+  [
+   "Al je stekken, dagen vooruit",
+   "Plan de week,\nniet alleen de dag"
+  ],
+  [
+   "Wind, luchtdruk, licht, maan",
+   "Zie wat de beet\nbepaalt"
+  ],
+  [
+   "Snoek, karper, kabeljauw en meer",
+   "Welke vis past nu\nbij het water"
+  ],
+  [
+   "Getij en zeewatertemperatuur",
+   "Ook gemaakt\nvoor de kust"
+  ],
+  [
+   "Begin- en toegangsscherm",
+   "Je beste venster\nin één oogopslag"
+  ],
+  [
+   "Zoek elke plas of rivier",
+   "Zet een speld\nwaar je vist"
+  ],
+  [
+   "Blanke sessies tellen ook mee",
+   "Een logboek dat\njouw water leert"
+  ],
+  [
+   "Je vangsten naast de voorspelling",
+   "Klopte de\nvoorspelling?"
+  ]
+ ],
+ "no": [
+  [
+   "Vær, sol, måne og tidevann",
+   "Finn dagens beste\nfisketimer"
+  ],
+  [
+   "Alle plassene du fisker",
+   "Én nappindeks\nfor hver plass"
+  ],
+  [
+   "Alle plassene, dagene framover",
+   "Planlegg uka,\nikke bare dagen"
+  ],
+  [
+   "Vind, lufttrykk, lys, måne",
+   "Se hva som\nstyrer nappet"
+  ],
+  [
+   "Gjedde, abbor, karpe, torsk m.fl.",
+   "Se hvilken fisk som\npasser vannet nå"
+  ],
+  [
+   "Tidevann og sjøtemperatur",
+   "Laget for kysten\nogså"
+  ],
+  [
+   "Hjem-skjerm og låst skjerm",
+   "Ditt beste vindu\nmed et blikk"
+  ],
+  [
+   "Søk opp vann og elver",
+   "Sett en nål\nder du fisker"
+  ],
+  [
+   "Bomturer teller også",
+   "En logg som lærer\nvannet ditt"
+  ],
+  [
+   "Fangstene dine mot prognosen",
+   "Stemte\nprognosen?"
+  ]
+ ],
+ "pl": [
+  [
+   "Pogoda, słońce, księżyc i pływy",
+   "Najlepsze godziny\nna ryby dziś"
+  ],
+  [
+   "Każde twoje łowisko",
+   "Osobny indeks brań\ndla każdego łowiska"
+  ],
+  [
+   "Wszystkie łowiska, kolejne dni",
+   "Zaplanuj tydzień,\nnie tylko dzień"
+  ],
+  [
+   "Wiatr, ciśnienie, światło, księżyc",
+   "Zobacz, od czego\nzależą brania"
+  ],
+  [
+   "Szczupak, okoń, karp, dorsz i inne",
+   "Jakim rybom sprzyja\nteraz woda"
+  ],
+  [
+   "Pływy i temperatura morza",
+   "Sprawdza się też\nna wybrzeżu"
+  ],
+  [
+   "Ekran początkowy i ekran blokady",
+   "Najlepsze okno\nna pierwszy rzut oka"
+  ],
+  [
+   "Wyszukaj dowolne jezioro lub rzekę",
+   "Przypnij pinezkę\ntam, gdzie łowisz"
+  ],
+  [
+   "Wyprawy bez ryby też się liczą",
+   "Dziennik, który\npoznaje twoją wodę"
+  ],
+  [
+   "Twoje połowy a prognoza",
+   "Czy prognoza\nsię sprawdziła?"
+  ]
+ ],
+ "pt-BR": [
+  [
+   "Tempo, sol, lua e maré",
+   "As melhores horas\npara pescar hoje"
+  ],
+  [
+   "Todos os pontos onde você pesca",
+   "Um índice de atividade\npara cada ponto"
+  ],
+  [
+   "Todos os seus pontos, dia a dia",
+   "Planeje a semana,\nnão só o dia"
+  ],
+  [
+   "Vento, pressão, luz, lua",
+   "Veja o que faz\no peixe bater"
+  ],
+  [
+   "Robalo, carpa, truta e muito mais",
+   "Os peixes certos\npara a água de agora"
+  ],
+  [
+   "Marés e temperatura do mar",
+   "Feito também\npara o litoral"
+  ],
+  [
+   "Tela de Início e Tela Bloqueada",
+   "Sua melhor janela\nnum só olhar"
+  ],
+  [
+   "Busque qualquer lago ou rio",
+   "Marque no mapa\nonde você pesca"
+  ],
+  [
+   "Pescaria sem peixe também conta",
+   "Um diário que aprende\ncom as suas águas"
+  ],
+  [
+   "Suas capturas contra a previsão",
+   "A previsão\nacertou?"
+  ]
+ ],
+ "ru": [
+  [
+   "Погода, солнце, луна и приливы",
+   "Лучшие часы клёва\nна сегодня"
+  ],
+  [
+   "Все места, где вы ловите",
+   "Свой индекс клёва\nдля каждого места"
+  ],
+  [
+   "Все места на дни вперёд",
+   "Планируйте неделю,\nа не один день"
+  ],
+  [
+   "Ветер, давление, свет, луна",
+   "От чего зависит\nклёв"
+  ],
+  [
+   "Щука, окунь, карп, треска и другие",
+   "Какой рыбе сейчас\nподходит вода"
+  ],
+  [
+   "Приливы и температура моря",
+   "И для морского\nпобережья"
+  ],
+  [
+   "Экран «Домой» и экран блокировки",
+   "Лучшее окно\nс одного взгляда"
+  ],
+  [
+   "Найдите любое озеро или реку",
+   "Поставьте метку\nтам, где ловите"
+  ],
+  [
+   "Рыбалки без улова тоже считаются",
+   "Журнал, который\nизучает ваш водоём"
+  ],
+  [
+   "Ваш улов против прогноза",
+   "Сбылся ли\nпрогноз?"
+  ]
+ ],
+ "sv": [
+  [
+   "Väder, sol, måne och tidvatten",
+   "Hitta dagens bästa\nfisketimmar"
+  ],
+  [
+   "Alla platser du fiskar på",
+   "Ett huggindex\nför varje plats"
+  ],
+  [
+   "Alla dina platser, dagarna framåt",
+   "Planera veckan,\ninte bara dagen"
+  ],
+  [
+   "Vind, lufttryck, ljus, måne",
+   "Se vad som\nstyr hugget"
+  ],
+  [
+   "Gädda, abborre, karp, torsk m.fl.",
+   "Se vilken fisk som\npassar vattnet nu"
+  ],
+  [
+   "Tidvatten och havstemperatur",
+   "Gjord för kusten\nockså"
+  ],
+  [
+   "Hemskärm och låsskärm",
+   "Ditt bästa fönster\nmed en blick"
+  ],
+  [
+   "Sök på valfri sjö eller å",
+   "Sätt en nål\ndär du fiskar"
+  ],
+  [
+   "Bomturer räknas också",
+   "En loggbok som lär\nsig ditt vatten"
+  ],
+  [
+   "Dina fångster mot prognosen",
+   "Stämde\nprognosen?"
+  ]
+ ],
+ "tr": [
+  [
+   "Hava, güneş, ay ve gelgit",
+   "Bugün avın en iyi\nsaatlerini bilin"
+  ],
+  [
+   "Avlandığınız her mera",
+   "Her meraya ayrı\naktivite endeksi"
+  ],
+  [
+   "Tüm meralar, önünüzdeki günler",
+   "Yalnızca günü değil\nhaftayı planlayın"
+  ],
+  [
+   "Rüzgâr, basınç, ışık, ay",
+   "Aktiviteyi neyin\nbelirlediğini görün"
+  ],
+  [
+   "Levrek, turna, sazan ve dahası",
+   "Su şu an hangi\nbalığa uygun, görün"
+  ],
+  [
+   "Gelgit ve deniz suyu sıcaklığı",
+   "Kıyı avcılığı\niçin de hazır"
+  ],
+  [
+   "Ana Ekran ve Kilit Ekranı",
+   "En iyi pencereniz\nbir bakışta"
+  ],
+  [
+   "Herhangi bir göl veya nehir arayın",
+   "Avlandığınız yere\niğne bırakın"
+  ],
+  [
+   "Boş avlar da sayılır",
+   "Suyunuzu öğrenen\nbir günlük"
+  ],
+  [
+   "Avlarınız ve tahmin karşı karşıya",
+   "Tahmin\ntuttu mu?"
+  ]
+ ],
+ "uk": [
+  [
+   "Погода, сонце, місяць і припливи",
+   "Найкращі години\nкльову сьогодні"
+  ],
+  [
+   "Усі місця, де ви ловите",
+   "Свій індекс кльову\nдля кожного місця"
+  ],
+  [
+   "Усі місця на дні вперед",
+   "Плануйте тиждень,\nа не один день"
+  ],
+  [
+   "Вітер, тиск, світло, місяць",
+   "Від чого залежить\nкльов"
+  ],
+  [
+   "Щука, окунь, короп, тріска й інші",
+   "Якій рибі зараз\nпідходить вода"
+  ],
+  [
+   "Припливи й температура моря",
+   "І для морського\nузбережжя"
+  ],
+  [
+   "Початковий і замкнений екрани",
+   "Найкраще вікно\nз одного погляду"
+  ],
+  [
+   "Знайдіть будь-яке озеро чи річку",
+   "Поставте позначку\nтам, де ловите"
+  ],
+  [
+   "Риболовлі без улову теж рахуються",
+   "Журнал, що вивчає\nвашу водойму"
+  ],
+  [
+   "Ваш улов проти прогнозу",
+   "Чи справдився\nпрогноз?"
+  ]
+ ],
+ "zh-Hans": [
+  [
+   "天气、日出日落、月相、潮汐",
+   "今天几点鱼口好\n一看就知道"
+  ],
+  [
+   "你常去的每个钓点",
+   "每个钓点\n一个咬钩指数"
+  ],
+  [
+   "所有钓点，未来多天",
+   "不只看今天\n安排好一整周"
+  ],
+  [
+   "风、气压、光照、月相",
+   "看清什么在\n影响鱼口"
+  ],
+  [
+   "鲈鱼、狗鱼、鲤鱼、鳕鱼等",
+   "此刻的水情\n适合钓什么鱼"
+  ],
+  [
+   "潮汐与海水温度",
+   "海钓\n同样好用"
+  ],
+  [
+   "主屏幕与锁定屏幕",
+   "最佳窗口\n一眼可见"
+  ],
+  [
+   "搜索任意湖泊或河流",
+   "在你的钓点\n放个标点"
+  ],
+  [
+   "空军也算数",
+   "越记越懂\n你的水域"
+  ],
+  [
+   "你的渔获对比预报",
+   "预报\n准吗？"
+  ]
+ ]
+}

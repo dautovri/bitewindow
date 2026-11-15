@@ -10,3 +10,6 @@ node_modules/
 *.p8
 .DS_Store
 App/BiteWidgets/Info.plist
+# Store screenshots are rendered by App/marketing/store/compose.py and kept out of git.
+App/marketing/store/out/
+App/marketing/store/raw/
