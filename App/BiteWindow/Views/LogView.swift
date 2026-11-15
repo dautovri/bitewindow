@@ -106,7 +106,8 @@ private struct ActiveTripRow: View {
                     .font(.system(.largeTitle, design: .rounded).weight(.bold))
                     .monospacedDigit()
                     .foregroundStyle(Theme.accent)
-                Text("Started \(trip.startedAt.formatted(date: .omitted, time: .shortened))")
+                // On the spot's clock, like the fish times below it.
+                Text("Started \(trip.startedAt.clock(in: trip.spot?.timeZone ?? .current))")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -273,9 +274,11 @@ private struct ForecastCheckCard: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack(spacing: 6) {
                                     Circle().fill(BiteScale.color(sample)).frame(width: 8, height: 8)
+                                    // Two lines rather than a cut-off label ("Au-dessus de la moyenne").
                                     Text(verbatim: BiteScale.label(sample))
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.7)
+                                        .lineLimit(2)
+                                        .minimumScaleFactor(0.85)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                                 // The bar is the catch rate, so a forecast that holds reads as a staircase.
                                 GeometryReader { proxy in
@@ -366,7 +369,7 @@ private struct TripHistoryCard: View {
     }
 
     private var dateAndDuration: String {
-        let dateText = trip.startedAt.formatted(date: .abbreviated, time: .shortened)
+        let dateText = trip.startedAt.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened), in: trip.spot?.timeZone ?? .current)
         let durationText = Measurement(value: trip.hours, unit: UnitDuration.hours)
             .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(1))))
         return "\(dateText) · \(durationText)"
