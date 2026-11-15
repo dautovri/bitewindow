@@ -21306,6 +21306,748 @@
           }
         }
       }
+    },
+    "Share my catches": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del mine fangster"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meine Fänge teilen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir mis capturas"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jaa saaliini"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partager mes prises"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condividi le mie catture"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "釣果を共有"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "조과 공유"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del fangstene mine"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn vangsten delen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udostępniaj moje połowy"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhar minhas capturas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Делиться уловом"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dela mina fångster"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avlarımı paylaş"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ділитися уловом"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共享我的渔获"
+          }
+        }
+      }
+    },
+    "Trips shared": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delte ture"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geteilte Touren"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salidas compartidas"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jaetut reissut"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sorties partagées"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uscite condivise"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共有した釣行"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유한 출조"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delte turer"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gedeelde sessies"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udostępnione wyprawy"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pescarias compartilhadas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Передано рыбалок"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delade fisketurer"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paylaşılan avlar"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Надіслано риболовель"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已共享的行程"
+          }
+        }
+      }
+    },
+    "Delete what I shared": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet det, jeg har delt"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geteilte Daten löschen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar lo compartido"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poista jakamani tiedot"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer mes partages"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina i dati condivisi"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共有したデータを削除"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유한 데이터 삭제"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slett det jeg har delt"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gedeelde gegevens wissen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń udostępnione dane"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar o que compartilhei"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить отправленные данные"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radera det jag delat"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paylaştıklarımı sil"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити надіслані дані"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除我共享的数据"
+          }
+        }
+      }
+    },
+    "Off unless you switch it on. Helps tune the forecast to real catches. For each finished trip it sends, without your name or an account: the area as a 5 km square, the month, the water and fish, and for each hour the number of fish and the forecast factors. Never the spot, its name, the date or your notes. Deleting removes it from the server and switches sharing off.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slået fra, medmindre du slår det til. Hjælper med at tilpasse prognosen efter rigtige fangster. For hver afsluttet tur sendes uden dit navn eller en konto: området som et 5 km-kvadrat, måneden, vandtypen og fiskearterne samt antal fisk og prognosefaktorer for hver time. Aldrig selve fiskepladsen, dens navn, datoen eller dine noter. Sletning fjerner dataene fra serveren og slår deling fra."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus, solange du es nicht einschaltest. Hilft, die Vorhersage an echte Fänge anzupassen. Für jede abgeschlossene Tour werden ohne deinen Namen oder ein Konto gesendet: das Gebiet als 5-km-Quadrat, der Monat, Gewässer und Fischarten sowie für jede Stunde die Anzahl der Fische und die Vorhersagefaktoren. Niemals der genaue Platz, sein Name, das Datum oder deine Notizen. Durch das Löschen werden die Daten vom Server entfernt und das Teilen ausgeschaltet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivado a menos que lo actives. Ayuda a ajustar el pronóstico a las capturas reales. Por cada salida finalizada envía, sin tu nombre ni una cuenta: la zona como una cuadrícula de 5 km, el mes, el tipo de agua y los peces, y por cada hora el número de peces y los factores del pronóstico. Nunca el punto exacto, su nombre, la fecha ni tus notas. Al eliminar, se borra del servidor y se desactiva el uso compartido."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pois päältä, ellet laita sitä päälle. Auttaa säätämään ennustetta todellisten saaliiden perusteella. Jokaisesta päättyneestä reissusta lähetetään ilman nimeäsi tai tiliä: alue 5 km:n ruutuna, kuukausi, vesistö ja kalat sekä tunneittain kalojen määrä ja ennustetekijät. Ei koskaan tarkkaa paikkaa, sen nimeä, päivämäärää tai muistiinpanojasi. Poistaminen poistaa tiedot palvelimelta ja kytkee jakamisen pois päältä."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé sauf si vous l’activez. Aide à ajuster les prévisions aux prises réelles. Pour chaque sortie terminée, l’app envoie sans votre nom ni compte : la zone sous forme de carré de 5 km, le mois, le type d’eau et les poissons, et pour chaque heure le nombre de poissons et les facteurs de prévision. Jamais le poste précis, son nom, la date ni vos notes. La suppression efface ces données du serveur et désactive le partage."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disattivato a meno che tu non lo attivi. Aiuta a calibrare le previsioni sulle catture reali. Per ogni uscita conclusa invia, senza il tuo nome né un account: l’area come quadrato di 5 km, il mese, il tipo di acqua e i pesci, e per ogni ora il numero di pesci e i fattori delle previsioni. Mai il punto esatto, il suo nome, la data o le tue note. L’eliminazione rimuove i dati dal server e disattiva la condivisione."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オンにしない限りオフです。実際の釣果に合わせて予報の精度を高めるのに役立ちます。終了した釣行ごとに、名前やアカウントなしで以下を送信します：5 km四方のエリア、月、水域と魚種、および1時間ごとの釣果数と予報要因。ポイントの正確な位置や名前、日付、メモは一切送信されません。削除するとサーバーからデータが消去され、共有がオフになります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "직접 켜기 전에는 꺼져 있습니다. 실제 조과에 맞춰 예보를 보정하는 데 도움이 됩니다. 완료된 출조마다 이름이나 계정 없이 5km 정사각형 단위의 지역, 월, 수역 및 어종, 그리고 시간당 낚은 물고기 수와 예보 요인을 전송합니다. 포인트의 정확한 위치나 이름, 날짜, 메모는 절대 전송하지 않습니다. 삭제하면 서버에서 데이터가 제거되고 공유가 꺼집니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Av med mindre du slår det på. Hjelper med å tilpasse varselet etter faktiske fangster. For hver avsluttet tur sendes, uten navnet ditt eller en konto: området som en 5 km-rute, måneden, vannet og fisken, og for hver time antallet fisk og varselfaktorene. Aldri selve fiskeplassen, navnet på den, datoen eller notatene dine. Sletting fjerner dataene fra tjeneren og slår av deling."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uit, tenzij je dit inschakelt. Helpt de voorspelling af te stemmen op echte vangsten. Voor elke voltooide sessie wordt zonder je naam of een account het volgende verzonden: het gebied als een vlak van 5 km, de maand, het water en de vissoorten, en voor elk uur het aantal vissen en de voorspellingsfactoren. Nooit de stek, de naam ervan, de datum of je notities. Wissen verwijdert dit van de server en schakelt delen uit."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyłączone, dopóki sam tego nie włączysz. Pomaga dopasować prognozę do rzeczywistych połowów. Po każdej zakończonej wyprawie aplikacja wysyła bez Twojego imienia ani konta: obszar jako kwadrat 5 km, miesiąc, rodzaj wody i ryby, a dla każdej godziny liczbę ryb oraz czynniki prognozy. Nigdy nie wysyła dokładnego łowiska, jego nazwy, daty ani Twoich notatek. Usunięcie kasuje dane z serwera i wyłącza udostępnianie."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desativado, a menos que você ative. Ajuda a ajustar a previsão às capturas reais. Para cada pescaria concluída, envia sem seu nome nem conta: a área como um quadrado de 5 km, o mês, a água e os peixes e, para cada hora, o número de peixes e os fatores da previsão. Nunca envia o ponto exato, o nome dele, a data ou suas notas. Apagar remove os dados do servidor e desativa o compartilhamento."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключено, пока вы сами не включите. Помогает точнее настраивать прогноз по реальным уловам. После каждой завершённой рыбалки без вашего имени и аккаунта отправляются: район в виде квадрата 5 км, месяц, водоём и рыба, а за каждый час — количество рыбы и факторы прогноза. Точка лова, её название, дата и ваши заметки никогда не передаются. Удаление стирает данные с сервера и выключает отправку."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Av om du inte slår på det. Hjälper till att anpassa prognosen efter verkliga fångster. För varje avslutad tur skickas, utan ditt namn eller ett konto: området som en 5 km-ruta, månaden, vattnet och fisken samt för varje timme antalet fiskar och prognosfaktorerna. Aldrig själva fiskeplatsen, dess namn, datumet eller dina anteckningar. Radering tar bort datan från servern och stänger av delning."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siz açmadığınız sürece kapalıdır. Tahmini gerçek avlara göre iyileştirmeye yardımcı olur. Tamamlanan her av için adınız veya bir hesap olmadan şunları gönderir: 5 km'lik kare olarak bölge, ay, su ve balık bilgisi ve her saat için balık sayısı ile tahmin faktörleri. Avlak noktasını, adını, tarihi veya notlarınızı asla göndermez. Silme işlemi verileri sunucudan kaldırır ve paylaşımı kapatır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вимкнено, доки ви самі не ввімкнете. Допомагає налаштовувати прогноз за реальними уловами. Після кожної завершеної риболовлі без вашого імені чи облікового запису надсилаються: район як квадрат 5 км, місяць, водойма й риба, а за кожну годину — кількість риби та фактори прогнозу. Точка лову, її назва, дата чи ваші нотатки ніколи не передаються. Видалення стирає дані з сервера й вимикає надсилання."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "除非您主动开启，否则默认关闭。开启后有助于根据实际渔获校准预报。每次行程结束后，会在不包含您的姓名或账户信息的情况下发送：5 公里方格区域、月份、水域和鱼类，以及每小时的鱼获数量和预报因素。绝不会发送具体钓点、钓点名称、日期或您的笔记。删除操作会将数据从服务器移除并关闭共享。"
+          }
+        }
+      }
+    },
+    "Could not reach the server. Nothing was deleted.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke oprette forbindelse til serveren. Intet blev slettet."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server nicht erreichbar. Es wurde nichts gelöscht."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo conectar con el servidor. No se eliminó nada."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Palvelimeen ei saatu yhteyttä. Mitään ei poistettu."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre le serveur. Rien n’a été supprimé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile raggiungere il server. Non è stato eliminato nulla."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サーバーに接続できませんでした。データは削除されていません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "서버에 연결할 수 없습니다. 삭제된 항목이 없습니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke kontakte tjeneren. Ingenting ble slettet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server niet bereikbaar. Er is niets gewist."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się połączyć z serwerem. Nic nie zostało usunięte."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível conectar ao servidor. Nada foi apagado."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось связаться с сервером. Ничего не удалено."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunde inte nå servern. Ingenting raderades."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucuya ulaşılamadı. Hiçbir şey silinmedi."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося з’єднатися з сервером. Нічого не видалено."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法连接服务器。未删除任何内容。"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "확인"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ОК"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamam"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
+          }
+        }
+      }
+    },
+    "Trips already in your log are sent too.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ture, der allerede er i din log, sendes også."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touren, die bereits in deinem Fangbuch sind, werden ebenfalls gesendet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las salidas que ya están en tu registro también se envían."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Myös lokissasi jo olevat reissut lähetetään."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les sorties déjà présentes dans votre journal sont également envoyées."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anche le uscite già presenti nel tuo diario vengono inviate."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ログにすでにある釣行も送信されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일지에 이미 기록된 출조도 함께 전송됩니다."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turer som allerede ligger i loggen din, sendes også."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessies die al in je logboek staan, worden ook verzonden."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyprawy zapisane już w dzienniku również są wysyłane."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As pescarias que já estão no seu diário também são enviadas."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выезды, которые уже есть в вашем журнале, тоже отправляются."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turer som redan finns i din logg skickas också."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Günlüğünüzde zaten kayıtlı olan avlar da gönderilir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виїзди, які вже є у вашому журналі, також надсилаються."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日志中已有的行程也会一并发送。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

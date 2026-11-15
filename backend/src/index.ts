@@ -9,6 +9,7 @@ import {
   toTideStation,
   type StationRef,
 } from "./tide.ts";
+import { digest, isAngler, MAX_BODY, parseTrip, totals } from "./trip.ts";
 
 interface KV {
   get(key: string): Promise<string | null>;
@@ -24,6 +25,13 @@ export interface Env {
   WEATHERKIT_PRIVATE_KEY: string;
   /** Workers Rate Limiting binding (`[[ratelimits]]` in wrangler.toml). */
   UPSTREAM_LIMITER?: RateLimit;
+  /** Opt-in shared trips (D1, see schema.sql). */
+  TRIPS?: D1;
+  TRIP_LIMITER?: RateLimit;
+}
+
+interface D1 {
+  prepare(sql: string): { bind(...values: unknown[]): { run(): Promise<unknown> } };
 }
 
 interface RateLimit {
@@ -174,10 +182,63 @@ async function water(gh: string, kind: WaterKind, req: Request, env: Env): Promi
   return json(body, 200, { ...headers, "x-cache": "miss" });
 }
 
+/** The request body as JSON, or null when it is too large or not JSON. */
+async function smallJson(req: Request): Promise<unknown> {
+  // A declared length is required: a chunked body could otherwise be buffered whole before
+  // its size is known.
+  const declared = Number(req.headers.get("content-length") ?? Number.NaN);
+  if (!Number.isInteger(declared) || declared < 2 || declared > MAX_BODY) return null;
+  const text = await req.text();
+  if (text.length > MAX_BODY) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * `POST /trip` stores one shared trip; `POST /trip/delete` removes everything sent under an
+ * angler id. Neither touches WeatherKit or NOAA, and the caller's address is used for the
+ * rate limit only, never stored.
+ */
+async function trips(path: string, req: Request, env: Env): Promise<Response> {
+  if (!env.TRIPS) return json({ error: "sharing is not set up" }, 503);
+  if (env.TRIP_LIMITER) {
+    const ip = req.headers.get("cf-connecting-ip") ?? "unknown";
+    if (!(await env.TRIP_LIMITER.limit({ key: ip })).success) return tooMany();
+  }
+  const body = await smallJson(req);
+  if (path === "/trip/delete") {
+    const angler = (body as { angler?: unknown } | null)?.angler;
+    if (!isAngler(angler)) return json({ error: "bad request" }, 400);
+    await env.TRIPS.prepare("DELETE FROM trips WHERE angler = ?").bind(angler).run();
+    return new Response(null, { status: 204, headers: SECURITY_HEADERS });
+  }
+  const trip = parseTrip(body);
+  if (!trip) return json({ error: "bad request" }, 400);
+  const payload = JSON.stringify(trip);
+  const { hours, catches } = totals(trip);
+  await env.TRIPS.prepare(
+    "INSERT OR IGNORE INTO trips (received, angler, digest, gh, month, water, species, hours, catches, payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  )
+    .bind(new Date().toISOString().slice(0, 7), trip.angler, await digest(payload), trip.gh, trip.month, trip.water,
+      trip.species, hours, catches, payload)
+    .run();
+  return new Response(null, { status: 204, headers: SECURITY_HEADERS });
+}
+
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     if (url.pathname === "/health") return json({ ok: true });
+    if (req.method === "POST" && (url.pathname === "/trip" || url.pathname === "/trip/delete")) {
+      try {
+        return await trips(url.pathname, req, env);
+      } catch {
+        return json({ error: "storage" }, 502);
+      }
+    }
     if (req.method !== "GET" || !["/wx", "/tide", "/water"].includes(url.pathname)) {
       return json({ error: "not found" }, 404);
     }

@@ -21,3 +21,16 @@ WEATHERKIT_KEY_ID = "XBFDGDBMD6"
 name = "UPSTREAM_LIMITER"
 namespace_id = "1001"
 simple = { limit = 60, period = 60 }
+
+# Opt-in shared trips (src/trip.ts). Schema: wrangler d1 execute bitecurve-trips --remote --file schema.sql
+# Export for a fit: wrangler d1 execute bitecurve-trips --remote --command "SELECT payload FROM trips" --json
+[[d1_databases]]
+binding = "TRIPS"
+database_name = "bitecurve-trips"
+database_id = "b19f5ad1-1d56-4d19-a427-caa2124498b9"
+
+# A phone sends a trip when it ends; ten a minute per address is far more than that.
+[[ratelimits]]
+name = "TRIP_LIMITER"
+namespace_id = "1002"
+simple = { limit = 10, period = 60 }

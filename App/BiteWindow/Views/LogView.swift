@@ -1,6 +1,7 @@
 import BiteCore
 import SwiftData
 import SwiftUI
+import os
 
 /// Trip log. Ending a trip with zero fish is a single tap, because blank trips
 /// are what make the catch-rate model honest.
@@ -155,6 +156,7 @@ private struct ActiveTripRow: View {
         trip.endedAt = finish
         guard finish.timeIntervalSince(start) <= CatchModel.maxTripHours * 3600 else { return }
         let base = trip.spot?.context
+        let water = trip.spot?.waterReading
         let ended = trip
         Task { @MainActor in
             var context = base
@@ -168,7 +170,20 @@ private struct ActiveTripRow: View {
                 ended.bandHours = record.hours
                 ended.bandCatches = record.catches
                 ended.forecastIndex = record.meanIndex
+                // Kept on the phone: the only form in which this trip could ever tune the weights.
+                if let context,
+                   let slices = Scorecard.slices(points: points, weights: Weights.prior(water: context.water, species: context.species),
+                                                 from: start, to: finish, catchTimes: times) {
+                    let fit = TripFitRecord(water: context.water.rawValue, species: context.species.rawValue,
+                                            waterTempC: water?.tempC, waterSource: water?.sourceName,
+                                            hasBank: context.bankBearingDeg != nil, hasTideStation: context.tide != nil,
+                                            slices: slices)
+                    ended.fitRecord = try? JSONEncoder().encode(fit)
+                    Logger(subsystem: "com.dautovri.bitecurve", category: "log")
+                        .info("trip fit record: \(slices.count) slices, \(ended.fitRecord?.count ?? 0) bytes")
+                }
             }
+            await TripSharing.sendPending()
         }
     }
 }

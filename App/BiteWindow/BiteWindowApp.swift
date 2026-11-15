@@ -137,6 +137,8 @@ struct RootView: View {
         // Refresh saved forecasts whenever the app comes forward, at most hourly.
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
+                // Trips that could not be sent earlier (no signal at the water) go now.
+                Task { await TripSharing.sendPending() }
                 if Date().timeIntervalSince1970 - lastPrefetch > 3600 {
                     Task { _ = await OfflineStore.refresh() }
                 } else {
@@ -208,6 +210,13 @@ extension RootView {
             trip.bandHours = strong ? [0, 0.5, hours * 0.4, hours * 0.6 - 0.5] : [hours * 0.6, hours * 0.4, 0, 0]
             trip.bandCatches = strong ? [0, 0, fish / 3, fish - fish / 3] : [0, 0, 0, 0]
             trip.forecastIndex = strong ? 64 : 31
+            // A fit record too, so opt-in sharing can be tried without sitting out a real trip.
+            let whole = Int(hours.rounded(.down))
+            var slices = (0..<whole).map { FactorSlice(hours: 1, catches: $0 == 0 ? fish : 0, z: [strong ? 0.6 : -0.4, 0.2, 0.1, 0, 0.3, 0]) }
+            if hours > Double(whole) { slices.append(FactorSlice(hours: hours - Double(whole), catches: 0, z: [0, 0.2, 0.1, 0, 0, 0])) }
+            trip.fitRecord = try? JSONEncoder().encode(TripFitRecord(water: spot.water.rawValue, species: spot.species.rawValue,
+                                                                     waterTempC: 12, waterSource: "modelled", hasBank: false,
+                                                                     hasTideStation: false, slices: slices))
             modelContext.insert(trip)
         }
         try? modelContext.save()

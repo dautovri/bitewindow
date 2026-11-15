@@ -15,6 +15,10 @@ struct SettingsView: View {
     @AppStorage(BiteAlerts.thresholdKey) private var alertThreshold = BiteAlerts.defaultThreshold
     /// iOS refused notifications: the toggle goes back off and the footer says where to allow them.
     @State private var alertsDenied = false
+    @AppStorage(TripSharing.enabledKey) private var sharingOn = false
+    @Query private var allTrips: [Trip]
+    @State private var deletingShared = false
+    @State private var deleteFailed = false
 
     var body: some View {
         NavigationStack {
@@ -77,6 +81,40 @@ struct SettingsView: View {
                     }
                 }
                 .listRowBackground(Theme.card)
+
+                Section {
+                    Toggle("Share my catches", isOn: $sharingOn)
+                    if sharingOn || TripSharing.sharedCount(in: allTrips) > 0 {
+                        LabeledContent("Trips shared", value: "\(TripSharing.sharedCount(in: allTrips))")
+                        Button(role: .destructive) {
+                            deletingShared = true
+                            Task {
+                                deleteFailed = !(await TripSharing.deleteShared())
+                                deletingShared = false
+                            }
+                        } label: {
+                            if deletingShared {
+                                HStack {
+                                    ProgressView()
+                                    Text("Delete what I shared")
+                                }
+                            } else {
+                                Text("Delete what I shared")
+                            }
+                        }
+                        .disabled(deletingShared)
+                    }
+                } footer: {
+                    Text("Off unless you switch it on. Helps tune the forecast to real catches. For each finished trip it sends, without your name or an account: the area as a 5 km square, the month, the water and fish, and for each hour the number of fish and the forecast factors. Never the spot, its name, the date or your notes. Deleting removes it from the server and switches sharing off.")
+                    + Text(verbatim: " ") + Text("Trips already in your log are sent too.")
+                }
+                .listRowBackground(Theme.card)
+                .onChange(of: sharingOn) { _, on in
+                    if on { Task { await TripSharing.sendPending() } }
+                }
+                .alert("Could not reach the server. Nothing was deleted.", isPresented: $deleteFailed) {
+                    Button("OK", role: .cancel) {}
+                }
 
                 Section {
                     Button {

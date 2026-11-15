@@ -46,3 +46,7 @@ Refit plan: Poisson model of catch count with log(hours) offset, random intercep
 ## Forecast check (trip log)
 
 Each fish is stamped with the time it was logged. When a trip ends, the bite curve from the real forecast is filed into four bands (below 35, 35–50, 50–65, 65 and up): hours fished and fish caught in each. A trip gets no record when the forecast did not cover all of it or some fish have no time, so nothing is guessed. The log then compares fish per hour above and below index 50. It gives a verdict only after 3 hours on each side and 5 fish, and calls a difference clear at a ratio of 1.25 (heuristic). Blank hours count. This is a check on one angler's own trips, not a validation of the model.
+
+## Opt-in shared trips
+
+Off by default. With the switch on, each finished trip that has a forecast record is sent to the worker (`POST /trip`, stored in D1): a random id made on the phone, the geohash-5 cell, the month, water type, fish, the water temperature used and its source, whether the bank and a tide station were known, and for each hour the fish caught and the six unweighted factor scores. The band totals of the forecast check are not enough for a refit, because the index has already folded the factors together with the starting weights. No spot name, position, date, time or notes are sent, and the server stores no address. "Delete what I shared" removes every row under the phone's id and makes a new id. Fitting is done offline from an export, never in the worker.

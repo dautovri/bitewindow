@@ -60,6 +60,15 @@ final class Spot {
         }
 
         var isMeasured: Bool { if case .measured = self { return true } else { return false } }
+
+        /// Name of the source in a `TripFitRecord`.
+        var sourceName: String {
+            switch self {
+            case .measured: return "measured"
+            case .satellite: return "satellite"
+            case .modelled: return "modelled"
+            }
+        }
     }
 
     var waterReading: WaterReading? {
@@ -125,6 +134,11 @@ final class Trip {
     var bandHours: [Double]?
     var bandCatches: [Int]?
     var forecastIndex: Double?
+    /// What a later refit of the factor weights needs from this trip (`TripFitRecord` as JSON),
+    /// fixed when the trip ends because the forecast is gone afterwards. Stays on the device.
+    var fitRecord: Data?
+    /// When this trip was sent under opt-in sharing (see `TripSharing`); nil while it was not.
+    var sharedAt: Date?
     var spot: Spot?
 
     init(spot: Spot?) {
@@ -163,6 +177,23 @@ final class Trip {
               bandHours.count == Scorecard.bandFloors.count, bandCatches.count == Scorecard.bandFloors.count else { return nil }
         return Scorecard.TripRecord(hours: bandHours, catches: bandCatches, meanIndex: forecastIndex)
     }
+}
+
+/// A finished trip as a model fit needs it: hourly slices with each factor's own score and the
+/// fish caught, plus what the scores rested on. No place, name, date or notes.
+struct TripFitRecord: Codable, Equatable {
+    var v = 1
+    var water: String
+    var species: String
+    /// Water temperature the thermal score used, and where it came from
+    /// ("measured", "satellite", "modelled"); nil when there was none.
+    var waterTempC: Double?
+    var waterSource: String?
+    /// Whether the wind score knew which bank was fished.
+    var hasBank: Bool
+    /// Whether the tide score came from a station (else from the moon phase alone).
+    var hasTideStation: Bool
+    var slices: [FactorSlice]
 }
 
 /// Raw station pressure from the phone barometer. Stays on the device.

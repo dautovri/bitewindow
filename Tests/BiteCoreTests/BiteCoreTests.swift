@@ -337,6 +337,31 @@ final class BiteCoreTests: XCTestCase {
         XCTAssertEqual(Scorecard.band(index: 65), 3)
     }
 
+    func testFactorSlicesKeepUnweightedScoresPerHour() {
+        let t0 = utc(2026, 6, 21, 6)
+        let w = Weights(light: 0.25, thermal: 0.2, wind: 0.2, pressure: 0.15, solunar: 0.1, tide: 0)
+        // Light score 0.8 in the first hour, -0.4 after; wind constant 0.5; tide has no weight.
+        let points = (0...10).map { k -> ScorePoint in
+            var c = Contributions()
+            c.light = w.light * (k < 4 ? 0.8 : -0.4)
+            c.wind = w.wind * 0.5
+            c.tide = 0.3
+            return ScorePoint(time: t0.addingTimeInterval(Double(k) * 900), index: 50, contributions: c)
+        }
+        let end = t0.addingTimeInterval(9000)   // 2.5 h
+        let catches = [t0.addingTimeInterval(120), t0.addingTimeInterval(8900), end]
+        let slices = Scorecard.slices(points: points, weights: w, from: t0, to: end, catchTimes: catches)
+        XCTAssertEqual(slices?.count, 3)
+        XCTAssertEqual(slices?.map(\.catches), [1, 0, 2])
+        XCTAssertEqual(slices?.map(\.hours) ?? [], [1, 1, 0.5])
+        XCTAssertEqual(slices?[0].z[0] ?? 0, 0.8, accuracy: 0.2)
+        XCTAssertEqual(slices?[2].z[0] ?? 0, -0.4, accuracy: 1e-9)
+        XCTAssertEqual(slices?[1].z[2] ?? 0, 0.5, accuracy: 1e-9)
+        XCTAssertEqual(slices?[1].z[5], 0)
+        XCTAssertNil(Scorecard.slices(points: Array(points.prefix(3)), weights: w, from: t0, to: end, catchTimes: []))
+        XCTAssertNil(Scorecard.slices(points: points, weights: w, from: t0, to: end, catchTimes: [end.addingTimeInterval(600)]))
+    }
+
     func testScorecardVerdictNeedsBothSides() {
         let good = Scorecard.TripRecord(hours: [0, 0, 2, 2], catches: [0, 0, 3, 5], meanIndex: 66)
         let slow = Scorecard.TripRecord(hours: [2, 2, 0, 0], catches: [1, 1, 0, 0], meanIndex: 34)

@@ -239,3 +239,72 @@ public enum Scorecard {
         return summary
     }
 }
+
+/// A stretch of a trip (an hour, or the last part of one) with the fish caught in it and the
+/// mean of each factor's own score, before weighting. The bite index folds the factors into one
+/// number with the starting weights, so the weights can only ever be refitted from these.
+public struct FactorSlice: Codable, Sendable, Equatable {
+    public var hours: Double
+    public var catches: Int
+    /// Mean unweighted scores in the order light, thermal, wind, pressure, solunar, tide.
+    /// A factor with no weight for this water is 0.
+    public var z: [Double]
+
+    public init(hours: Double, catches: Int, z: [Double]) {
+        self.hours = hours; self.catches = catches; self.z = z
+    }
+}
+
+extension Scorecard {
+    /// Cuts a trip into slices of `length` seconds. Nil under the same conditions as `record`:
+    /// the forecast must cover the whole trip and every fish must lie inside it.
+    public static func slices(points: [ScorePoint], weights: Weights, from: Date, to: Date,
+                              catchTimes: [Date], length: TimeInterval = 3600) -> [FactorSlice]? {
+        let sorted = points.sorted { $0.time < $1.time }
+        let duration = to.timeIntervalSince(from)
+        guard duration > 0, length > 0, sorted.count >= 2, let first = sorted.first, let last = sorted.last,
+              first.time <= from.addingTimeInterval(900), last.time >= to.addingTimeInterval(-900),
+              catchTimes.allSatisfy({ $0 >= from.addingTimeInterval(-60) && $0 <= to.addingTimeInterval(60) })
+        else { return nil }
+
+        func unweighted(_ c: Contributions) -> [Double] {
+            func z(_ value: Double, _ weight: Double) -> Double { weight > 0 ? value / weight : 0 }
+            return [z(c.light, weights.light), z(c.thermal, weights.thermal), z(c.wind, weights.wind),
+                    z(c.pressure, weights.pressure), z(c.solunar, weights.solunar), z(c.tide, weights.tide)]
+        }
+        let scores = sorted.map { unweighted($0.contributions) }
+
+        func score(at t: Date) -> [Double] {
+            if t <= first.time { return scores[0] }
+            if t >= last.time { return scores[scores.count - 1] }
+            var lo = 0, hi = sorted.count - 1
+            while hi - lo > 1 {
+                let mid = (lo + hi) / 2
+                if sorted[mid].time <= t { lo = mid } else { hi = mid }
+            }
+            let span = sorted[hi].time.timeIntervalSince(sorted[lo].time)
+            guard span > 0 else { return scores[lo] }
+            let f = t.timeIntervalSince(sorted[lo].time) / span
+            return zip(scores[lo], scores[hi]).map { $0 + ($1 - $0) * f }
+        }
+
+        let count = max(1, Int((duration / length).rounded(.up)))
+        var out: [FactorSlice] = []
+        for k in 0..<count {
+            let start = Double(k) * length, end = min(duration, Double(k + 1) * length)
+            let steps = max(1, Int(((end - start) / 300).rounded(.up)))
+            let dt = (end - start) / Double(steps)
+            var sum = [Double](repeating: 0, count: 6)
+            for s in 0..<steps {
+                let z = score(at: from.addingTimeInterval(start + (Double(s) + 0.5) * dt))
+                for i in sum.indices { sum[i] += z[i] }
+            }
+            out.append(FactorSlice(hours: (end - start) / 3600, catches: 0, z: sum.map { $0 / Double(steps) }))
+        }
+        for time in catchTimes {
+            let offset = min(max(0, time.timeIntervalSince(from)), duration)
+            out[min(count - 1, Int(offset / length))].catches += 1
+        }
+        return out
+    }
+}

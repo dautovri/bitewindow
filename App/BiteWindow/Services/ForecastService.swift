@@ -92,6 +92,19 @@ final class ForecastService {
         }.value
     }
 
+    /// One JSON POST to the worker; the HTTP status, or nil when it could not be reached.
+    func post(path: String, body: Data) async -> Int? {
+        guard let baseURL else { return nil }
+        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+        request.httpMethod = "POST"
+        request.httpBody = body
+        request.setValue("application/json", forHTTPHeaderField: "content-type")
+        let session = session
+        return await Task.detached {
+            ((try? await session.data(for: request))?.1 as? HTTPURLResponse)?.statusCode
+        }.value
+    }
+
     /// The forecast saved on disk for this location, without touching the network.
     func cached(latitude: Double, longitude: Double) -> Forecast? {
         let file = Self.cacheFile(Geohash.encode(latitude: latitude, longitude: longitude, precision: 5))
