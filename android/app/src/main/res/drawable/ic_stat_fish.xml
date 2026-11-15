@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status bar icon of a bite alert. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M2,12c3,-4.4 7.5,-6 11.2,-6c3,0 5.2,1.5 6.7,3.4L23,6.4v11.2l-3.1,-3c-1.5,1.9 -3.7,3.4 -6.7,3.4c-3.7,0 -8.2,-1.6 -11.2,-6zM8,10.6a1.1,1.1 0,1 0,0.01 0z" />
+</vector>
