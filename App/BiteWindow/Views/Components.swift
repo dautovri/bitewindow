@@ -35,16 +35,17 @@ enum BiteScale {
         guard let index else { return .secondary }
         // Four clearly different steps, so 51 and 68 no longer look alike. A slow day is
         // quiet slate, not alarm red: nothing is wrong, the fish are just not feeding.
-        switch index {
-        case 65...: return Color(light: 0x059669, dark: 0x34D399)
-        case 50..<65: return Color(light: 0x0891B2, dark: 0x22D3EE)
-        case 35..<50: return Color(light: 0xD97706, dark: 0xFBBF24)
-        default: return Color(light: 0x64748B, dark: 0x94A3B8)
-        }
+        return WidgetPalette.color(index)
     }
 
+    /// Text on a solid bite colour.
+    static let onSolid = WidgetPalette.onSolid
+
+    /// The step's shape (diamond, circle, triangle, ring), so no reading depends on colour alone.
+    static func symbol(_ index: Double) -> String { WidgetPalette.symbol(index) }
+
     static func label(_ index: Double) -> String {
-        switch index {
+        switch index.rounded() {
         case 65...: return String(localized: "Strong bite")
         case 50..<65: return String(localized: "Above average")
         case 35..<50: return String(localized: "Below average")
@@ -53,27 +54,94 @@ enum BiteScale {
     }
 }
 
-/// Ring filled to the index, with the number in the middle. `nil` draws an empty ring.
+/// An open 270° dial filled to the index, like a marine gauge, with a tick at 12 o'clock for
+/// the neutral 50: an arc that passes the tick is above average without reading the number.
+/// `nil` draws the empty dial.
 struct IndexGauge: View {
     let index: Double?
     var size: CGFloat = 44
 
+    /// The dial covers three quarters of the circle, open at the bottom.
+    static let sweep = 0.75
+
     var body: some View {
-        let lineWidth = max(3, size * 0.11)
+        let lineWidth = max(3, size * 0.1)
+        let value = max(0, min(100, index ?? 0)) / 100
         ZStack {
-            Circle().stroke(Color.secondary.opacity(0.18), lineWidth: lineWidth)
             Circle()
-                .trim(from: 0, to: CGFloat(max(0, min(100, index ?? 0)) / 100))
+                .trim(from: 0, to: Self.sweep)
+                .stroke(Color.secondary.opacity(0.18), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(135))
+            Circle()
+                .trim(from: 0, to: Self.sweep * value)
                 .stroke(BiteScale.color(index), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                .rotationEffect(.degrees(-90))
+                .rotationEffect(.degrees(135))
+            // The neutral 50, at the top of the dial, cut out of the arc so an arc that ends
+            // right at 50 does not hide it.
+            Capsule()
+                .fill(Color.primary.opacity(0.7))
+                .frame(width: max(1.5, size * 0.035), height: lineWidth + max(3, size * 0.06))
+                .padding(.horizontal, max(1.5, size * 0.03))
+                .background(Theme.card, in: .capsule)
+                .offset(y: -size / 2 + lineWidth / 2)
             Text(index.map { "\(Int($0.rounded()))" } ?? "–")
-                .font(.system(size: size * 0.36, weight: .bold, design: .rounded))
+                .font(.system(size: size * 0.34, weight: .bold, design: .rounded))
                 .monospacedDigit()
+                .offset(y: size * 0.03)
         }
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Bite index")
         .accessibilityValue(index.map { String(localized: "\(Int($0.rounded())) of 100") } ?? String(localized: "not available"))
+    }
+}
+
+/// A score as a tile: solid for a strong bite, outlined for above average, dashed for below,
+/// flat for slow, with the step's shape beside the number. Used where many scores sit side
+/// by side (day strip, planner), so they read without colour and without rings.
+struct ScoreTile: View {
+    let index: Double
+    var size = CGSize(width: 46, height: 40)
+    var showsShape = true
+
+    var body: some View {
+        let color = BiteScale.color(index)
+        let strong = index.rounded() >= 65
+        HStack(spacing: 3) {
+            if showsShape {
+                Image(systemName: BiteScale.symbol(index))
+                    .font(.system(size: 7, weight: .bold))
+                    .accessibilityHidden(true)
+            }
+            Text(verbatim: "\(Int(index.rounded()))")
+                .font(.system(.callout, design: .rounded, weight: .bold))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        }
+        .padding(.horizontal, 2)
+        .foregroundStyle(strong ? BiteScale.onSolid : (index.rounded() < 35 ? Theme.ink2 : color))
+        .frame(width: size.width, height: size.height)
+        .background(fill(color), in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
+        .overlay { border(color) }
+    }
+
+    private func fill(_ color: Color) -> Color {
+        switch index.rounded() {
+        case 65...: return color
+        case 50..<65: return color.opacity(0.14)
+        case 35..<50: return color.opacity(0.12)
+        default: return Theme.well
+        }
+    }
+
+    @ViewBuilder private func border(_ color: Color) -> some View {
+        let shape = RoundedRectangle(cornerRadius: Theme.cellRadius, style: .continuous)
+        switch index.rounded() {
+        case 50..<65: shape.strokeBorder(color, lineWidth: 1.5)
+        case 35..<50: shape.strokeBorder(color, style: StrokeStyle(lineWidth: 1.25, dash: [4, 3]))
+        default: EmptyView()
+        }
     }
 }
 
@@ -87,6 +155,8 @@ struct BiteCurveChart: View {
     var sunset: Date? = nil
     var domain: ClosedRange<Date>? = nil
     var timeZone: TimeZone = .current
+    /// Off when a tide chart sits right under it on the same clock: the hours show once, below.
+    var showsTimeLabels = true
 
     private var span: ClosedRange<Date>? {
         if let domain { return domain }
@@ -138,6 +208,9 @@ struct BiteCurveChart: View {
                 RuleMark(x: .value("Now", now))
                     .lineStyle(StrokeStyle(lineWidth: 1.5))
                     .foregroundStyle(Color.primary.opacity(0.6))
+                PointMark(x: .value("Now", now), y: .value("Top", 100))
+                    .symbolSize(30)
+                    .foregroundStyle(Color.primary.opacity(0.75))
             }
         }
         .chartYScale(domain: 0...100)
@@ -146,7 +219,9 @@ struct BiteCurveChart: View {
         .chartXAxis {
             AxisMarks(values: .stride(by: .hour, count: 6, calendar: zoneCalendar)) { _ in
                 AxisGridLine()
-                AxisValueLabel(format: Date.FormatStyle(timeZone: timeZone).hour())
+                if showsTimeLabels {
+                    AxisValueLabel(format: Date.FormatStyle(timeZone: timeZone).hour())
+                }
             }
         }
         .accessibilityLabel("Bite index through the day")
@@ -195,8 +270,8 @@ struct FactorBreakdown: View {
 
     let factors: [Factor]
 
-    private static let positive = Color(light: 0x059669, dark: 0x34D399)
-    private static let negative = Color(light: 0xD97706, dark: 0xFBBF24)
+    private static let positive = WidgetPalette.color(70)
+    private static let negative = WidgetPalette.color(40)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -204,10 +279,11 @@ struct FactorBreakdown: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
             ForEach(factors) { factor in
+                VStack(alignment: .leading, spacing: 7) {
                 HStack(spacing: 10) {
                     Image(systemName: factor.symbol)
                         .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(Theme.ink2)
                         .frame(width: 22)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 1) {
@@ -223,6 +299,9 @@ struct FactorBreakdown: View {
                     }
                     Spacer(minLength: 8)
                     effect(factor.value)
+                }
+                DivergingBar(value: factor.value, color: color(factor.value))
+                    .padding(.leading, 32)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text(verbatim: [factor.name, factor.reading].compactMap { $0 }.joined(separator: ", ")))
@@ -258,6 +337,30 @@ struct FactorBreakdown: View {
         .padding(.horizontal, 9)
         .background(tint.opacity(0.13), in: .capsule)
         .fixedSize()
+    }
+}
+
+/// A factor's push as a bar from a centre line: right helps, left hurts; ±0.25 fills a side.
+private struct DivergingBar: View {
+    let value: Double
+    let color: Color
+
+    var body: some View {
+        GeometryReader { proxy in
+            let half = proxy.size.width / 2
+            let length = min(1, abs(value) / 0.25) * half
+            ZStack(alignment: .leading) {
+                Capsule().fill(Theme.well)
+                Rectangle().fill(Color.secondary.opacity(0.5))
+                    .frame(width: 1.5, height: proxy.size.height + 4)
+                    .offset(x: half - 0.75)
+                Capsule().fill(color)
+                    .frame(width: max(abs(value) > 0.02 ? 3 : 0, length))
+                    .offset(x: value >= 0 ? half : half - length)
+            }
+        }
+        .frame(height: 4)
+        .accessibilityHidden(true)
     }
 }
 

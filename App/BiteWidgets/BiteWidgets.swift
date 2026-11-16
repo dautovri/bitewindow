@@ -81,21 +81,32 @@ private func dayLabel(_ pick: WidgetSnapshot.Pick) -> String? {
     return pick.day.date.formatted(style)
 }
 
+/// The app's open 270° dial, with the tick at the top for the neutral 50.
 private struct Ring: View {
     let index: Double
     var size: CGFloat = 58
 
     var body: some View {
-        let width = max(4, size * 0.12)
+        let width = max(4, size * 0.11)
         ZStack {
-            Circle().stroke(Color.secondary.opacity(0.2), lineWidth: width)
             Circle()
-                .trim(from: 0, to: CGFloat(max(0, min(100, index)) / 100))
+                .trim(from: 0, to: 0.75)
+                .stroke(Color.secondary.opacity(0.2), style: StrokeStyle(lineWidth: width, lineCap: .round))
+                .rotationEffect(.degrees(135))
+            Circle()
+                .trim(from: 0, to: 0.75 * CGFloat(max(0, min(100, index)) / 100))
                 .stroke(WidgetPalette.color(index), style: StrokeStyle(lineWidth: width, lineCap: .round))
-                .rotationEffect(.degrees(-90))
+                .rotationEffect(.degrees(135))
+            Capsule()
+                .fill(Color.primary.opacity(0.7))
+                .frame(width: max(1.5, size * 0.035), height: width + max(3, size * 0.06))
+                .padding(.horizontal, max(1.5, size * 0.03))
+                .background(Color(uiColor: .systemBackground), in: .capsule)
+                .offset(y: -size / 2 + width / 2)
             Text(verbatim: "\(Int(index.rounded()))")
-                .font(.system(size: size * 0.38, weight: .bold, design: .rounded))
+                .font(.system(size: size * 0.36, weight: .bold, design: .rounded))
                 .monospacedDigit()
+                .offset(y: size * 0.03)
         }
         .frame(width: size, height: size)
     }

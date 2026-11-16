@@ -23,7 +23,7 @@ struct PlannerView: View {
     }
 
     private let nameWidth: CGFloat = 112
-    private let cell = CGSize(width: 46, height: 46)
+    private let cell = CGSize(width: 48, height: 48)
     private let gap: CGFloat = 6
 
     private var visibleDays: Int { entitlements.isPro ? Self.horizonDays : Self.freeDays }
@@ -140,8 +140,16 @@ struct PlannerView: View {
                         }
                     }
                 }
+                .padding(.trailing, 12)
             }
             .scrollIndicators(.hidden)
+            .mask {
+                HStack(spacing: 0) {
+                    Color.black
+                    LinearGradient(colors: [.black, .black.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                        .frame(width: 12)
+                }
+            }
         }
     }
 
@@ -156,26 +164,22 @@ struct PlannerView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(width: cell.width, height: cell.height)
-                    .background(Theme.well.opacity(0.6), in: .rect(cornerRadius: 12, style: .continuous))
+                    .background(Theme.well.opacity(0.6), in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
             }
             .buttonStyle(.plain)
             .accessibilityLabel(Text("BiteCurve Pro"))
         } else if let day, let index = day.index {
-            let color = BiteScale.color(index)
             let isBest = best.map { $0.spot.id == spot.id && $0.day.date == day.date } ?? false
             Button {
                 target = Target(spotID: spot.id, day: day.date)
             } label: {
-                Text(verbatim: "\(Int(index.rounded()))")
-                    .font(.system(.callout, design: .rounded, weight: .bold))
-                    .monospacedDigit()
-                    // Strong days are solid; the rest are tinted, so the eye lands on the best ones.
-                    .foregroundStyle(index >= 65 ? .white : color)
-                    .frame(width: cell.width, height: cell.height)
-                    .background(color.opacity(index >= 65 ? 1 : 0.16), in: .rect(cornerRadius: 12, style: .continuous))
+                // Solid, outlined, dashed or flat by step, with its shape: readable without colour.
+                ScoreTile(index: index, size: cell)
                     .overlay {
                         if isBest {
-                            RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.primary, lineWidth: 2)
+                            RoundedRectangle(cornerRadius: Theme.cellRadius + 3, style: .continuous)
+                                .strokeBorder(Color.primary, lineWidth: 2)
+                                .padding(-3)
                         }
                     }
             }
@@ -186,7 +190,7 @@ struct PlannerView: View {
             Text(verbatim: loaded ? "–" : "")
                 .foregroundStyle(.secondary)
                 .frame(width: cell.width, height: cell.height)
-                .background(Theme.well.opacity(0.4), in: .rect(cornerRadius: 12, style: .continuous))
+                .background(Theme.well.opacity(0.4), in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
                 .accessibilityHidden(true)
         }
     }
@@ -203,7 +207,9 @@ struct PlannerView: View {
         HStack(spacing: 12) {
             ForEach([70.0, 57, 42, 20], id: \.self) { sample in
                 HStack(spacing: 5) {
-                    Circle().fill(BiteScale.color(sample)).frame(width: 8, height: 8)
+                    Image(systemName: BiteScale.symbol(sample))
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(BiteScale.color(sample))
                     Text(verbatim: BiteScale.label(sample))
                 }
             }

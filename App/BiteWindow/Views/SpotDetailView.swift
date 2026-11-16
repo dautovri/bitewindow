@@ -421,9 +421,9 @@ struct SpotDetailView: View {
     private func chart(_ day: DaySummary, _ conditions: Conditions) -> some View {
         let dayEnd = spot.calendar.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
         if entitlements.isPro {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 16) {
                 BiteCurveChart(points: day.points, window: day.window, sunrise: conditions.sunrise, sunset: conditions.sunset,
-                               timeZone: spot.timeZone)
+                               timeZone: spot.timeZone, showsTimeLabels: !(isSalt && tide != nil))
                     .frame(height: 190)
                 if isSalt, let tide {
                     TideChart(samples: tide.curve(from: day.id, to: dayEnd), timeZone: spot.timeZone)
@@ -640,10 +640,16 @@ struct DayStrip: View {
                                 Image(systemName: "lock.fill")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-                                    .frame(width: 36, height: 36)
-                                    .overlay(Circle().strokeBorder(Color.secondary.opacity(0.3), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+                                    .frame(width: 42, height: 34)
+                                    .overlay(RoundedRectangle(cornerRadius: Theme.cellRadius, style: .continuous)
+                                        .strokeBorder(Color.secondary.opacity(0.3), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+                            } else if let index = day.index {
+                                ScoreTile(index: index, size: CGSize(width: 42, height: 34), showsShape: false)
                             } else {
-                                IndexGauge(index: day.index, size: 36)
+                                Text(verbatim: "–")
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 42, height: 34)
+                                    .background(Theme.well, in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
                             }
                             // The best day in view.
                             Circle()
