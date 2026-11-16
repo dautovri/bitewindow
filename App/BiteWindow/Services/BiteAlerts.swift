@@ -48,9 +48,24 @@ enum BiteAlerts {
         center.removePendingNotificationRequests(withIdentifiers: ours)
     }
 
+    /// The latest reschedule; the next one waits for it. Two running at once could each cancel
+    /// before the other adds, leaving alerts from an older forecast behind.
+    private static var last: Task<Void, Never>?
+
     /// Replaces the pending alerts with ones worked out from the saved forecasts.
-    /// Does nothing visible when alerts are off or not allowed.
-    static func reschedule(now: Date = Date()) async {
+    /// Does nothing visible when alerts are off or not allowed. Calls run one after another;
+    /// `now` defaults to the moment each one starts.
+    static func reschedule(now: Date? = nil) async {
+        let previous = last
+        let task = Task { @MainActor in
+            await previous?.value
+            await run(now: now ?? Date())
+        }
+        last = task
+        await task.value
+    }
+
+    private static func run(now: Date) async {
         await cancelAll()
         guard isEnabled, await isAuthorized() else { return }
         // The main context outlives this call; models from a throwaway context would dangle.

@@ -265,15 +265,9 @@ struct SpotMapView: View {
         guard let saved = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude) else {
             return nil
         }
-        let calendar = spot.calendar
-        let now = Date()
-        let today = calendar.startOfDay(for: now)
-        guard let end = calendar.date(byAdding: .day, value: 1, to: today) else { return nil }
         var context = spot.context
         context.tide = tide
-        let points = Forecaster.curve(context: context, hours: saved.hours, from: today, to: end, fillMissingWeather: true)
-            .filter { $0.time < end }
-        return Forecaster.bestWindow(in: points, notBefore: now.addingTimeInterval(-900))?.meanIndex
+        return DayOutlooks.days(context: context, hours: saved.hours, calendar: spot.calendar, days: 1).first?.window?.meanIndex
     }
 
     /// Fish ranked by how well the water suits them now, from the saved forecast only. The

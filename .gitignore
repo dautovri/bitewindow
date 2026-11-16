@@ -13,3 +13,5 @@ App/BiteWidgets/Info.plist
 # Store screenshots are rendered by App/marketing/store/compose.py and kept out of git.
 App/marketing/store/out/
 App/marketing/store/raw/
+# Local tool logs, never committed.
+receipts/

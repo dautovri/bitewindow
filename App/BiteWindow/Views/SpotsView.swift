@@ -123,14 +123,11 @@ private struct SpotSnapshot {
     init() {}
 
     init(spot: Spot, context: SpotContext, forecast: Forecast, now: Date = Date(), calendar: Calendar = .current) {
-        let today = calendar.startOfDay(for: now)
-        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: today),
-              let end = calendar.date(byAdding: .day, value: 2, to: today) else { return }
-        let all = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end, fillMissingWeather: true)
-        points = all.filter { $0.time < tomorrow }
-        // Windows that already started more than one 15-minute step ago are over for today.
-        self.today = Forecaster.bestWindow(in: points, notBefore: now.addingTimeInterval(-900))
-        self.tomorrow = Forecaster.bestWindow(in: all.filter { $0.time >= tomorrow && $0.time < end })
+        let days = DayOutlooks.days(context: context, hours: forecast.hours, calendar: calendar, days: 2, now: now)
+        guard days.count == 2 else { return }
+        points = days[0].points
+        self.today = days[0].window
+        self.tomorrow = days[1].window
         conditions = Conditions(at: now, hours: forecast.hours, latitude: spot.latitude, longitude: spot.longitude, calendar: calendar)
         isOffline = forecast.source == .cached
     }
@@ -349,19 +346,10 @@ struct SpotDetailView: View {
         let calendar = spot.calendar
         let today = calendar.startOfDay(for: Date())
         let count = entitlements.isPro ? Self.horizonDays : Self.freeDays
-        guard let end = calendar.date(byAdding: .day, value: count, to: today) else { return [] }
-        let points = Forecaster.curve(context: context, hours: forecast.hours, from: today, to: end,
-                                      pressure: pressure, fillMissingWeather: true)
         // Today's window starts no earlier than now; the curve still covers the whole day.
-        let cutoff = Date().addingTimeInterval(-900)
-        var days = Dictionary(grouping: points) { calendar.startOfDay(for: $0.time) }
-            .filter { $0.key < end }
-            .map { day in
-                DaySummary(id: day.key,
-                           window: Forecaster.bestWindow(in: day.value, notBefore: day.key == today ? cutoff : nil),
-                           points: day.value)
-            }
-            .sorted { $0.id < $1.id }
+        var days = DayOutlooks.days(context: context, hours: forecast.hours, calendar: calendar, days: count, pressure: pressure)
+            .filter { !$0.points.isEmpty }
+            .map { DaySummary(id: $0.date, window: $0.window, points: $0.points) }
         if !entitlements.isPro {
             for offset in Self.freeDays..<Self.horizonDays {
                 if let date = calendar.date(byAdding: .day, value: offset, to: today) {

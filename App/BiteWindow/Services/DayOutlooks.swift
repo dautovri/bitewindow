@@ -27,23 +27,43 @@ struct SpotSummaryInput: Sendable {
 }
 
 enum DayOutlooks {
-    /// The next `days` days at a spot, today first, as the Forecast tab scores them: today's
-    /// window starts no earlier than now. Empty without any forecast hours and no tide.
-    static func compute(context: SpotContext, hours: [HourConditions], calendar: Calendar, days: Int,
-                        now: Date = Date()) -> [DayOutlook] {
+    /// One scored day: its best window and the curve it came from.
+    struct ScoredDay: Sendable {
+        /// Midnight at the spot.
+        let date: Date
+        let window: BiteWindow?
+        let points: [ScorePoint]
+    }
+
+    /// The one place that cuts a forecast into days. The next `days` days at a spot, today
+    /// first; today's window starts no earlier than now (less one 15-minute step), later days
+    /// use the whole day. Every screen, the planner, alerts and widgets score days through here,
+    /// so they always agree. `pressure` replaces the forecast pressure (live barometer).
+    static func days(context: SpotContext, hours: [HourConditions], calendar: Calendar, days: Int,
+                     pressure: Terms.PressureSeries? = nil, now: Date = Date()) -> [ScoredDay] {
         let today = calendar.startOfDay(for: now)
         guard days > 0, let end = calendar.date(byAdding: .day, value: days, to: today) else { return [] }
-        let points = Forecaster.curve(context: context, hours: hours, from: today, to: end, fillMissingWeather: true)
+        let points = Forecaster.curve(context: context, hours: hours, from: today, to: end,
+                                      pressure: pressure, fillMissingWeather: true)
         let cutoff = now.addingTimeInterval(-900)
         let byDay = Dictionary(grouping: points.filter { $0.time < end }) { calendar.startOfDay(for: $0.time) }
         return (0..<days).compactMap { offset in
             guard let day = calendar.date(byAdding: .day, value: offset, to: today) else { return nil }
-            let window = Forecaster.bestWindow(in: byDay[day] ?? [], notBefore: day == today ? cutoff : nil)
-            return DayOutlook(date: day, window: window)
+            let dayPoints = byDay[day] ?? []
+            let window = Forecaster.bestWindow(in: dayPoints, notBefore: day == today ? cutoff : nil)
+            return ScoredDay(date: day, window: window, points: dayPoints)
         }
     }
 
-    /// Every saved spot with its saved forecast (no network), ready to score off the main actor.
+    /// The next `days` days at a spot as the planner, alerts and widgets need them.
+    static func compute(context: SpotContext, hours: [HourConditions], calendar: Calendar, days: Int,
+                        now: Date = Date()) -> [DayOutlook] {
+        Self.days(context: context, hours: hours, calendar: calendar, days: days, now: now)
+            .map { DayOutlook(date: $0.date, window: $0.window) }
+    }
+
+    /// Every saved spot with its saved forecast and tide (no network), ready to score off the
+    /// main actor. Downloads happen in `OfflineStore.refresh` before this runs.
     @MainActor
     static func inputs(for spots: [Spot]) async -> [SpotSummaryInput] {
         var out: [SpotSummaryInput] = []
@@ -51,7 +71,7 @@ enum DayOutlooks {
             let hours = ForecastService.shared.cached(latitude: spot.latitude, longitude: spot.longitude)?.hours ?? []
             var context = spot.context
             if spot.isSalt {
-                context.tide = await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude)
+                context.tide = ForecastService.shared.cachedTideStation(latitude: spot.latitude, longitude: spot.longitude)
             }
             out.append(SpotSummaryInput(id: spot.id, name: spot.name, context: context, timeZone: spot.timeZone, hours: hours))
         }

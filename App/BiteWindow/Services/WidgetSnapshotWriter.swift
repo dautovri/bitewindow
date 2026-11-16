@@ -10,7 +10,21 @@ import os
 enum WidgetSnapshotWriter {
     static let days = 7
 
-    static func update(now: Date = Date()) async {
+    /// The latest update; the next one waits for it, so an older snapshot never lands last.
+    private static var last: Task<Void, Never>?
+
+    /// Calls run one after another; `now` defaults to the moment each one starts.
+    static func update(now: Date? = nil) async {
+        let previous = last
+        let task = Task { @MainActor in
+            await previous?.value
+            await run(now: now ?? Date())
+        }
+        last = task
+        await task.value
+    }
+
+    private static func run(now: Date) async {
         // The main context outlives this call; models from a throwaway context would dangle.
         let spots = (try? OfflineStore.container.mainContext.fetch(FetchDescriptor<Spot>(sortBy: [SortDescriptor(\.createdAt)]))) ?? []
         let inputs = await DayOutlooks.inputs(for: spots)

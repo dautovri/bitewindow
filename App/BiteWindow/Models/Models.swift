@@ -5,6 +5,20 @@ import SwiftData
 // CloudKit-compatible schema: every property has a default or is optional,
 // relationships are optional, and there are no unique constraints.
 
+/// The store's schema as shipped since 1.0 (fields added since then were all optional or
+/// defaulted, which SwiftData migrates on its own). Before any other kind of change (a rename,
+/// a new required field, a type change), freeze copies of today's models in this enum as
+/// nested types, add `BiteSchemaV2` with the new ones and a stage to `BiteMigrationPlan`.
+enum BiteSchemaV1: VersionedSchema {
+    static let versionIdentifier = Schema.Version(1, 0, 0)
+    static var models: [any PersistentModel.Type] { [Spot.self, Trip.self, PressureSample.self] }
+}
+
+enum BiteMigrationPlan: SchemaMigrationPlan {
+    static var schemas: [any VersionedSchema.Type] { [BiteSchemaV1.self] }
+    static var stages: [MigrationStage] { [] }
+}
+
 @Model
 final class Spot {
     var id: UUID = UUID()
