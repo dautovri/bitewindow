@@ -129,6 +129,10 @@ struct SpotMapView: View {
         }
     }
 
+    private var isShowingSuggestions: Bool {
+        !searchCompleter.results.isEmpty && !searchCompleter.query.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
     private var topOverlay: some View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
@@ -141,7 +145,7 @@ struct SpotMapView: View {
                     Image(systemName: isHybrid ? "globe.americas.fill" : "map")
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Theme.accent)
-                        .frame(width: 40, height: 40)
+                        .frame(width: 44, height: 44)
                         .background(.regularMaterial, in: .circle)
                         .overlay(Circle().strokeBorder(Theme.stroke, lineWidth: 1))
                 }
@@ -155,7 +159,7 @@ struct SpotMapView: View {
                     Image(systemName: locationCenter.isAuthorized ? "location.fill" : "location")
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Theme.accent)
-                        .frame(width: 40, height: 40)
+                        .frame(width: 44, height: 44)
                         .background(.regularMaterial, in: .circle)
                         .overlay(Circle().strokeBorder(Theme.stroke, lineWidth: 1))
                 }
@@ -163,14 +167,15 @@ struct SpotMapView: View {
             }
             .frame(maxWidth: Theme.readableWidth)
 
-            if !searchCompleter.results.isEmpty && !searchCompleter.query.trimmingCharacters(in: .whitespaces).isEmpty {
+            if isShowingSuggestions {
                 SearchSuggestionsList(results: searchCompleter.results) { completion in
                     selectSuggestion(completion)
                 }
                 .frame(maxWidth: Theme.readableWidth)
             }
 
-            if !spots.isEmpty {
+            // Out of the way while suggestions are open, so they sit over clear map.
+            if !spots.isEmpty && !isShowingSuggestions {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(spots) { spot in
@@ -210,8 +215,8 @@ struct SpotMapView: View {
                 }
                 .frame(maxWidth: Theme.readableWidth)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
-            } else {
-                // Out of the way while a spot's card is open, so the map stays visible.
+            } else if !(searchFocused && isShowingSuggestions) {
+                // Out of the way while a spot's card or the search suggestions are open.
                 addSpotButton
                     .transition(.scale(scale: 0.9).combined(with: .opacity))
             }
@@ -412,9 +417,10 @@ private struct SpotPill: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 if let index {
-                    Circle()
-                        .fill(BiteScale.color(index))
-                        .frame(width: 8, height: 8)
+                    Image(systemName: BiteScale.symbol(index))
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(BiteScale.color(index))
+                        .accessibilityHidden(true)
                     Text(verbatim: name)
                         .font(.subheadline.weight(.medium))
                         .lineLimit(1)
@@ -452,33 +458,34 @@ private struct SpotAnnotationPin: View {
     var best: SpeciesOutlook?
 
     var body: some View {
-        VStack(spacing: 4) {
-            ZStack {
-                Circle()
-                    .fill(index != nil ? BiteScale.color(index) : Theme.accent)
-                if let index {
-                    Text(verbatim: "\(Int(index.rounded()))")
-                        .font(.system(.subheadline, design: .rounded, weight: .bold))
-                        .monospacedDigit()
-                        .foregroundStyle(.white)
-                } else {
-                    Image(systemName: "fish.fill")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.white)
+        VStack(spacing: 3) {
+            // Score and name in one capsule, so pins overlap less.
+            HStack(spacing: 6) {
+                ZStack {
+                    Circle()
+                        .fill(index != nil ? BiteScale.color(index) : Theme.accent)
+                    if let index {
+                        Text(verbatim: "\(Int(index.rounded()))")
+                            .font(.system(.subheadline, design: .rounded, weight: .bold))
+                            .monospacedDigit()
+                            .foregroundStyle(BiteScale.onSolid)
+                    } else {
+                        Image(systemName: "fish.fill")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(BiteScale.onSolid)
+                    }
                 }
+                .frame(width: 30, height: 30)
+                Text(verbatim: name)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .padding(.trailing, 8)
             }
-            .frame(width: 34, height: 34)
-            .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+            .padding(2)
+            .background(.regularMaterial, in: .capsule)
+            .overlay(Capsule().strokeBorder(.white.opacity(0.9), lineWidth: 1.5))
             .shadow(color: .black.opacity(0.28), radius: 4, y: 2)
-
-            Text(verbatim: name)
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .padding(.horizontal, 7)
-                .padding(.vertical, 3)
-                .background(.regularMaterial, in: .capsule)
-                .overlay(Capsule().strokeBorder(Theme.stroke, lineWidth: 0.5))
 
             if let best, best.index >= 50 {
                 HStack(spacing: 4) {
@@ -490,7 +497,7 @@ private struct SpotAnnotationPin: View {
                         .font(.caption2.weight(.bold))
                         .lineLimit(1)
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(BiteScale.onSolid)
                 .padding(.leading, 4)
                 .padding(.trailing, 8)
                 .padding(.vertical, 2)
@@ -612,7 +619,8 @@ private struct SpeciesNowRow: View {
     }
 }
 
-/// Reticle in the centre of the map: a dashed ring with a crosshair and a 4-decimal coordinate capsule below.
+/// Reticle in the centre of the map: a dashed ring with a crosshair and a 4-decimal coordinate
+/// capsule above it, clear of the pins that hang below their points.
 private struct CrosshairReticle: View {
     let center: CLLocationCoordinate2D?
 
@@ -641,7 +649,7 @@ private struct CrosshairReticle: View {
         }
         .foregroundStyle(.white)
         .shadow(color: .black.opacity(0.55), radius: 2)
-        .overlay(alignment: .top) {
+        .overlay(alignment: .bottom) {
             if let coordinateText {
                 Text(verbatim: coordinateText)
                     .font(.caption2.monospacedDigit().weight(.medium))
@@ -651,7 +659,7 @@ private struct CrosshairReticle: View {
                     .padding(.vertical, 3)
                     .background(.ultraThinMaterial, in: .capsule)
                     .overlay(Capsule().strokeBorder(Theme.stroke, lineWidth: 0.5))
-                    .offset(y: ringSize + 6)
+                    .offset(y: -(ringSize + 6))
             }
         }
     }

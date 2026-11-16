@@ -140,6 +140,7 @@ private struct SpotSnapshot {
 private struct SpotCard: View {
     let spot: Spot
     @Environment(EntitlementManager.self) private var entitlements
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var snapshot = SpotSnapshot()
     @State private var loaded = false
     /// Changes when forecasts are downloaded again, so the card reloads.
@@ -150,15 +151,28 @@ private struct SpotCard: View {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(verbatim: spot.name)
-                        .font(.headline)
+                        .font(.title3.weight(.bold))
                         .multilineTextAlignment(.leading)
-                    Label {
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 6) {
+                        if spot.species != .general {
+                            spot.species.image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 34, height: 18)
+                                .accessibilityHidden(true)
+                        } else {
+                            Image(systemName: spot.isSalt ? "water.waves" : "drop.fill")
+                                .foregroundStyle(Theme.ink2)
+                                .accessibilityHidden(true)
+                        }
                         Text(verbatim: "\(spot.species.localizedName) · \(spot.water.localizedName)")
-                    } icon: {
-                        Image(systemName: spot.isSalt ? "water.waves" : "drop.fill")
+                            // One line normally; at accessibility text sizes it wraps rather than cuts off.
+                            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                            .minimumScaleFactor(0.8)
                     }
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.ink2)
                 }
                 Spacer(minLength: 8)
                 IndexGauge(index: snapshot.today?.meanIndex, size: 60)
@@ -176,16 +190,21 @@ private struct SpotCard: View {
                     trailingPreview
                 }
             }
+            .padding(6)
+            .background(Theme.well.opacity(0.6), in: .rect(cornerRadius: Theme.wellRadius + 6, style: .continuous))
 
             if let conditions = snapshot.conditions {
-                if conditions.hour != nil {
-                    Text("Now")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                        .padding(.top, 2)
+                VStack(alignment: .leading, spacing: 8) {
+                    if conditions.hour != nil {
+                        Text("Now")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.ink2)
+                            .textCase(.uppercase)
+                            .tracking(0.5)
+                    }
+                    WeatherStrip(conditions: conditions)
+                    SunMoonStrip(conditions: conditions)
                 }
-                ConditionsGrid(conditions: conditions)
                 if snapshot.isOffline {
                     Label("Offline", systemImage: "wifi.slash")
                         .font(.caption)
@@ -227,9 +246,10 @@ private struct SpotCard: View {
     @ViewBuilder private var trailingPreview: some View {
         if entitlements.isPro {
             if snapshot.points.count > 1 {
-                MiniCurve(points: snapshot.points, color: BiteScale.color(snapshot.today?.meanIndex))
+                MiniCurve(points: snapshot.points, window: snapshot.today, color: BiteScale.color(snapshot.today?.meanIndex))
                     .frame(minWidth: 96, maxWidth: .infinity)
                     .frame(height: 36)
+                    .padding(.trailing, 8)
             }
         } else if let tomorrow = snapshot.tomorrow {
             HStack(spacing: 6) {
@@ -269,16 +289,28 @@ private struct SpotCard: View {
     }
 }
 
-/// Today's curve without axes, with a dot at the current time.
+/// Today's curve without axes: the best window shaded, so the peak lines up with the times
+/// beside it, a dashed neutral 50, and a dot at the current time.
 private struct MiniCurve: View {
     let points: [ScorePoint]
+    let window: BiteWindow?
     let color: Color
 
     var body: some View {
         let now = Date()
         let current = points.min { abs($0.time.timeIntervalSince(now)) < abs($1.time.timeIntervalSince(now)) }
         Chart {
+            if let window {
+                RectangleMark(xStart: .value("Window start", window.start), xEnd: .value("Window end", window.end))
+                    .foregroundStyle(color.opacity(0.16))
+            }
+            RuleMark(y: .value("Neutral", 50))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 3]))
+                .foregroundStyle(Color.secondary.opacity(0.45))
             ForEach(points, id: \.time) { point in
+                AreaMark(x: .value("Time", point.time), y: .value("Index", point.index))
+                    .interpolationMethod(.monotone)
+                    .foregroundStyle(LinearGradient(colors: [color.opacity(0.25), color.opacity(0.0)], startPoint: .top, endPoint: .bottom))
                 LineMark(x: .value("Time", point.time), y: .value("Index", point.index))
                     .interpolationMethod(.monotone)
                     .foregroundStyle(color)
@@ -725,9 +757,9 @@ struct SpotDetailView: View {
     private func chart(_ day: DaySummary, _ conditions: Conditions) -> some View {
         let dayEnd = spot.calendar.date(byAdding: .day, value: 1, to: day.id) ?? day.id.addingTimeInterval(86_400)
         if entitlements.isPro {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 16) {
                 BiteCurveChart(points: day.points, window: day.window, sunrise: conditions.sunrise, sunset: conditions.sunset,
-                               timeZone: spot.timeZone)
+                               timeZone: spot.timeZone, showsTimeLabels: !(isSalt && tide != nil))
                     .frame(height: 190)
                 if isSalt, let tide {
                     TideChart(samples: tide.curve(from: day.id, to: dayEnd), timeZone: spot.timeZone)
@@ -944,10 +976,16 @@ struct DayStrip: View {
                                 Image(systemName: "lock.fill")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-                                    .frame(width: 36, height: 36)
-                                    .overlay(Circle().strokeBorder(Color.secondary.opacity(0.3), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+                                    .frame(width: 42, height: 34)
+                                    .overlay(RoundedRectangle(cornerRadius: Theme.cellRadius, style: .continuous)
+                                        .strokeBorder(Color.secondary.opacity(0.3), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+                            } else if let index = day.index {
+                                ScoreTile(index: index, size: CGSize(width: 42, height: 34), showsShape: false)
                             } else {
-                                IndexGauge(index: day.index, size: 36)
+                                Text(verbatim: "–")
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 42, height: 34)
+                                    .background(Theme.well, in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
                             }
                             // The best day in view.
                             Circle()

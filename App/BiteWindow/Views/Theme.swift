@@ -7,46 +7,30 @@ import UIKit
 /// dark enough before dawn and legible in daylight.
 enum Theme {
     /// Behind everything.
-    static let background = Color(light: 0xEEF3F6, dark: 0x07111A)
-    /// A card on the background.
-    static let card = Color(light: 0xFFFFFF, dark: 0x0E1E2B)
+    /// Chart mist in daylight, wheelhouse black before dawn.
+    static let background = Color(light: 0xF1F5F8, dark: 0x050C12)
+    /// A card on the background: an instrument panel.
+    static let card = Color(light: 0xFFFFFF, dark: 0x0D1822)
     /// A recessed strip or pill inside a card.
-    static let well = Color(light: 0xE3ECF2, dark: 0x15293A)
-    /// Hairline around a card.
-    static let stroke = Color(light: 0xCBD5E1, dark: 0x38BDF8, lightOpacity: 0.45, darkOpacity: 0.14)
-    /// Buttons, links, the selected tab.
-    static let accent = Color(light: 0x0D9488, dark: 0x2DD4BF)
-    /// The tide curve.
-    static let tide = Color(light: 0x0284C7, dark: 0x38BDF8)
-    /// The dark panel that carries Pro; the same in light and dark.
-    static let deepWater = Color(light: 0x0F293A, dark: 0x0F293A)
+    static let well = Color(light: 0xE5EDF2, dark: 0x152534)
+    /// Hairline around a card; nearly opaque in light mode so it survives glare.
+    static let stroke = Color(light: 0xC5D3DF, dark: 0x7DD3FC, lightOpacity: 0.9, darkOpacity: 0.16)
+    /// Buttons, links, the selected tab: interactive things only.
+    static let accent = Color(light: 0x0F766E, dark: 0x38E2C7)
+    /// The tide curve: indigo, so it never reads as a bite colour.
+    static let tide = Color(light: 0x3B5BDB, dark: 0x818CF8)
+    /// The dark panel that carries Pro.
+    static let deepWater = Color(light: 0x0A1E2C, dark: 0x11283B)
+    /// Readings and their symbols: quiet slate, so the bite colours carry the signal.
+    static let ink2 = Color(light: 0x475868, dark: 0x94A7B8)
 
-    static let cardRadius: CGFloat = 20
+    static let cardRadius: CGFloat = 18
+    static let cellRadius: CGFloat = 10
     static let wellRadius: CGFloat = 12
-    static let gap: CGFloat = 14
+    static let gap: CGFloat = 12
     static let cardPadding: CGFloat = 16
     /// Cards never grow wider than this on iPad; grids take over there.
     static let readableWidth: CGFloat = 640
-}
-
-extension Color {
-    /// One colour for light and one for dark appearance, from 0xRRGGBB values.
-    init(light: UInt32, dark: UInt32, lightOpacity: Double = 1, darkOpacity: Double = 1) {
-        self.init(uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(hex: dark, alpha: darkOpacity)
-                : UIColor(hex: light, alpha: lightOpacity)
-        })
-    }
-}
-
-private extension UIColor {
-    convenience init(hex: UInt32, alpha: Double) {
-        self.init(red: CGFloat((hex >> 16) & 0xFF) / 255,
-                  green: CGFloat((hex >> 8) & 0xFF) / 255,
-                  blue: CGFloat(hex & 0xFF) / 255,
-                  alpha: alpha)
-    }
 }
 
 extension View {
@@ -191,7 +175,7 @@ struct Reading: View {
             Image(systemName: symbol)
                 .symbolRenderingMode(.hierarchical)
                 .rotationEffect(.degrees(rotation ?? 0))
-                .foregroundStyle(Theme.accent)
+                .foregroundStyle(Theme.ink2)
                 .accessibilityHidden(true)
             Text(verbatim: text).monospacedDigit()
             if let trailingSymbol {
@@ -313,7 +297,7 @@ struct ConditionsGrid: View {
                     .font(.body)
                     .symbolRenderingMode(.hierarchical)
                     .rotationEffect(.degrees(rotation ?? 0))
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(Theme.ink2)
                     .frame(height: 20)
                     .accessibilityHidden(true)
                 HStack(spacing: 2) {
@@ -341,7 +325,7 @@ struct SunMoonStrip: View {
         Image(systemName: conditions.moonSymbol)
             .font(.footnote)
             .symbolRenderingMode(.hierarchical)
-            .foregroundStyle(Theme.accent)
+            .foregroundStyle(Theme.ink2)
             .accessibilityLabel("Moon")
     }
 
