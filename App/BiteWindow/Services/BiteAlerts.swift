@@ -71,7 +71,9 @@ enum BiteAlerts {
         // The main context outlives this call; models from a throwaway context would dangle.
         let spots = (try? OfflineStore.container.mainContext.fetch(FetchDescriptor<Spot>())) ?? []
         let inputs = await DayOutlooks.inputs(for: spots)
-        let days = await DayOutlooks.compute(inputs, days: horizonDays, now: now)
+        // Free users get alerts for the days they can see in the app: today and tomorrow.
+        let horizon = EntitlementManager.cachedIsPro ? horizonDays : EntitlementManager.freeDays
+        let days = await DayOutlooks.compute(inputs, days: horizon, now: now)
         let plan = plan(inputs: inputs, days: days, threshold: threshold, now: now)
         Logger(subsystem: "com.dautovri.bitecurve", category: "alerts")
             .info("scheduling \(min(plan.count, maxPending)) bite alerts, first: \(plan.first.map { "\($0.fireDate.formatted(.iso8601)) \($0.title) | \($0.body)" } ?? "-", privacy: .public)")

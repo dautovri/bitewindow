@@ -108,6 +108,7 @@ final class AppRouter {
 
 struct RootView: View {
     @Environment(PressureSampler.self) private var sampler
+    @Environment(EntitlementManager.self) private var entitlements
     @State private var router = AppRouter()
     /// Set once the welcome screen was answered (or was never needed).
     @AppStorage("didOnboard") private var didOnboard = false
@@ -179,6 +180,13 @@ struct RootView: View {
                 }
             } else if phase == .background {
                 OfflineStore.scheduleBackgroundRefresh()
+            }
+        }
+        // Buying or losing Pro changes how many days alerts and widgets cover.
+        .onChange(of: entitlements.isPro) {
+            Task {
+                await BiteAlerts.reschedule()
+                await WidgetSnapshotWriter.update()
             }
         }
         // `initial: true` restarts sampling on launch when the toggle was left on.

@@ -14,7 +14,7 @@ struct PlannerView: View {
     @State private var showPaywall = false
 
     static let horizonDays = 10
-    static let freeDays = 2
+    static let freeDays = EntitlementManager.freeDays
 
     /// A spot on a day, to open its forecast.
     struct Target: Hashable {

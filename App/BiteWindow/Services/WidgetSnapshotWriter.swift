@@ -28,7 +28,9 @@ enum WidgetSnapshotWriter {
         // The main context outlives this call; models from a throwaway context would dangle.
         let spots = (try? OfflineStore.container.mainContext.fetch(FetchDescriptor<Spot>(sortBy: [SortDescriptor(\.createdAt)]))) ?? []
         let inputs = await DayOutlooks.inputs(for: spots)
-        let outlooks = await DayOutlooks.compute(inputs, days: days, now: now)
+        // Free users see today and tomorrow, as in the app.
+        let outlooks = await DayOutlooks.compute(inputs, days: EntitlementManager.cachedIsPro ? days : EntitlementManager.freeDays,
+                                                 now: now)
         let snapshot = WidgetSnapshot(updated: now, spots: inputs.map { input in
             WidgetSnapshot.Spot(id: input.id, name: input.name, timeZoneID: input.timeZone.identifier,
                                 days: (outlooks[input.id] ?? []).map {

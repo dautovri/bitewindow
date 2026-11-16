@@ -13,6 +13,13 @@ final class EntitlementManager {
     static let allIDs: Set<String> = [annual, monthly, lifetime]
 
     static let freeSpotLimit = 3
+    /// Days with a forecast window for free users (today and tomorrow), everywhere it shows:
+    /// screens, planner, alerts and widgets.
+    static let freeDays = 2
+    /// The last known Pro state, for code that runs without the environment (alerts, widgets,
+    /// background refresh). Written by `refresh()`.
+    nonisolated static let cachedProKey = "isProCached"
+    nonisolated static var cachedIsPro: Bool { UserDefaults.standard.bool(forKey: cachedProKey) }
 
     private(set) var isPro = false
     private var updates: Task<Void, Never>?
@@ -47,5 +54,6 @@ final class EntitlementManager {
         if UserDefaults.standard.bool(forKey: "BCPro") { pro = true }
         #endif
         isPro = pro
+        UserDefaults.standard.set(pro, forKey: Self.cachedProKey)
     }
 }
