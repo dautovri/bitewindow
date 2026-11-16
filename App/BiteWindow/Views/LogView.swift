@@ -1,7 +1,6 @@
 import BiteCore
 import SwiftData
 import SwiftUI
-import os
 
 /// Trip log. Ending a trip with zero fish is a single tap, because blank trips
 /// are what make the catch-rate model honest.
@@ -9,6 +8,7 @@ struct LogView: View {
     @Query(sort: \Trip.startedAt, order: .reverse) private var trips: [Trip]
     @Query(sort: \Spot.createdAt) private var spots: [Spot]
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.requestReview) private var requestReview
 
     private var active: Trip? { trips.first { $0.isActive } }
     private var finished: [Trip] { trips.filter { !$0.isActive } }
@@ -20,11 +20,21 @@ struct LogView: View {
                     if let trip = active {
                         VStack(alignment: .leading, spacing: 8) {
                             CardHeader(title: "Current trip")
-                            ActiveTripRow(trip: trip)
+                            ActiveTripRow(trip: trip) { ended in
+                                // After the card has moved to the history, never over a running
+                                // trip; checked right before asking.
+                                Task {
+                                    try? await Task.sleep(for: .milliseconds(800))
+                                    if ReviewPrompt.isDue(after: ended) { requestReview() }
+                                }
+                            }
                         }
                     } else {
                         StartTripMenu(spots: spots) { spot in
                             modelContext.insert(Trip(spot: spot))
+                            try? modelContext.save()
+                            // No "how did it go?" for this spot while the trip runs.
+                            Task { await BiteAlerts.reschedule() }
                         }
                     }
 
@@ -97,6 +107,8 @@ private struct StartTripMenu: View {
 private struct ActiveTripRow: View {
     @Bindable var trip: Trip
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// Told when the trip ends (the Log tab may ask for a rating).
+    var onEnded: (Trip) -> Void = { _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -170,6 +182,8 @@ private struct ActiveTripRow: View {
             }
             .well()
 
+            PlannedQuestion(planned: $trip.planned)
+
             Button {
                 end()
             } label: {
@@ -189,44 +203,44 @@ private struct ActiveTripRow: View {
         .card()
     }
 
-    /// Ends the trip and stores what the model expected for it, so the trip
-    /// can train the personal catch rate later.
     private func end() {
-        let start = trip.startedAt, finish = Date()
-        // Neutral estimate first, so the trip counts even if the app quits now.
-        trip.expectedCatch = CatchModel.expectedCatch(points: [], from: start, to: finish)
-        trip.endedAt = finish
-        guard finish.timeIntervalSince(start) <= CatchModel.maxTripHours * 3600 else { return }
-        let base = trip.spot?.context
-        let water = trip.spot?.waterReading
         let ended = trip
-        Task { @MainActor in
-            var context = base
-            if let c = base, c.water.isSalt {
-                context?.tide = await ForecastService.shared.tideStation(latitude: c.latitude, longitude: c.longitude)
-            }
-            let points = await ForecastService.shared.tripPoints(context: context, from: start, to: finish)
-            ended.expectedCatch = CatchModel.expectedCatch(points: points, from: start, to: finish)
-            if let times = ended.completeCatchTimes,
-               let record = Scorecard.record(points: points, from: start, to: finish, catchTimes: times) {
-                ended.bandHours = record.hours
-                ended.bandCatches = record.catches
-                ended.forecastIndex = record.meanIndex
-                // Kept on the phone: the only form in which this trip could ever tune the weights.
-                if let context,
-                   let slices = Scorecard.slices(points: points, weights: Weights.prior(water: context.water, species: context.species),
-                                                 from: start, to: finish, catchTimes: times) {
-                    let fit = TripFitRecord(water: context.water.rawValue, species: context.species.rawValue,
-                                            waterTempC: water?.tempC, waterSource: water?.sourceName,
-                                            hasBank: context.bankBearingDeg != nil, hasTideStation: context.tide != nil,
-                                            slices: slices)
-                    ended.fitRecord = try? JSONEncoder().encode(fit)
-                    Logger(subsystem: "com.dautovri.bitecurve", category: "log")
-                        .info("trip fit record: \(slices.count) slices, \(ended.fitRecord?.count ?? 0) bytes")
-                }
-            }
-            await TripSharing.sendPending()
+        TripRecorder.end(ended)
+        try? ended.modelContext?.save()
+        onEnded(ended)
+    }
+}
+
+/// "Planned from forecast?" with Yes and No. Optional: tapping the chosen answer again clears it.
+private struct PlannedQuestion: View {
+    @Binding var planned: Bool?
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("Planned from forecast?")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            pill(true, Text("Yes"))
+            pill(false, Text("No"))
         }
+        .accessibilityElement(children: .contain)
+    }
+
+    private func pill(_ value: Bool, _ label: Text) -> some View {
+        let on = planned == value
+        return Button {
+            planned = on ? nil : value
+        } label: {
+            label
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 14)
+                .frame(minHeight: 44)
+                .foregroundStyle(on ? BiteScale.onSolid : Theme.ink2)
+                .background(on ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(Theme.well), in: .capsule)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(on ? .isSelected : [])
     }
 }
 

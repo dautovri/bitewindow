@@ -153,6 +153,9 @@ final class Trip {
     var fitRecord: Data?
     /// When this trip was sent under opt-in sharing (see `TripSharing`); nil while it was not.
     var sharedAt: Date?
+    /// Whether the angler chose this time because of the forecast, as they answered on the
+    /// running trip; nil when they did not answer. Nothing is guessed.
+    var planned: Bool?
     var spot: Spot?
 
     init(spot: Spot?) {
@@ -208,6 +211,10 @@ struct TripFitRecord: Codable, Equatable {
     /// Whether the tide score came from a station (else from the moon phase alone).
     var hasTideStation: Bool
     var slices: [FactorSlice]
+    /// The scoring model the slices came from (`Forecaster.modelID`); nil in records made before 1.3.
+    var model: String? = Forecaster.modelID
+    /// See `Trip.planned`.
+    var planned: Bool? = nil
 }
 
 /// Raw station pressure from the phone barometer. Stays on the device.

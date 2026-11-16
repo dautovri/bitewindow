@@ -11,6 +11,7 @@ struct BiteWindowApp: App {
     /// purchases in their local store would wait for an Apple Account for good.
     static let isHostingTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
 
+    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
     @State private var entitlements = EntitlementManager(listens: !BiteWindowApp.isHostingTests)
     @State private var sampler = PressureSampler()
 
@@ -27,6 +28,15 @@ struct BiteWindowApp: App {
             OfflineStore.scheduleBackgroundRefresh()
             _ = await OfflineStore.refresh()
         }
+    }
+}
+
+/// Sets up notification handling at launch, before any notification action can arrive.
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        MainActor.assumeIsolated { NotificationHandler.install() }
+        return true
     }
 }
 

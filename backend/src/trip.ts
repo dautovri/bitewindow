@@ -12,6 +12,8 @@ export const SPECIES = [
   "stripedBass", "redDrum",
 ] as const;
 export const WATER_SOURCES = ["measured", "satellite", "modelled"] as const;
+/** Scoring models the app can name (`Forecaster.modelID`); version 1 payloads were all "prior-1". */
+export const MODELS = ["prior-1"] as const;
 
 /** Largest request body accepted, bytes. A 24-hour trip is about 3 kB. */
 export const MAX_BODY = 8192;
@@ -25,7 +27,8 @@ export interface Slice {
 }
 
 export interface SharedTrip {
-  v: 1;
+  /** Stored shape; version 1 payloads (app 1.2) are stored as version 2 with model "prior-1". */
+  v: 2;
   /** Random id made on the phone, replaced whenever the angler deletes what they shared. */
   angler: string;
   /** Geohash-5 cell (about 5 km), never the spot itself. */
@@ -40,6 +43,10 @@ export interface SharedTrip {
   /** Every fish was logged within two minutes: probably entered at the end, not as caught. */
   burst: boolean;
   slices: Slice[];
+  /** The scoring model the slices came from. */
+  model: string;
+  /** Whether the angler chose the time because of the forecast; null when not answered. */
+  planned: boolean | null;
 }
 
 export const isAngler = (s: unknown): s is string => typeof s === "string" && /^[0-9a-f]{16}$/.test(s);
@@ -52,7 +59,19 @@ const round = (x: number) => Math.round(x * 1000) / 1000;
 export function parseTrip(body: unknown): SharedTrip | null {
   if (typeof body !== "object" || body === null || Array.isArray(body)) return null;
   const b = body as Record<string, unknown>;
-  if (b.v !== 1 || !isAngler(b.angler) || !isGeohash5(b.gh as string | null)) return null;
+  if ((b.v !== 1 && b.v !== 2) || !isAngler(b.angler) || !isGeohash5(b.gh as string | null)) return null;
+  // Version 1 (app 1.2) has neither field; version 2 names a known model and may answer `planned`.
+  let model: string = "prior-1";
+  let planned: boolean | null = null;
+  if (b.v === 1) {
+    if (b.model !== undefined || b.planned !== undefined) return null;
+  } else {
+    if (!(MODELS as readonly unknown[]).includes(b.model)) return null;
+    model = b.model as string;
+    const p = b.planned ?? null;
+    if (p !== null && typeof p !== "boolean") return null;
+    planned = p;
+  }
   if (!num(b.month, 1, 12) || !Number.isInteger(b.month)) return null;
   if (!(WATERS as readonly unknown[]).includes(b.water) || !(SPECIES as readonly unknown[]).includes(b.species)) return null;
   const temp = b.waterTempC ?? null;
@@ -79,7 +98,7 @@ export function parseTrip(body: unknown): SharedTrip | null {
   if (hours < 0.25 || hours > 24.01 || catches > 200) return null;
 
   return {
-    v: 1,
+    v: 2,
     angler: b.angler,
     gh: b.gh as string,
     month: b.month,
@@ -91,6 +110,8 @@ export function parseTrip(body: unknown): SharedTrip | null {
     hasTideStation: b.hasTideStation,
     burst: b.burst,
     slices,
+    model,
+    planned,
   };
 }
 

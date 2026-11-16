@@ -50,4 +50,50 @@ final class StructureTests: XCTestCase {
         try container.mainContext.save()
         XCTAssertEqual(try container.mainContext.fetchCount(FetchDescriptor<Trip>()), 1)
     }
+
+    // MARK: "How did it go?" notifications
+
+    private func alertPlan(busy: Set<UUID> = [], pending: Set<String> = [], hoursAfterMidnight: Double) -> (UUID, [BiteAlerts.Alert]) {
+        let id = UUID()
+        let midnight = calendar.date(from: DateComponents(year: 2026, month: 6, day: 10))!
+        let now = midnight.addingTimeInterval(hoursAfterMidnight * 3600)
+        let input = SpotSummaryInput(id: id, name: "Test", context: context, timeZone: calendar.timeZone,
+                                     hours: ForecastService.sampleHours(now: now))
+        let days = [id: DayOutlooks.compute(context: context, hours: input.hours, calendar: calendar, days: 2, now: now)]
+        return (id, BiteAlerts.plan(inputs: [input], days: days, threshold: 0, now: now, busySpots: busy, keptAfterIDs: pending))
+    }
+
+    func testAlertedWindowsGetAnAfterNotification() {
+        let (id, plan) = alertPlan(hoursAfterMidnight: 0.5)
+        let soon = plan.filter { $0.id.hasPrefix("soon.") }
+        let after = plan.filter { $0.id.hasPrefix("after.") }
+        XCTAssertFalse(after.isEmpty)
+        XCTAssertEqual(after.count, soon.count)
+        for alert in after {
+            let window = try! XCTUnwrap(alert.window)
+            XCTAssertEqual(window.spotID, id)
+            XCTAssertEqual(alert.fireDate, window.end.addingTimeInterval(900))
+        }
+    }
+
+    func testNoAfterNotificationForASpotWithARunningTrip() {
+        let id = UUID()
+        let midnight = calendar.date(from: DateComponents(year: 2026, month: 6, day: 10))!
+        let now = midnight.addingTimeInterval(1800)
+        let input = SpotSummaryInput(id: id, name: "Test", context: context, timeZone: calendar.timeZone,
+                                     hours: ForecastService.sampleHours(now: now))
+        let days = [id: DayOutlooks.compute(context: context, hours: input.hours, calendar: calendar, days: 2, now: now)]
+        let plan = BiteAlerts.plan(inputs: [input], days: days, threshold: 0, now: now, busySpots: [id])
+        XCTAssertTrue(plan.allSatisfy { $0.window == nil })
+    }
+
+    func testKeptAfterNotificationsAreNotPlannedTwice() {
+        let (_, first) = alertPlan(hoursAfterMidnight: 0.5)
+        let ids = Set(first.filter { $0.window != nil }.map(\.id))
+        XCTAssertFalse(ids.isEmpty)
+        let (_, again) = alertPlan(pending: ids, hoursAfterMidnight: 0.5)
+        // A fresh spot id is drawn per call, so compare by count: none of the kept ones repeat.
+        XCTAssertEqual(again.filter { $0.window != nil }.count, first.filter { $0.window != nil }.count)
+    }
 }
+

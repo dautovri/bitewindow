@@ -27,7 +27,7 @@ enum TripSharing {
     }
 
     struct Payload: Codable, Equatable {
-        var v = 1
+        var v = 2
         var angler: String
         var gh: String
         var month: Int
@@ -39,6 +39,10 @@ enum TripSharing {
         var hasTideStation: Bool
         var burst: Bool
         var slices: [FactorSlice]
+        /// The scoring model the slices came from; records made before 1.3 used "prior-1".
+        var model: String
+        /// Whether the angler chose the time because of the forecast; nil when not answered.
+        var planned: Bool?
     }
 
     /// What would be sent for a trip, or nil when it has nothing usable: no forecast record,
@@ -54,7 +58,8 @@ enum TripSharing {
         return Payload(angler: angler, gh: Geohash.encode(latitude: latitude, longitude: longitude, precision: 5),
                        month: month, water: fit.water, species: fit.species,
                        waterTempC: hasWater ? fit.waterTempC : nil, waterSource: hasWater ? fit.waterSource : nil,
-                       hasBank: fit.hasBank, hasTideStation: fit.hasTideStation, burst: burst, slices: fit.slices)
+                       hasBank: fit.hasBank, hasTideStation: fit.hasTideStation, burst: burst, slices: fit.slices,
+                       model: fit.model ?? "prior-1", planned: fit.planned)
     }
 
     private static var sending = false

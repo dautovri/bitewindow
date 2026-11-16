@@ -71,6 +71,10 @@ public struct SpeciesOutlook: Sendable, Equatable {
 }
 
 public enum Forecaster {
+    /// Names the scoring model (terms and weights) a shared trip was scored with, so later fits
+    /// can tell data scored by different models apart. Change it whenever the weights change.
+    public static let modelID = "prior-1"
+
     /// Logistic gain. With k = 3 a fully favourable day (Σ w·z ≈ 0.9) scores ~94.
     public static let gain = 3.0
 
