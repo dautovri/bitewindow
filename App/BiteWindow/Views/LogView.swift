@@ -1,4 +1,5 @@
 import BiteCore
+import StoreKit
 import SwiftData
 import SwiftUI
 

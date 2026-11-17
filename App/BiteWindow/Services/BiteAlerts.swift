@@ -23,7 +23,7 @@ enum BiteAlerts {
     /// iOS keeps at most 64 pending notifications per app.
     private static let maxPending = 60
     /// Category of the "How did it go?" notification after an alerted window, and its actions.
-    static let afterCategory = "bite.after"
+    nonisolated static let afterCategory = "bite.after"
     static let actionNoFish = "bite.after.0"
     static let actionOneFish = "bite.after.1"
     static let actionMoreFish = "bite.after.more"
@@ -99,7 +99,7 @@ enum BiteAlerts {
                         keptAfterIDs: Set(kept.map { String($0.dropFirst(prefix.count)) }))
         Logger(subsystem: "com.dautovri.bitecurve", category: "alerts")
             .info("scheduling \(min(plan.count, maxPending)) bite alerts, first: \(plan.first.map { "\($0.fireDate.formatted(.iso8601)) \($0.title) | \($0.body)" } ?? "-", privacy: .public)")
-        for alert in plan.prefix(maxPending - kept.count) {
+        for alert in plan.prefix(max(0, maxPending - kept.count)) {
             let content = UNMutableNotificationContent()
             content.title = alert.title
             content.body = alert.body

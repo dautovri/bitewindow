@@ -53,8 +53,7 @@ final class StructureTests: XCTestCase {
 
     // MARK: "How did it go?" notifications
 
-    private func alertPlan(busy: Set<UUID> = [], pending: Set<String> = [], hoursAfterMidnight: Double) -> (UUID, [BiteAlerts.Alert]) {
-        let id = UUID()
+    private func alertPlan(id: UUID = UUID(), busy: Set<UUID> = [], pending: Set<String> = [], hoursAfterMidnight: Double) -> (UUID, [BiteAlerts.Alert]) {
         let midnight = calendar.date(from: DateComponents(year: 2026, month: 6, day: 10))!
         let now = midnight.addingTimeInterval(hoursAfterMidnight * 3600)
         let input = SpotSummaryInput(id: id, name: "Test", context: context, timeZone: calendar.timeZone,
@@ -88,12 +87,12 @@ final class StructureTests: XCTestCase {
     }
 
     func testKeptAfterNotificationsAreNotPlannedTwice() {
-        let (_, first) = alertPlan(hoursAfterMidnight: 0.5)
+        let (id, first) = alertPlan(hoursAfterMidnight: 0.5)
         let ids = Set(first.filter { $0.window != nil }.map(\.id))
         XCTAssertFalse(ids.isEmpty)
-        let (_, again) = alertPlan(pending: ids, hoursAfterMidnight: 0.5)
-        // A fresh spot id is drawn per call, so compare by count: none of the kept ones repeat.
-        XCTAssertEqual(again.filter { $0.window != nil }.count, first.filter { $0.window != nil }.count)
+        let (_, again) = alertPlan(id: id, pending: ids, hoursAfterMidnight: 0.5)
+        XCTAssertTrue(again.allSatisfy { $0.window == nil })
+        XCTAssertEqual(again.count, first.count - ids.count)
     }
 }
 
