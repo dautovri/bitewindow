@@ -36,6 +36,23 @@ struct PlannerView: View {
         return (0..<Self.horizonDays).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: today) }
     }
 
+    /// Locked columns of the coming week that fall on a weekend: a free user planning
+    /// Saturday on a Wednesday is looking exactly here.
+    private var lockedWeekend: [Int] {
+        guard !entitlements.isPro else { return [] }
+        // The coming weekend only: it starts within the week, and may run a day past it.
+        let weekend = (Self.freeDays..<Self.horizonDays).filter { Calendar.current.isDateInWeekend(dayLabels[$0]) }
+        guard let first = weekend.first, first < 7 else { return [] }
+        return weekend.enumerated().filter { $0.element == first + $0.offset }.map(\.element)
+    }
+
+    /// True when any spot has a strong window on a locked weekend day. Says no more than that.
+    private var weekendLooksStrong: Bool {
+        lockedWeekend.contains { column in
+            spots.contains { (day(for: $0, column: column)?.index ?? 0) >= BiteAlerts.defaultThreshold }
+        }
+    }
+
     /// The single best spot-and-day in view.
     private var best: (spot: Spot, day: DayOutlook)? {
         var out: (spot: Spot, day: DayOutlook)?
@@ -68,12 +85,24 @@ struct PlannerView: View {
                     grid.card(padding: 12)
                     legend
                     if !entitlements.isPro {
+                        if weekendLooksStrong {
+                            Label("A strong bite is forecast this weekend", systemImage: BiteScale.symbol(BiteAlerts.defaultThreshold))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(BiteScale.color(BiteAlerts.defaultThreshold))
+                                .frame(maxWidth: .infinity)
+                        }
                         Button {
                             showPaywall = true
                         } label: {
-                            Label("Unlock all 10 days with BiteCurve Pro", systemImage: "lock.open.fill")
-                                .font(.subheadline.weight(.semibold))
-                                .frame(maxWidth: .infinity)
+                            Group {
+                                if lockedWeekend.isEmpty {
+                                    Label("Unlock all 10 days with BiteCurve Pro", systemImage: "lock.open.fill")
+                                } else {
+                                    Label("See the weekend with BiteCurve Pro", systemImage: "lock.open.fill")
+                                }
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
                         .buttonBorderShape(.capsule)
@@ -160,11 +189,18 @@ struct PlannerView: View {
             Button {
                 showPaywall = true
             } label: {
+                let weekend = lockedWeekend.contains(offset)
                 Image(systemName: "lock.fill")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(weekend ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(.secondary))
                     .frame(width: cell.width, height: cell.height)
                     .background(Theme.well.opacity(0.6), in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
+                    .overlay {
+                        if weekend {
+                            RoundedRectangle(cornerRadius: Theme.cellRadius, style: .continuous)
+                                .strokeBorder(Theme.accent.opacity(0.6), lineWidth: 1.5)
+                        }
+                    }
             }
             .buttonStyle(.plain)
             .accessibilityLabel(Text("BiteCurve Pro"))

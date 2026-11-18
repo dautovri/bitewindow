@@ -478,6 +478,14 @@ private struct TripHistoryCard: View {
                         .foregroundStyle(BiteScale.color(index))
                         .accessibilityHidden(true)
                     Text("Forecast \(Int(index.rounded())) · \(BiteScale.label(index))")
+                    ShareLink(item: TripShare(day: trip.startedAt, timeZone: trip.spot?.timeZone ?? .current, index: index,
+                                              catches: trip.catchCount, hours: trip.hours),
+                              preview: SharePreview(Text(verbatim: "BiteCurve"))) {
+                        Image(systemName: "square.and.arrow.up")
+                            .frame(minWidth: 44, minHeight: 32)
+                            .contentShape(.rect)
+                    }
+                    .labelStyle(.iconOnly)
                 }
                 .font(.footnote)
                 .foregroundStyle(.secondary)
