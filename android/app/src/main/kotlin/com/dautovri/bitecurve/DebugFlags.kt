@@ -20,10 +20,13 @@ import com.dautovri.bitecurve.data.nowSeconds
  * - `BCAPIBase`: another host for the worker (an unroutable one, or a local server answering 503).
  * - `BCSeedSpots`: adds three sample spots and a short trip log.
  * - `BCSkipWelcome`: keeps the welcome screen away.
+ * - `BCSamplePlans`: the paywall shows made-up plans instead of asking Google Play (nothing can be bought).
  * - `BCAlertNow`: shows the next planned bite alert at once, to see it without waiting for it.
  */
 object DebugFlags {
     var skipWelcome = false
+        private set
+    var samplePlans = false
         private set
 
     fun apply(app: BiteCurveApp, intent: Intent?) {
@@ -31,6 +34,7 @@ object DebugFlags {
         if (extras.containsKey("BCPro")) app.entitlements.debugPro = extras.getBoolean("BCPro")
         if (extras.containsKey("BCAPIBase")) app.apiBaseOverride = extras.getString("BCAPIBase")?.takeIf { it.isNotBlank() }
         if (extras.containsKey("BCSkipWelcome")) skipWelcome = extras.getBoolean("BCSkipWelcome")
+        if (extras.containsKey("BCSamplePlans")) samplePlans = extras.getBoolean("BCSamplePlans")
         if (extras.getBoolean("BCAlertNow")) {
             app.scope.launch {
                 BiteAlerts.reschedule(app).firstOrNull()?.let { BiteAlerts.show(app, 99, it.title, it.body) }

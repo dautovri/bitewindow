@@ -14,6 +14,8 @@ import com.dautovri.bitecurve.data.Store
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -39,6 +41,8 @@ class BiteCurveApp : Application() {
         forecasts = ForecastService(File(filesDir, "forecasts")) { apiBaseOverride ?: BuildConfig.API_BASE }
         entitlements = Entitlements(this, scope)
         BiteAlerts.createChannel(this)
+        // Pro bought, restored or lapsed: the alerts cover a week or two days accordingly.
+        scope.launch { entitlements.isPro.drop(1).collect { BiteAlerts.reschedule(this@BiteCurveApp) } }
         scheduleBackgroundRefresh()
     }
 

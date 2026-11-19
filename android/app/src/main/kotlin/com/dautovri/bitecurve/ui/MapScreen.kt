@@ -186,7 +186,7 @@ private fun currentLocation(context: Context, onResult: (LatLng?) -> Unit) {
  * "my location" asks for it only when tapped.
  */
 @Composable
-fun MapScreen(request: MapRequest?, onRequestHandled: () -> Unit, onFirstSpot: () -> Unit, onPaywall: () -> Unit) {
+fun MapScreen(request: MapRequest?, onRequestHandled: () -> Unit, onFirstSpot: (Spot) -> Unit, onPaywall: (PaywallContext) -> Unit) {
     val app = app()
     val context = LocalContext.current
     val colors = Theme.colors
@@ -194,7 +194,7 @@ fun MapScreen(request: MapRequest?, onRequestHandled: () -> Unit, onFirstSpot: (
     val scope = rememberCoroutineScope()
     val focus = LocalFocusManager.current
     val data by app.store.data.collectAsStateWithLifecycle()
-    val isPro by app.entitlements.isPro.collectAsStateWithLifecycle()
+    val unlimitedSpots by app.entitlements.hasUnlimitedSpots.collectAsStateWithLifecycle()
     val lastPrefetch by app.forecasts.lastPrefetch.collectAsStateWithLifecycle()
     val spots = data.spots
 
@@ -336,7 +336,7 @@ fun MapScreen(request: MapRequest?, onRequestHandled: () -> Unit, onFirstSpot: (
         val at = pending ?: center ?: return
         pending = null
         // Checked again here: the count can change while the sheet is open.
-        if (!isPro && spots.size >= Entitlements.freeSpotLimit) return onPaywall()
+        if (!unlimitedSpots && spots.size >= Entitlements.freeSpotLimit) return onPaywall(PaywallContext.SPOTS)
         val isFirst = spots.isEmpty()
         val spot = Spot(
             name = name.trim().ifEmpty { context.getString(R.string.spot_x, spots.size + 1) },
@@ -345,7 +345,7 @@ fun MapScreen(request: MapRequest?, onRequestHandled: () -> Unit, onFirstSpot: (
         )
         app.store.addSpot(spot)
         // The first spot: straight to its forecast.
-        if (isFirst) onFirstSpot()
+        if (isFirst) onFirstSpot(spot)
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -419,8 +419,8 @@ fun MapScreen(request: MapRequest?, onRequestHandled: () -> Unit, onFirstSpot: (
                 Button(
                     {
                         val at = center
-                        if (!isPro && spots.size >= Entitlements.freeSpotLimit) {
-                            onPaywall()
+                        if (!unlimitedSpots && spots.size >= Entitlements.freeSpotLimit) {
+                            onPaywall(PaywallContext.SPOTS)
                         } else if (at != null && !lookingUp) {
                             focus.clearFocus()
                             // The place's name and country; the sheet opens after three seconds

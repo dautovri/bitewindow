@@ -34,10 +34,15 @@ class Prefs(context: Context) {
         threshold.value = value
     }
 
-    /** Offer the Pro trial once, after the first spot has a forecast. */
-    var offerTrialAfterFirstSpot: Boolean
-        get() = store.getBoolean("offerTrialAfterFirstSpot", false)
-        set(value) = store.edit().putBoolean("offerTrialAfterFirstSpot", value).apply()
+    /** The card on the Forecast tab that offers bite alerts was answered, either way. */
+    var alertsPromptAnswered: Boolean
+        get() = store.getBoolean("alertsPromptAnswered", false)
+        set(value) = store.edit().putBoolean("alertsPromptAnswered", value).apply()
+
+    /** The Pro card in the trip log was put away. */
+    var logProCardDismissed: Boolean
+        get() = store.getBoolean("logProCardDismissed", false)
+        set(value) = store.edit().putBoolean("logProCardDismissed", value).apply()
 
     /** Request codes of the alarms laid out last time, so they can be cancelled. */
     var pendingAlertCount: Int

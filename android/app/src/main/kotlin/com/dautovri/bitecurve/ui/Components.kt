@@ -352,10 +352,10 @@ fun SmallReading(icon: ImageVector, text: String) {
 class Factor(val name: String, val value: Double, val icon: ImageVector? = null, val reading: String? = null, val trend: Int? = null, val moonPhase: Double? = null)
 
 @Composable
-fun FactorBreakdown(factors: List<Factor>) {
+fun FactorBreakdown(factors: List<Factor>, title: String = stringResource(R.string.what_drives_this_window)) {
     val colors = Theme.colors
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.what_drives_this_window), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = colors.secondaryText)
+        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = colors.secondaryText)
         for (factor in factors) {
             val helps = stringResource(R.string.helps)
             val hurts = stringResource(R.string.hurts)

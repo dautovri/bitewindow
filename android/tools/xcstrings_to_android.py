@@ -6,8 +6,10 @@ Reads  ../App/BiteWindow/Localizable.xcstrings   (never written to)
 Writes app/src/main/res/values*/strings.xml and app/src/main/res/xml/locales_config.xml
 
 A resource name is the English text in snake_case (first 48 characters). `%@` and `%lld`
-become positional `%1$s` / `%2$d`. Strings in ANDROID_ONLY exist only here; KEEP_ENGLISH
-names are not translated.
+become positional `%1$s` / `%2$d`. Strings in ANDROID_ONLY exist only here and are not
+translated. tools/android_strings.json holds the translated strings that only the Android app
+has (Google Play wording, screens iOS words differently): {name: {language: text}}, written
+with the same `%@` / `%d` placeholders.
 """
 import json, os, re, sys
 from xml.sax.saxutils import escape
@@ -15,6 +17,7 @@ from xml.sax.saxutils import escape
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CATALOG = os.path.join(ROOT, "..", "App", "BiteWindow", "Localizable.xcstrings")
 RES = os.path.join(ROOT, "app", "src", "main", "res")
+EXTRA = os.path.join(ROOT, "tools", "android_strings.json")
 
 FOLDERS = {"pt-BR": "values-pt-rBR", "zh-Hans": "values-b+zh+Hans"}
 
@@ -63,7 +66,8 @@ def drop_sentence(text):
 
 def main():
     strings = json.load(open(CATALOG, encoding="utf-8"))["strings"]
-    taken = set(ANDROID_ONLY)
+    extra = json.load(open(EXTRA, encoding="utf-8"))
+    taken = set(ANDROID_ONLY) | set(extra)
     names = {key: name_for(key, taken) for key in strings}
     langs = sorted({l for v in strings.values() for l in v.get("localizations", {})} - {"en"})
 
@@ -83,6 +87,7 @@ def main():
     for key, entry in strings.items():
         en = entry.get("localizations", {}).get("en", {}).get("stringUnit", {}).get("value", key)
         base.append((names[key], drop_sentence(en), True))
+    base += [(name, texts["en"], True) for name, texts in extra.items()]
     write("values", base)
 
     missing = 0
@@ -94,6 +99,11 @@ def main():
                 missing += 1
                 continue
             rows.append((names[key], drop_sentence(unit["value"]), True))
+        for name, texts in extra.items():
+            if texts.get(lang):
+                rows.append((name, texts[lang], True))
+            else:
+                missing += 1
         write(FOLDERS.get(lang, f"values-{lang}"), rows)
 
     os.makedirs(os.path.join(RES, "xml"), exist_ok=True)

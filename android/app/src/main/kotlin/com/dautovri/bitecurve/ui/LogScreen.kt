@@ -42,6 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -123,10 +124,12 @@ fun endTrip(app: BiteCurveApp, tripId: String) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogScreen() {
+fun LogScreen(onPaywall: (PaywallContext) -> Unit) {
     val app = app()
     val colors = Theme.colors
     val data by app.store.data.collectAsStateWithLifecycle()
+    val isPro by app.entitlements.isPro.collectAsStateWithLifecycle()
+    var proCardDismissed by remember { mutableStateOf(app.prefs.logProCardDismissed) }
     val trips = data.trips.sortedByDescending { it.startedAt }
     val active = trips.firstOrNull { it.isActive }
     val finished = trips.filter { !it.isActive }
@@ -166,6 +169,23 @@ fun LogScreen() {
                     Column(Modifier.widthIn(max = Theme.readableWidth), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         CardHeader(stringResource(R.string.was_the_forecast_right))
                         ForecastCheckCard(Scorecard.summary(finished.mapNotNull { it.scoreRecord }))
+                    }
+                }
+            }
+            // A few trips in, the log is what Pro tunes the expected catch to. Says so once; never a pop-up.
+            if (!isPro && !proCardDismissed && finished.size >= 3) {
+                item {
+                    BiteCard(Modifier.widthIn(max = Theme.readableWidth)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(stringResource(R.string.log_pro_card, finished.size), style = MaterialTheme.typography.bodyMedium, color = colors.primaryText)
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button({ onPaywall(PaywallContext.FACTORS) }) { Text(stringResource(R.string.see_pro_plans), fontWeight = FontWeight.SemiBold) }
+                                TextButton({
+                                    app.prefs.logProCardDismissed = true
+                                    proCardDismissed = true
+                                }) { Text(stringResource(R.string.not_now)) }
+                            }
+                        }
                     }
                 }
             }

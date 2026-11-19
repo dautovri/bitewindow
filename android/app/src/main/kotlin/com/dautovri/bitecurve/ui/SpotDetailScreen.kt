@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
@@ -43,6 +45,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -84,6 +87,7 @@ import com.dautovri.bitecurve.core.TideStation
 import com.dautovri.bitecurve.core.WaterType
 import com.dautovri.bitecurve.data.Forecast
 import com.dautovri.bitecurve.data.Spot
+import com.dautovri.bitecurve.data.Trip
 import com.dautovri.bitecurve.data.WaterReading
 import com.dautovri.bitecurve.data.nowSeconds
 import com.dautovri.bitecurve.data.startOfDay
@@ -91,6 +95,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.math.roundToInt
 
 private class DaySummary(
     val date: Double,
@@ -105,7 +110,7 @@ private class DaySummary(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, onPaywall: () -> Unit) {
+fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, onPaywall: (PaywallContext) -> Unit, onTripStarted: () -> Unit) {
     val app = app()
     val context = LocalContext.current
     val colors = Theme.colors
@@ -185,7 +190,7 @@ fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, on
 
                 if (days.isNotEmpty()) {
                     DayStrip(days.map { StripDay(it.date, it.window?.meanIndex, it.isLocked) }, day?.date, zone) { tapped ->
-                        if (tapped.isLocked) onPaywall() else selectedDay = tapped.date
+                        if (tapped.isLocked) onPaywall(PaywallContext.DAYS) else selectedDay = tapped.date
                     }
                 }
 
@@ -229,16 +234,17 @@ fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, on
                                 }
 
                                 val dayEnd = startOfDay(day.date + 3600, zone, 1)
-                                if (isPro) {
+                                // Today's curve is free: it shows what the index is made of. Other days' curves and the tide curve are Pro.
+                                if (isPro || isToday) {
                                     BiteCurveChart(day.points, day.window, conditions.sunrise, conditions.sunset, zone, Modifier.height(190.dp))
                                     val station = tide
-                                    if (spot.isSalt && station != null) {
+                                    if (isPro && spot.isSalt && station != null) {
                                         val samples = remember(station, day.date) { station.curve(day.date, dayEnd) }
                                         TideChart(samples, zone, Modifier.height(84.dp))
                                     }
                                 } else {
                                     // The day's real frame (daylight, best window) with the curve withheld, never a made-up one.
-                                    Box(Modifier.clip(RoundedCornerShape(14.dp)).clickable(onClick = onPaywall), contentAlignment = Alignment.Center) {
+                                    Box(Modifier.clip(RoundedCornerShape(14.dp)).clickable { onPaywall(PaywallContext.CURVE) }, contentAlignment = Alignment.Center) {
                                         BiteCurveChart(emptyList(), day.window, conditions.sunrise, conditions.sunset, zone, Modifier.height(170.dp), domain = day.date..dayEnd)
                                         Row(
                                             Modifier.padding(horizontal = 24.dp)
@@ -276,7 +282,7 @@ fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, on
                                         } else {
                                             val plans = stringResource(R.string.see_pro_plans)
                                             Box(
-                                                Modifier.size(34.dp).clip(CircleShape).background(colors.well).clickable(onClick = onPaywall)
+                                                Modifier.size(34.dp).clip(CircleShape).background(colors.well).clickable { onPaywall(PaywallContext.FACTORS) }
                                                     .clearAndSetSemantics { contentDescription = plans },
                                                 contentAlignment = Alignment.Center,
                                             ) { Icon(Icons.Filled.Lock, null, Modifier.size(15.dp), tint = colors.primaryText) }
@@ -300,8 +306,25 @@ fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, on
                             }
                         }
 
+                        // One tap from the forecast to the log, while no trip is running.
+                        if (isToday && data.trips.none { it.isActive }) {
+                            OutlinedButton(
+                                {
+                                    // Asked again at the tap: a second tap can land before this screen is gone.
+                                    if (app.store.data.value.trips.none { it.isActive }) app.store.addTrip(Trip(spotId = spot.id))
+                                    onTripStarted()
+                                },
+                                Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                            ) {
+                                Icon(Icons.Filled.PlayArrow, null, Modifier.size(20.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.start_trip_here), fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+
                         val window = day.window
-                        if (isPro && window != null) {
+                        // Pro: every factor, on every day. Free: the two that move today's score most.
+                        if ((isPro || isToday) && window != null) {
                             // Mean weighted contribution of each active factor over the window, with the reading behind it.
                             val inside = day.points.filter { it.time >= window.start && it.time <= window.end }
                             if (inside.isNotEmpty()) {
@@ -321,7 +344,26 @@ fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, on
                                     // Without a station the tide term still counts: the moon phase stands in for spring and neap tides.
                                     if (spot.isSalt) add(Factor(stringResource(R.string.tide), mean { it.contributions.tide }, Icons.Filled.Waves))
                                 }
-                                BiteCard { FactorBreakdown(factors) }
+                                if (isPro) {
+                                    BiteCard { FactorBreakdown(factors) }
+                                } else {
+                                    BiteCard {
+                                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                            FactorBreakdown(
+                                                factors.sortedByDescending { kotlin.math.abs(it.value) }.take(2),
+                                                stringResource(R.string.why_today_scores_x, window.meanIndex.roundToInt()),
+                                            )
+                                            Hairline()
+                                            Row(
+                                                Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { onPaywall(PaywallContext.FACTORS) }.padding(vertical = 4.dp),
+                                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            ) {
+                                                Icon(Icons.Filled.Lock, null, Modifier.size(15.dp), tint = colors.accent)
+                                                Text(stringResource(R.string.see_all_factors), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = colors.accent)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
 

@@ -21,14 +21,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -60,6 +58,7 @@ import com.dautovri.bitecurve.data.DayOutlooks
 import com.dautovri.bitecurve.data.Spot
 import com.dautovri.bitecurve.data.nowSeconds
 import com.dautovri.bitecurve.data.startOfDay
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.math.roundToInt
@@ -70,7 +69,7 @@ import kotlin.math.roundToInt
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlannerScreen(onBack: () -> Unit, onOpen: (Spot, Double) -> Unit, onPaywall: () -> Unit) {
+fun PlannerScreen(onOpen: (Spot, Double) -> Unit, onPaywall: (PaywallContext) -> Unit) {
     val app = app()
     val context = LocalContext.current
     val colors = Theme.colors
@@ -99,6 +98,20 @@ fun PlannerScreen(onBack: () -> Unit, onOpen: (Spot, Double) -> Unit, onPaywall:
         return rows[spot.id]?.firstOrNull { Instant.ofEpochSecond(it.date.toLong()).atZone(spot.zone).toLocalDate() == wanted }
     }
 
+    // Locked columns of the coming weekend: someone planning Saturday on a Wednesday looks
+    // exactly here. Only the weekend that starts within the week, as one run of days; on a
+    // Sunday the Saturday six days off is next weekend, not "this weekend".
+    val lockedWeekend: List<Int> = if (isPro) emptyList() else {
+        val weekend = (Entitlements.freeDays until horizon).filter {
+            Instant.ofEpochSecond(dayLabels[it].toLong()).atZone(phone).dayOfWeek in setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+        }
+        val first = weekend.firstOrNull()
+        if (first == null || first >= 6) emptyList() else weekend.filterIndexed { i, column -> column == first + i }
+    }
+    // True when any spot has a strong window on a locked weekend day. Says no more than that.
+    val weekendLooksStrong = lockedWeekend.any { column -> spots.any { (day(it, column)?.index ?: 0.0) >= 65 } }
+    val lockedContext = if (weekendLooksStrong) PaywallContext.WEEKEND else PaywallContext.DAYS
+
     // The single best spot-and-day in view.
     var best: Pair<Spot, DayOutlook>? = null
     for (spot in spots) for (column in 0 until visibleDays) {
@@ -111,8 +124,7 @@ fun PlannerScreen(onBack: () -> Unit, onOpen: (Spot, Double) -> Unit, onPaywall:
         containerColor = colors.background,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.planner)) },
-                navigationIcon = { IconButton(onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.close)) } },
+                title = { Text(stringResource(R.string.planner), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
             )
         },
@@ -175,11 +187,16 @@ fun PlannerScreen(onBack: () -> Unit, onOpen: (Spot, Double) -> Unit, onPaywall:
                                             val shape = RoundedCornerShape(12.dp)
                                             val pro = stringResource(R.string.bitecurve_pro)
                                             when {
-                                                offset >= visibleDays -> Box(
-                                                    Modifier.size(cell).clip(shape).background(colors.well.copy(alpha = 0.6f)).clickable(onClick = onPaywall)
-                                                        .clearAndSetSemantics { contentDescription = pro },
-                                                    contentAlignment = Alignment.Center,
-                                                ) { Icon(Icons.Filled.Lock, null, Modifier.size(14.dp), tint = colors.secondaryText) }
+                                                offset >= visibleDays -> {
+                                                    val weekend = offset in lockedWeekend
+                                                    Box(
+                                                        Modifier.size(cell).clip(shape).background(colors.well.copy(alpha = 0.6f))
+                                                            .then(if (weekend) Modifier.border(1.5.dp, colors.accent.copy(alpha = 0.6f), shape) else Modifier)
+                                                            .clickable { onPaywall(if (weekend) lockedContext else PaywallContext.DAYS) }
+                                                            .clearAndSetSemantics { contentDescription = pro },
+                                                        contentAlignment = Alignment.Center,
+                                                    ) { Icon(Icons.Filled.Lock, null, Modifier.size(14.dp), tint = if (weekend) colors.accent else colors.secondaryText) }
+                                                }
 
                                                 d != null && index != null -> {
                                                     val color = colors.bite(index)
@@ -218,10 +235,20 @@ fun PlannerScreen(onBack: () -> Unit, onOpen: (Spot, Double) -> Unit, onPaywall:
                         }
                     }
                     if (!isPro) {
-                        Button(onPaywall, Modifier.fillMaxWidth()) {
+                        if (weekendLooksStrong) {
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                                Box(Modifier.size(9.dp).background(colors.bite(65.0), CircleShape))
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.a_strong_bite_is_forecast_this_weekend), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = colors.bite(65.0))
+                            }
+                        }
+                        Button({ onPaywall(if (lockedWeekend.isEmpty()) PaywallContext.DAYS else lockedContext) }, Modifier.fillMaxWidth()) {
                             Icon(Icons.Filled.LockOpen, null, Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.unlock_all_10_days_with_bitecurve_pro), fontWeight = FontWeight.SemiBold)
+                            Text(
+                                stringResource(if (lockedWeekend.isEmpty()) R.string.unlock_all_10_days_with_bitecurve_pro else R.string.see_the_weekend_with_bitecurve_pro),
+                                fontWeight = FontWeight.SemiBold,
+                            )
                         }
                     }
                 }

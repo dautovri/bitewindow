@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.WifiOff
@@ -105,10 +105,12 @@ private suspend fun snapshot(spot: Spot, context: SpotContext, forecast: Forecas
 /** The Forecast tab: one card per saved spot with today's index, best window and the weather now. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForecastScreen(onAddSpot: () -> Unit, onOpen: (Spot) -> Unit, onPlanner: () -> Unit, onPaywall: () -> Unit, isFront: Boolean) {
+fun ForecastScreen(onAddSpot: () -> Unit, onOpen: (Spot) -> Unit, onSettings: () -> Unit) {
     val app = app()
     val data by app.store.data.collectAsStateWithLifecycle()
     val isPro by app.entitlements.isPro.collectAsStateWithLifecycle()
+    val alertsOn by app.prefs.alertsEnabled.collectAsStateWithLifecycle()
+    var alertsPromptAnswered by remember { mutableStateOf(app.prefs.alertsPromptAnswered) }
     val spots = data.spots
 
     // A spot added, removed or changed: the alerts follow.
@@ -116,25 +118,15 @@ fun ForecastScreen(onAddSpot: () -> Unit, onOpen: (Spot) -> Unit, onPlanner: () 
         delay(4000)
         com.dautovri.bitecurve.alerts.BiteAlerts.reschedule(app)
     }
-    // Once, for someone who came through the welcome screen: after their first spot has had
-    // time to show its forecast, offer Pro.
-    LaunchedEffect(spots.size, isFront) {
-        if (spots.size != 1 || isPro || !isFront || !app.prefs.offerTrialAfterFirstSpot) return@LaunchedEffect
-        delay(8000)
-        if (app.entitlements.isPro.value) return@LaunchedEffect
-        app.prefs.offerTrialAfterFirstSpot = false
-        onPaywall()
-    }
-
     Scaffold(
         containerColor = Theme.colors.background,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.forecast), fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    if (spots.isNotEmpty()) IconButton(onPlanner) { Icon(Icons.Filled.CalendarMonth, stringResource(R.string.planner), tint = Theme.colors.accent) }
+                actions = {
+                    IconButton(onAddSpot) { Icon(Icons.Filled.Add, stringResource(R.string.add_spot), tint = Theme.colors.accent) }
+                    IconButton(onSettings) { Icon(Icons.Filled.Settings, stringResource(R.string.settings), tint = Theme.colors.accent) }
                 },
-                actions = { IconButton(onAddSpot) { Icon(Icons.Filled.Add, stringResource(R.string.add_spot), tint = Theme.colors.accent) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Theme.colors.background),
             )
         },
@@ -161,6 +153,12 @@ fun ForecastScreen(onAddSpot: () -> Unit, onOpen: (Spot) -> Unit, onPlanner: () 
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(Theme.gap), horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                // Once, to someone with a spot and no alerts: free for today and tomorrow, so not a paywall.
+                if (!alertsOn && !alertsPromptAnswered) {
+                    item(key = "alerts-prompt") {
+                        Box(Modifier.widthIn(max = Theme.readableWidth)) { AlertsPromptCard { alertsPromptAnswered = true } }
+                    }
+                }
                 items(spots, key = { it.id }) { spot ->
                     SpotCard(spot, isPro, onOpen = { onOpen(spot) }, onDelete = { app.store.deleteSpot(spot.id) })
                 }

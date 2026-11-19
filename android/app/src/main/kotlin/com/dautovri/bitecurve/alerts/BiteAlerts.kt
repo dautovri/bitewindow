@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import com.dautovri.bitecurve.BiteCurveApp
 import com.dautovri.bitecurve.MainActivity
 import com.dautovri.bitecurve.R
+import com.dautovri.bitecurve.billing.Entitlements
 import com.dautovri.bitecurve.core.BiteWindow
 import com.dautovri.bitecurve.data.DayOutlook
 import com.dautovri.bitecurve.data.DayOutlooks
@@ -44,8 +45,11 @@ import kotlin.math.roundToInt
  */
 object BiteAlerts {
     const val channelId = "bite"
-    /** How far ahead alerts are laid out, so they keep coming for a week without the app opened. */
+    /** How far ahead Pro alerts are laid out, so they keep coming for a week without the app opened. */
     const val horizonDays = 7
+
+    /** Free alerts cover the days the free forecast shows: today and tomorrow, as on iOS. */
+    fun horizon(isPro: Boolean): Int = if (isPro) horizonDays else minOf(horizonDays, Entitlements.freeDays)
     private const val maxPending = 40
 
     data class Alert(val id: String, val fireDate: Double, val title: String, val body: String)
@@ -128,7 +132,7 @@ object BiteAlerts {
         cancelAll(context)
         if (!app.prefs.alertsEnabled.value || !isAuthorized(context)) return emptyList()
         val inputs = DayOutlooks.inputs(app.store.data.value.spots, app.forecasts)
-        val days = DayOutlooks.compute(inputs, horizonDays, now)
+        val days = DayOutlooks.compute(inputs, horizon(app.entitlements.isPro.value), now)
         val wording = object : Wording {
             override fun clock(time: Double, zone: ZoneId) = clock(context, time, zone)
             override fun startsInAnHour(range: String, index: Int) =

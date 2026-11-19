@@ -83,4 +83,11 @@ class BiteAlertsTest {
         // Every zone the table can answer with is one this platform knows.
         assertTrue(java.io.File("src/main/res/raw/tzlookup.txt").readLines()[1].split(',').all { runCatching { ZoneId.of(it) }.isSuccess })
     }
+
+    @Test
+    fun freeAlertsStopAtTomorrow() {
+        // Free alerts cover the days the free forecast shows; Pro gets the week.
+        assertEquals(2, BiteAlerts.horizon(isPro = false))
+        assertEquals(7, BiteAlerts.horizon(isPro = true))
+    }
 }

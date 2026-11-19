@@ -16,7 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -44,6 +44,7 @@ import com.dautovri.bitecurve.ui.HowItWorksScreen
 import com.dautovri.bitecurve.ui.LogScreen
 import com.dautovri.bitecurve.ui.MapRequest
 import com.dautovri.bitecurve.ui.MapScreen
+import com.dautovri.bitecurve.ui.PaywallContext
 import com.dautovri.bitecurve.ui.PaywallDialog
 import com.dautovri.bitecurve.ui.PlannerScreen
 import com.dautovri.bitecurve.ui.SettingsScreen
@@ -68,10 +69,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Tabs: Forecast, Planner, Map, Log. Settings opens from the gear on the Forecast tab.
+private const val mapTab = 2
+private const val logTab = 3
+
 /** A screen pushed over the tabs. */
 private sealed interface Pushed {
     data class Detail(val spotId: String, val day: Double?) : Pushed
-    data object Planner : Pushed
+    data object Settings : Pushed
     data object HowItWorks : Pushed
 }
 
@@ -81,7 +86,7 @@ private fun Root() {
     val colors = Theme.colors
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val stack = remember { mutableStateListOf<Pushed>() }
-    var paywall by remember { mutableStateOf(false) }
+    var paywall by remember { mutableStateOf<PaywallContext?>(null) }
     var mapRequest by remember { mutableStateOf<MapRequest?>(null) }
     val didOnboard by app.prefs.didOnboard.collectAsStateWithLifecycle()
     var showWelcome by remember { mutableStateOf(false) }
@@ -110,11 +115,9 @@ private fun Root() {
         WelcomeScreen { choice ->
             app.prefs.setDidOnboard(true)
             showWelcome = false
-            // Pro is offered once, after the first forecast has been seen.
-            app.prefs.offerTrialAfterFirstSpot = true
             when (choice) {
-                WelcomeChoice.LOCATE -> { mapRequest = MapRequest.LOCATE; tab = 1 }
-                WelcomeChoice.SEARCH -> { mapRequest = MapRequest.SEARCH; tab = 1 }
+                WelcomeChoice.LOCATE -> { mapRequest = MapRequest.LOCATE; tab = mapTab }
+                WelcomeChoice.SEARCH -> { mapRequest = MapRequest.SEARCH; tab = mapTab }
                 WelcomeChoice.SKIP -> {}
             }
         }
@@ -124,16 +127,20 @@ private fun Root() {
     val top = stack.lastOrNull()
     Box(Modifier.fillMaxSize()) {
         when (top) {
-            is Pushed.Detail -> SpotDetailScreen(top.spotId, top.day, onBack = { stack.remove(top) }, onPaywall = { paywall = true })
-            Pushed.Planner -> PlannerScreen(onBack = { stack.remove(top) }, onOpen = { spot, day -> stack.add(Pushed.Detail(spot.id, day)) }, onPaywall = { paywall = true })
+            is Pushed.Detail -> SpotDetailScreen(
+                top.spotId, top.day, onBack = { stack.remove(top) }, onPaywall = { paywall = it },
+                // The running trip lives on the Log tab.
+                onTripStarted = { stack.clear(); tab = logTab },
+            )
+            Pushed.Settings -> SettingsScreen(onBack = { stack.remove(top) }, onPaywall = { paywall = it }, onHowItWorks = { stack.add(Pushed.HowItWorks) })
             Pushed.HowItWorks -> HowItWorksScreen { stack.remove(top) }
             null -> Scaffold(
                 containerColor = colors.background,
                 bottomBar = {
                     NavigationBar(containerColor = colors.card) {
                         val tabs = listOf(
-                            R.string.forecast to Icons.AutoMirrored.Filled.ShowChart, R.string.map to Icons.Filled.Map,
-                            R.string.log to Icons.AutoMirrored.Filled.MenuBook, R.string.settings to Icons.Filled.Settings,
+                            R.string.forecast to Icons.AutoMirrored.Filled.ShowChart, R.string.planner to Icons.Filled.CalendarMonth,
+                            R.string.map to Icons.Filled.Map, R.string.log to Icons.AutoMirrored.Filled.MenuBook,
                         )
                         tabs.forEachIndexed { i, (title, icon) ->
                             NavigationBarItem(
@@ -151,17 +158,19 @@ private fun Root() {
                 // The tab bar already covers the system bar at the bottom; the screens inside must not pad for it again.
                 Box(Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding()).consumeWindowInsets(WindowInsets.navigationBars)) {
                     when (tab) {
-                        0 -> ForecastScreen(
-                            onAddSpot = { tab = 1 }, onOpen = { stack.add(Pushed.Detail(it.id, null)) }, onPlanner = { stack.add(Pushed.Planner) },
-                            onPaywall = { paywall = true }, isFront = !paywall,
+                        0 -> ForecastScreen(onAddSpot = { tab = mapTab }, onOpen = { stack.add(Pushed.Detail(it.id, null)) }, onSettings = { stack.add(Pushed.Settings) })
+                        1 -> PlannerScreen(onOpen = { spot, day -> stack.add(Pushed.Detail(spot.id, day)) }, onPaywall = { paywall = it })
+                        mapTab -> MapScreen(
+                            mapRequest, onRequestHandled = { mapRequest = null },
+                            // The first spot: straight to its forecast, curve and all.
+                            onFirstSpot = { spot -> tab = 0; stack.add(Pushed.Detail(spot.id, null)) },
+                            onPaywall = { paywall = it },
                         )
-                        1 -> MapScreen(mapRequest, onRequestHandled = { mapRequest = null }, onFirstSpot = { tab = 0 }, onPaywall = { paywall = true })
-                        2 -> LogScreen()
-                        else -> SettingsScreen(onPaywall = { paywall = true }, onHowItWorks = { stack.add(Pushed.HowItWorks) })
+                        else -> LogScreen(onPaywall = { paywall = it })
                     }
                 }
             }
         }
     }
-    if (paywall) PaywallDialog { paywall = false }
+    paywall?.let { context -> PaywallDialog(context) { paywall = null } }
 }
