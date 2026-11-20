@@ -510,6 +510,9 @@ struct SpotDetailView: View {
                     let conditions = conditions(day)
                     heroCard(day, conditions)
                     conditionsCard(day, conditions)
+                    AppleWeatherAttribution()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 4)
                     if entitlements.isPro, let window = day.window {
                         FactorBreakdown(factors: factors(day, window, conditions)).card()
                     }
@@ -874,8 +877,7 @@ struct SpotDetailView: View {
 
     private var footer: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Link("Weather data: Apple Weather — legal attribution",
-                 destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
+            AppleWeatherAttribution()
             Text("Bite windows are estimates from weather, sun, moon and tide. Fish don't read forecasts.")
                 .foregroundStyle(.secondary)
         }

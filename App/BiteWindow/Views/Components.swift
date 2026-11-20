@@ -274,3 +274,20 @@ struct StatTile: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+/// Apple requires its Weather mark and a link to its legal page wherever WeatherKit data is
+/// shown (guideline 5.2.5). The forecast comes from WeatherKit through our server, so the app
+/// has no WeatherKit entitlement and shows the mark as text.
+struct AppleWeatherAttribution: View {
+    static let legalURL = URL(string: "https://weatherkit.apple.com/legal-attribution.html")!
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(verbatim: "\u{F8FF} Weather")
+                .accessibilityLabel(Text(verbatim: "Apple Weather"))
+            Link("Other data sources", destination: Self.legalURL)
+                .tint(Theme.accent)
+        }
+        .font(.footnote)
+    }
+}

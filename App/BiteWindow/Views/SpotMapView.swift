@@ -563,6 +563,7 @@ private struct SpeciesNowCard: View {
                 Text("Conditions that suit each fish, not a survey of this water.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                AppleWeatherAttribution()
             } else if isSalt, outlook != nil {
                 // Weather is saved but no sea temperature has arrived for this spot yet.
                 message("No sea temperature for this spot yet. Open it on the Forecast tab while online.")
