@@ -1,7 +1,7 @@
 import BiteCore
+import StoreKit
 import SwiftData
 import SwiftUI
-import os
 
 /// Trip log. Ending a trip with zero fish is a single tap, because blank trips
 /// are what make the catch-rate model honest.
@@ -9,6 +9,7 @@ struct LogView: View {
     @Query(sort: \Trip.startedAt, order: .reverse) private var trips: [Trip]
     @Query(sort: \Spot.createdAt) private var spots: [Spot]
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.requestReview) private var requestReview
 
     private var active: Trip? { trips.first { $0.isActive } }
     private var finished: [Trip] { trips.filter { !$0.isActive } }
@@ -20,11 +21,21 @@ struct LogView: View {
                     if let trip = active {
                         VStack(alignment: .leading, spacing: 8) {
                             CardHeader(title: "Current trip")
-                            ActiveTripRow(trip: trip)
+                            ActiveTripRow(trip: trip) { ended in
+                                // After the card has moved to the history, never over a running
+                                // trip; checked right before asking.
+                                Task {
+                                    try? await Task.sleep(for: .milliseconds(800))
+                                    if ReviewPrompt.isDue(after: ended) { requestReview() }
+                                }
+                            }
                         }
                     } else {
                         StartTripMenu(spots: spots) { spot in
                             modelContext.insert(Trip(spot: spot))
+                            try? modelContext.save()
+                            // No "how did it go?" for this spot while the trip runs.
+                            Task { await BiteAlerts.reschedule() }
                         }
                     }
 
@@ -96,6 +107,9 @@ private struct StartTripMenu: View {
 
 private struct ActiveTripRow: View {
     @Bindable var trip: Trip
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// Told when the trip ends (the Log tab may ask for a rating).
+    var onEnded: (Trip) -> Void = { _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -113,23 +127,63 @@ private struct ActiveTripRow: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                // Each tap on plus stamps the fish with the time, for the forecast check.
-                Stepper {
-                    Label("Fish caught: \(trip.catchCount)", systemImage: "fish.fill")
-                        .font(.title3.weight(.medium))
-                        .monospacedDigit()
-                        .padding(.vertical, 4)
-                } onIncrement: {
-                    if trip.catchCount < 500 { trip.logCatch() }
-                } onDecrement: {
-                    trip.removeLastCatch()
+                // Each tap stamps the fish with the time, for the forecast check. One big
+                // target for wet hands on a moving boat, and a separate small one to take a fish back.
+                // Side by side normally; stacked at accessibility text sizes so the count stays whole.
+                let large = dynamicTypeSize.isAccessibilitySize
+                (large ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))) {
+                    Button {
+                        if trip.catchCount < 500 { trip.logCatch() }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "plus")
+                                .font(.title3.weight(.heavy))
+                            Label("Fish caught: \(trip.catchCount)", systemImage: "fish.fill")
+                                .font(.title3.weight(.bold))
+                                .monospacedDigit()
+                                .lineLimit(large ? nil : 1)
+                                .minimumScaleFactor(0.7)
+                                .fixedSize(horizontal: false, vertical: large)
+                        }
+                        .foregroundStyle(BiteScale.onSolid)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
+                        .frame(maxWidth: .infinity, minHeight: 64)
+                        .background(Theme.accent, in: .rect(cornerRadius: Theme.wellRadius, style: .continuous))
+                        .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.impact, trigger: trip.catchCount)
+                    .accessibilityAdjustableAction { direction in
+                        switch direction {
+                        case .increment: if trip.catchCount < 500 { trip.logCatch() }
+                        case .decrement: trip.removeLastCatch()
+                        @unknown default: break
+                        }
+                    }
+
+                    Button {
+                        trip.removeLastCatch()
+                    } label: {
+                        Image(systemName: "minus")
+                            .font(.title3.weight(.bold))
+                            .frame(maxWidth: large ? .infinity : 52)
+                            .frame(height: large ? 52 : 64)
+                            .background(Theme.card, in: .rect(cornerRadius: Theme.wellRadius, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.wellRadius, style: .continuous).strokeBorder(Theme.stroke, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(trip.catchCount == 0)
+                    // The minus symbol carries the system's own spoken label, so Voice Control
+                    // and Switch Control reach it too; VoiceOver can also swipe down on the catch button.
                 }
-                .controlSize(.large)
                 if let times = trip.completeCatchTimes, !times.isEmpty {
                     CatchTimesLine(times: times, timeZone: trip.spot?.timeZone ?? .current)
                 }
             }
             .well()
+
+            PlannedQuestion(planned: $trip.planned)
 
             Button {
                 end()
@@ -141,51 +195,53 @@ private struct ActiveTripRow: View {
                 .padding(.vertical, 6)
                 .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            // Secondary and set apart, so a bumped thumb never ends the trip.
+            .buttonStyle(.bordered)
             .controlSize(.large)
-            .tint(Theme.accent)
+            .tint(Theme.ink2)
+            .padding(.top, 4)
         }
         .card()
     }
 
-    /// Ends the trip and stores what the model expected for it, so the trip
-    /// can train the personal catch rate later.
     private func end() {
-        let start = trip.startedAt, finish = Date()
-        // Neutral estimate first, so the trip counts even if the app quits now.
-        trip.expectedCatch = CatchModel.expectedCatch(points: [], from: start, to: finish)
-        trip.endedAt = finish
-        guard finish.timeIntervalSince(start) <= CatchModel.maxTripHours * 3600 else { return }
-        let base = trip.spot?.context
-        let water = trip.spot?.waterReading
         let ended = trip
-        Task { @MainActor in
-            var context = base
-            if let c = base, c.water.isSalt {
-                context?.tide = await ForecastService.shared.tideStation(latitude: c.latitude, longitude: c.longitude)
-            }
-            let points = await ForecastService.shared.tripPoints(context: context, from: start, to: finish)
-            ended.expectedCatch = CatchModel.expectedCatch(points: points, from: start, to: finish)
-            if let times = ended.completeCatchTimes,
-               let record = Scorecard.record(points: points, from: start, to: finish, catchTimes: times) {
-                ended.bandHours = record.hours
-                ended.bandCatches = record.catches
-                ended.forecastIndex = record.meanIndex
-                // Kept on the phone: the only form in which this trip could ever tune the weights.
-                if let context,
-                   let slices = Scorecard.slices(points: points, weights: Weights.prior(water: context.water, species: context.species),
-                                                 from: start, to: finish, catchTimes: times) {
-                    let fit = TripFitRecord(water: context.water.rawValue, species: context.species.rawValue,
-                                            waterTempC: water?.tempC, waterSource: water?.sourceName,
-                                            hasBank: context.bankBearingDeg != nil, hasTideStation: context.tide != nil,
-                                            slices: slices)
-                    ended.fitRecord = try? JSONEncoder().encode(fit)
-                    Logger(subsystem: "com.dautovri.bitecurve", category: "log")
-                        .info("trip fit record: \(slices.count) slices, \(ended.fitRecord?.count ?? 0) bytes")
-                }
-            }
-            await TripSharing.sendPending()
+        TripRecorder.end(ended)
+        try? ended.modelContext?.save()
+        onEnded(ended)
+    }
+}
+
+/// "Planned from forecast?" with Yes and No. Optional: tapping the chosen answer again clears it.
+private struct PlannedQuestion: View {
+    @Binding var planned: Bool?
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("Planned from forecast?")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            pill(true, Text("Yes"))
+            pill(false, Text("No"))
         }
+        .accessibilityElement(children: .contain)
+    }
+
+    private func pill(_ value: Bool, _ label: Text) -> some View {
+        let on = planned == value
+        return Button {
+            planned = on ? nil : value
+        } label: {
+            label
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 14)
+                .frame(minHeight: 44)
+                .foregroundStyle(on ? BiteScale.onSolid : Theme.ink2)
+                .background(on ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(Theme.well), in: .capsule)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(on ? .isSelected : [])
     }
 }
 
@@ -273,7 +329,9 @@ private struct ForecastCheckCard: View {
                         GridRow {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack(spacing: 6) {
-                                    Circle().fill(BiteScale.color(sample)).frame(width: 8, height: 8)
+                                    Image(systemName: BiteScale.symbol(sample))
+                                        .font(.system(size: 8, weight: .bold))
+                                        .foregroundStyle(BiteScale.color(sample))
                                     // Two lines rather than a cut-off label ("Au-dessus de la moyenne").
                                     Text(verbatim: BiteScale.label(sample))
                                         .lineLimit(2)
@@ -283,10 +341,14 @@ private struct ForecastCheckCard: View {
                                 // The bar is the catch rate, so a forecast that holds reads as a staircase.
                                 GeometryReader { proxy in
                                     let share = peak > 0 ? (summary.rate(band: band) ?? 0) / peak : 0
-                                    Capsule().fill(BiteScale.color(sample).opacity(0.85))
-                                        .frame(width: max(share > 0 ? 4 : 0, proxy.size.width * share))
+                                    // On a visible track, so a band with no fish reads as zero, not as missing.
+                                    ZStack(alignment: .leading) {
+                                        Capsule().fill(Theme.well)
+                                        Capsule().fill(BiteScale.color(sample))
+                                            .frame(width: max(share > 0 ? 4 : 0, proxy.size.width * share))
+                                    }
                                 }
-                                .frame(height: 5)
+                                .frame(height: 6)
                                 .accessibilityHidden(true)
                             }
                             Text(verbatim: hours(summary.hours[band]))
@@ -376,15 +438,20 @@ private struct TripHistoryCard: View {
     }
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .center, spacing: 12) {
-                details
-                Spacer(minLength: 8)
-                badge
+        VStack(alignment: .leading, spacing: 8) {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 12) {
+                    details
+                    Spacer(minLength: 8)
+                    badge
+                }
+                VStack(alignment: .leading, spacing: 10) {
+                    details
+                    badge
+                }
             }
-            VStack(alignment: .leading, spacing: 10) {
-                details
-                badge
+            if let times = trip.completeCatchTimes, !times.isEmpty {
+                CatchTimesLine(times: times, timeZone: trip.spot?.timeZone ?? .current)
             }
         }
         .card()
@@ -406,15 +473,22 @@ private struct TripHistoryCard: View {
                 .foregroundStyle(.secondary)
             if let index = trip.forecastIndex {
                 HStack(spacing: 6) {
-                    Circle().fill(BiteScale.color(index)).frame(width: 8, height: 8)
+                    Image(systemName: BiteScale.symbol(index))
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(BiteScale.color(index))
                         .accessibilityHidden(true)
                     Text("Forecast \(Int(index.rounded())) · \(BiteScale.label(index))")
+                    ShareLink(item: TripShare(day: trip.startedAt, timeZone: trip.spot?.timeZone ?? .current, index: index,
+                                              catches: trip.catchCount, hours: trip.hours),
+                              preview: SharePreview(Text(verbatim: "BiteCurve"))) {
+                        Image(systemName: "square.and.arrow.up")
+                            .frame(minWidth: 44, minHeight: 32)
+                            .contentShape(.rect)
+                    }
+                    .labelStyle(.iconOnly)
                 }
                 .font(.footnote)
                 .foregroundStyle(.secondary)
-            }
-            if let times = trip.completeCatchTimes, !times.isEmpty {
-                CatchTimesLine(times: times, timeZone: trip.spot?.timeZone ?? .current)
             }
         }
     }

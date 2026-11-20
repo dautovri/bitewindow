@@ -14,7 +14,7 @@ struct PlannerView: View {
     @State private var showPaywall = false
 
     static let horizonDays = 10
-    static let freeDays = 2
+    static let freeDays = EntitlementManager.freeDays
 
     /// A spot on a day, to open its forecast.
     struct Target: Hashable {
@@ -23,7 +23,7 @@ struct PlannerView: View {
     }
 
     private let nameWidth: CGFloat = 112
-    private let cell = CGSize(width: 46, height: 46)
+    private let cell = CGSize(width: 48, height: 48)
     private let gap: CGFloat = 6
 
     private var visibleDays: Int { entitlements.isPro ? Self.horizonDays : Self.freeDays }
@@ -34,6 +34,23 @@ struct PlannerView: View {
     private var dayLabels: [Date] {
         let today = Calendar.current.startOfDay(for: Date())
         return (0..<Self.horizonDays).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: today) }
+    }
+
+    /// Locked columns of the coming week that fall on a weekend: a free user planning
+    /// Saturday on a Wednesday is looking exactly here.
+    private var lockedWeekend: [Int] {
+        guard !entitlements.isPro else { return [] }
+        // The coming weekend only: it starts within the week, and may run a day past it.
+        let weekend = (Self.freeDays..<Self.horizonDays).filter { Calendar.current.isDateInWeekend(dayLabels[$0]) }
+        guard let first = weekend.first, first < 7 else { return [] }
+        return weekend.enumerated().filter { $0.element == first + $0.offset }.map(\.element)
+    }
+
+    /// True when any spot has a strong window on a locked weekend day. Says no more than that.
+    private var weekendLooksStrong: Bool {
+        lockedWeekend.contains { column in
+            spots.contains { (day(for: $0, column: column)?.index ?? 0) >= BiteAlerts.defaultThreshold }
+        }
     }
 
     /// The single best spot-and-day in view.
@@ -68,12 +85,24 @@ struct PlannerView: View {
                     grid.card(padding: 12)
                     legend
                     if !entitlements.isPro {
+                        if weekendLooksStrong {
+                            Label("A strong bite is forecast this weekend", systemImage: BiteScale.symbol(BiteAlerts.defaultThreshold))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(BiteScale.color(BiteAlerts.defaultThreshold))
+                                .frame(maxWidth: .infinity)
+                        }
                         Button {
                             showPaywall = true
                         } label: {
-                            Label("Unlock all 10 days with BiteCurve Pro", systemImage: "lock.open.fill")
-                                .font(.subheadline.weight(.semibold))
-                                .frame(maxWidth: .infinity)
+                            Group {
+                                if lockedWeekend.isEmpty {
+                                    Label("Unlock all 10 days with BiteCurve Pro", systemImage: "lock.open.fill")
+                                } else {
+                                    Label("See the weekend with BiteCurve Pro", systemImage: "lock.open.fill")
+                                }
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
                         .buttonBorderShape(.capsule)
@@ -140,8 +169,16 @@ struct PlannerView: View {
                         }
                     }
                 }
+                .padding(.trailing, 12)
             }
             .scrollIndicators(.hidden)
+            .mask {
+                HStack(spacing: 0) {
+                    Color.black
+                    LinearGradient(colors: [.black, .black.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                        .frame(width: 12)
+                }
+            }
         }
     }
 
@@ -152,30 +189,33 @@ struct PlannerView: View {
             Button {
                 showPaywall = true
             } label: {
+                let weekend = lockedWeekend.contains(offset)
                 Image(systemName: "lock.fill")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(weekend ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(.secondary))
                     .frame(width: cell.width, height: cell.height)
-                    .background(Theme.well.opacity(0.6), in: .rect(cornerRadius: 12, style: .continuous))
+                    .background(Theme.well.opacity(0.6), in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
+                    .overlay {
+                        if weekend {
+                            RoundedRectangle(cornerRadius: Theme.cellRadius, style: .continuous)
+                                .strokeBorder(Theme.accent.opacity(0.6), lineWidth: 1.5)
+                        }
+                    }
             }
             .buttonStyle(.plain)
             .accessibilityLabel(Text("BiteCurve Pro"))
         } else if let day, let index = day.index {
-            let color = BiteScale.color(index)
             let isBest = best.map { $0.spot.id == spot.id && $0.day.date == day.date } ?? false
             Button {
                 target = Target(spotID: spot.id, day: day.date)
             } label: {
-                Text(verbatim: "\(Int(index.rounded()))")
-                    .font(.system(.callout, design: .rounded, weight: .bold))
-                    .monospacedDigit()
-                    // Strong days are solid; the rest are tinted, so the eye lands on the best ones.
-                    .foregroundStyle(index >= 65 ? .white : color)
-                    .frame(width: cell.width, height: cell.height)
-                    .background(color.opacity(index >= 65 ? 1 : 0.16), in: .rect(cornerRadius: 12, style: .continuous))
+                // Solid, outlined, dashed or flat by step, with its shape: readable without colour.
+                ScoreTile(index: index, size: cell)
                     .overlay {
                         if isBest {
-                            RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.primary, lineWidth: 2)
+                            RoundedRectangle(cornerRadius: Theme.cellRadius + 3, style: .continuous)
+                                .strokeBorder(Color.primary, lineWidth: 2)
+                                .padding(-3)
                         }
                     }
             }
@@ -186,7 +226,7 @@ struct PlannerView: View {
             Text(verbatim: loaded ? "–" : "")
                 .foregroundStyle(.secondary)
                 .frame(width: cell.width, height: cell.height)
-                .background(Theme.well.opacity(0.4), in: .rect(cornerRadius: 12, style: .continuous))
+                .background(Theme.well.opacity(0.4), in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
                 .accessibilityHidden(true)
         }
     }
@@ -203,7 +243,9 @@ struct PlannerView: View {
         HStack(spacing: 12) {
             ForEach([70.0, 57, 42, 20], id: \.self) { sample in
                 HStack(spacing: 5) {
-                    Circle().fill(BiteScale.color(sample)).frame(width: 8, height: 8)
+                    Image(systemName: BiteScale.symbol(sample))
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(BiteScale.color(sample))
                     Text(verbatim: BiteScale.label(sample))
                 }
             }

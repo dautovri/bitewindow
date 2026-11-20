@@ -1,40 +1,38 @@
-# BiteWindow
+# BiteCurve: Fishing Forecast
 
-Evidence-calibrated fishing bite-window prediction for iOS. Working name.
+Evidence-calibrated fishing bite-window prediction for iOS (App Store id 6834430484). The code and Xcode targets still use the original working name, BiteWindow.
 
 | Part | Path | What it is |
 |---|---|---|
-| Engine | `Sources/BiteCore` | Pure Swift: sun/moon ephemeris, solunar periods, bite-score terms, tide harmonics, Gamma–Poisson personalization, geohash |
-| App | `App/` | SwiftUI + SwiftData + StoreKit 2 + CoreMotion + MapKit, iOS 17+, generated with XcodeGen |
-| Backend | `backend/` | Cloudflare Worker: WeatherKit REST behind a geohash-5 / hourly KV cache; NOAA CO-OPS harmonic constants for the nearest tide station (`/tide`) |
+| Engine | `Sources/BiteCore` | Pure Swift: sun/moon ephemeris, solunar periods, bite-score terms, tide harmonics, Gamma–Poisson personalization, forecast scorecard, geohash |
+| App | `App/` | SwiftUI + SwiftData + StoreKit 2 + WidgetKit + CoreMotion + MapKit, iOS 17+, generated with XcodeGen |
+| Backend | `backend/` | Cloudflare Worker: WeatherKit behind a geohash-5 hourly KV cache (`/wx`), NOAA tide constants (`/tide`), water temperature (`/water`), opt-in shared trips in D1 (`/trip`) |
+| Android | `android/` | Kotlin port in progress (own branch), with a parity harness against `BiteCore` |
 
 ## Status
 
 | Component | State |
 |---|---|
-| `BiteCore` | 29 unit tests pass on Linux (Swift 6.0, container `swift:6.0`) |
-| `backend` | 11 tests pass on Node 22; never deployed, never called the live WeatherKit or NOAA APIs (NOAA response shapes taken from docs) |
-| `App` | Compiles in CI (`ios` job, macos-15, iOS Simulator, unsigned). Never run on a simulator or device; no UI tests |
-| Tide engine | 8 constituents, tested for self-consistency only; not checked against NOAA predictions |
+| App | 1.0 and 1.1 released; 1.2.0 in App Review. 18 store languages |
+| `BiteCore` | 42 unit tests (Linux, `swift:6.0`) |
+| App tests | StoreKit purchase tests and structure tests (`App/BiteWindowTests`), run in CI on Xcode 26 |
+| `backend` | Deployed at `bitewindow-wx.dautov.workers.dev`; Node tests in `backend/test` |
+| Tide engine | Checked against NOAA predictions at three US stations (see `docs/SCIENCE.md`); US stations only |
 | Species thermal parameters, factor weights | Heuristic placeholders (see `docs/SCIENCE.md`) |
 
 ## Run
 
 ```sh
-swift test                      # engine
-cd backend && npm test          # worker
-cd App && xcodegen generate && open BiteWindow.xcodeproj   # app (macOS, `brew install xcodegen`)
+xcrun --toolchain default swift test     # engine
+cd backend && npm test                   # worker
+cd App && xcodegen generate && open BiteWindow.xcodeproj   # app
 ```
 
-The app runs on synthetic sample weather until `BiteAPIBase` in `App/project.yml` points at a deployed worker.
+Debug launch arguments: `-BCSeedSpots YES` (sample spots and trips), `-BCSkipWelcome YES`, `-BCPro YES`, `-BCAPIBase <url>` (another backend, for failure drills).
 
-## Setup still required
+## Data store
 
-1. **WeatherKit**: enable the capability for a Services ID, create a key (`.p8`), fill `backend/wrangler.toml`, `wrangler kv namespace create WX_CACHE`, `wrangler secret put WEATHERKIT_PRIVATE_KEY`, `wrangler deploy`.
-2. **WeatherKit terms**: confirm that serving cached WeatherKit data from your own server to your own app is permitted before launch. The whole backend design depends on it.
-3. **App Store Connect**: subscription group "Pro" with `bitewindow.pro.annual` ($39.99, 7-day trial) and `bitewindow.pro.monthly` ($7.99); non-consumable `bitewindow.pro.lifetime` later. Enable Billing Grace Period. Enroll in the Small Business Program.
-4. **StoreKit testing**: add a StoreKit configuration file in Xcode with the same product IDs.
-5. **iCloud sync**: add the iCloud/CloudKit capability; the SwiftData schema is already CloudKit-compatible.
+SwiftData, local only, with a versioned schema (`BiteSchemaV1`, `BiteMigrationPlan` in `App/BiteWindow/Models/Models.swift`). Adding optional or defaulted fields needs nothing; any other change needs a new schema version and a migration stage. A store that cannot be opened is moved aside as `default.store.unreadable-<time>`, never deleted.
 
 ## Free vs Pro (as implemented)
 
@@ -43,6 +41,8 @@ The app runs on synthetic sample weather until `BiteAPIBase` in `App/project.yml
 | Trip log incl. zero-catch trips | yes | yes |
 | Saved spots | 3 | unlimited |
 | Daily best window + index | today, tomorrow | 10 days |
+| Bite alerts and widgets | today, tomorrow | 7 days |
+| Planner | today, tomorrow | 10 days |
 | Hourly bite curve | no | yes |
 | Tide height curve (saltwater) | no | yes |
 | Expected catch in the best window, scaled by your log | no | yes |
@@ -75,6 +75,5 @@ English plus 17 translations in `App/BiteWindow/Localizable.xcstrings` (109 stri
 
 ## Not built yet
 
-- Personal model: only the per-spot catch-rate scale is fitted (`CatchRateMultiplier`). Factor weights are not refitted from the log.
-- Tides: US (NOAA) stations only; within 40 km of the spot; no validation against NOAA published predictions.
-- Bathymetry overlays, offline map packs, push alerts, CoreML model, App Store Server Notifications, backend rate limiting / App Attest.
+- Factor weights are not refitted yet: opt-in shared trips (`/trip`) collect what a refit needs.
+- Tides outside the US (moon phase stands in), offline map packs, iCloud sync, bathymetry.

@@ -61,8 +61,50 @@ final class ForecastService {
         return url
     }
 
+    // MARK: One download per place at a time
+
+    /// Requests already on their way, by key. The refresh, a spot card and the detail screen
+    /// often ask for the same place at the same moment; they all wait for one request.
+    private final class Flights<Value> {
+        private let lock = NSLock()
+        private var tasks: [String: Task<Value, Never>] = [:]
+
+        func run(_ key: String, _ work: @escaping () async -> Value) async -> Value {
+            let task = lock.withLock {
+                if let running = tasks[key] { return running }
+                let task = Task { await work() }
+                tasks[key] = task
+                return task
+            }
+            let value = await task.value
+            lock.withLock { if tasks[key] == task { tasks[key] = nil } }
+            return value
+        }
+    }
+
+    private let forecastFlights = Flights<Forecast>()
+    private let tideFlights = Flights<TideStation?>()
+    private let waterFlights = Flights<WaterEstimate?>()
+
+    /// When each place's forecast last came in live, so a second ask within two minutes
+    /// is answered from disk instead of the network.
+    private let liveLock = NSLock()
+    private var lastLive: [String: Date] = [:]
+    private static let liveReuse: TimeInterval = 120
+
     func forecast(latitude: Double, longitude: Double) async -> Forecast {
         let gh = Geohash.encode(latitude: latitude, longitude: longitude, precision: 5)
+        guard baseURL != nil else { return Forecast(hours: Self.sampleHours(), source: .sample) }
+        let recent = liveLock.withLock { lastLive[gh].map { Date().timeIntervalSince($0) < Self.liveReuse } ?? false }
+        if recent, let saved = cached(latitude: latitude, longitude: longitude) {
+            return Forecast(hours: saved.hours, source: .live, fetchedAt: saved.fetchedAt)
+        }
+        let result = await forecastFlights.run(gh) { await self.downloadForecast(gh: gh, latitude: latitude, longitude: longitude) }
+        if result.source == .live { liveLock.withLock { lastLive[gh] = Date() } }
+        return result
+    }
+
+    private func downloadForecast(gh: String, latitude: Double, longitude: Double) async -> Forecast {
         guard let baseURL else { return Forecast(hours: Self.sampleHours(), source: .sample) }
 
         var components = URLComponents(url: baseURL.appendingPathComponent("wx"), resolvingAgainstBaseURL: false)
@@ -194,6 +236,14 @@ final class ForecastService {
         let cached = cachedWaterEstimate(latitude: latitude, longitude: longitude, isSalt: isSalt)
         if cached != nil, let saved = (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date,
            Date().timeIntervalSince(saved) < 12 * 3600 { return cached }
+        return await waterFlights.run(file.path) {
+            await self.downloadWaterEstimate(latitude: latitude, longitude: longitude, isSalt: isSalt, cached: cached)
+        }
+    }
+
+    private func downloadWaterEstimate(latitude: Double, longitude: Double, isSalt: Bool,
+                                       cached: WaterEstimate?) async -> WaterEstimate? {
+        let file = Self.waterFile(latitude: latitude, longitude: longitude, isSalt: isSalt)
         guard let baseURL else { return cached }
         var components = URLComponents(url: baseURL.appendingPathComponent("water"), resolvingAgainstBaseURL: false)
         components?.queryItems = [
@@ -234,19 +284,33 @@ final class ForecastService {
     func tideStation(latitude: Double, longitude: Double) async -> TideStation? {
         let gh = Geohash.encode(latitude: latitude, longitude: longitude, precision: 5)
         let file = Self.cacheFile("tide-\(gh)")
-        let cached = (try? Data(contentsOf: file)).flatMap { try? JSONDecoder().decode(TidePayload.self, from: $0) }
+        let cached = Self.savedTide(file)
         if let cached {
             let saved = (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date
             let maxAge: TimeInterval = cached.station == nil ? 86_400 : 30 * 86_400
             if let saved, Date().timeIntervalSince(saved) < maxAge { return cached.station }
         }
-        guard let baseURL else { return cached?.station }
+        return await tideFlights.run(gh) { await self.downloadTide(gh: gh, file: file, cached: cached?.station) }
+    }
+
+    /// The saved tide station, however old, without touching the network.
+    func cachedTideStation(latitude: Double, longitude: Double) -> TideStation? {
+        let gh = Geohash.encode(latitude: latitude, longitude: longitude, precision: 5)
+        return Self.savedTide(Self.cacheFile("tide-\(gh)"))?.station
+    }
+
+    private static func savedTide(_ file: URL) -> TidePayload? {
+        (try? Data(contentsOf: file)).flatMap { try? JSONDecoder().decode(TidePayload.self, from: $0) }
+    }
+
+    private func downloadTide(gh: String, file: URL, cached: TideStation?) async -> TideStation? {
+        guard let baseURL else { return cached }
         var components = URLComponents(url: baseURL.appendingPathComponent("tide"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "gh", value: gh)]
         guard let url = components?.url,
               let result = await download(url),
               (result.1 as? HTTPURLResponse)?.statusCode == 200,
-              let payload = try? JSONDecoder().decode(TidePayload.self, from: result.0) else { return cached?.station }
+              let payload = try? JSONDecoder().decode(TidePayload.self, from: result.0) else { return cached }
         try? result.0.write(to: file, options: .atomic)
         return payload.station
     }

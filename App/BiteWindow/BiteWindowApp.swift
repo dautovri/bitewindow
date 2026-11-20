@@ -2,6 +2,7 @@ import BackgroundTasks
 import BiteCore
 import SwiftData
 import SwiftUI
+import os
 
 @main
 struct BiteWindowApp: App {
@@ -10,6 +11,7 @@ struct BiteWindowApp: App {
     /// purchases in their local store would wait for an Apple Account for good.
     static let isHostingTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
 
+    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
     @State private var entitlements = EntitlementManager(listens: !BiteWindowApp.isHostingTests)
     @State private var sampler = PressureSampler()
 
@@ -29,18 +31,55 @@ struct BiteWindowApp: App {
     }
 }
 
+/// Sets up notification handling at launch, before any notification action can arrive.
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        MainActor.assumeIsolated { NotificationHandler.install() }
+        return true
+    }
+}
+
 /// Keeps every spot's forecast saved on the device for use without signal.
 enum OfflineStore {
     /// Must match `BGTaskSchedulerPermittedIdentifiers` in project.yml.
     static let refreshTaskID = "com.dautovri.bitecurve.refresh"
 
+    /// Opens the store through `BiteMigrationPlan`. If it still cannot be opened (a failed
+    /// migration, a damaged file), the old files are moved aside, not deleted, and a fresh store
+    /// is opened, so the app starts instead of crashing on every launch. A later version can
+    /// read the moved files back.
     static let container: ModelContainer = {
+        let schema = Schema(versionedSchema: BiteSchemaV1.self)
+        let configuration = ModelConfiguration(schema: schema)
+        func open() throws -> ModelContainer {
+            try ModelContainer(for: schema, migrationPlan: BiteMigrationPlan.self, configurations: configuration)
+        }
         do {
-            return try ModelContainer(for: Spot.self, Trip.self, PressureSample.self)
+            return try open()
         } catch {
-            fatalError("Cannot open the data store: \(error)")
+            let log = Logger(subsystem: "com.dautovri.bitecurve", category: "store")
+            log.error("store could not be opened, moving it aside: \(error.localizedDescription, privacy: .public)")
+            moveStoreAside(configuration.url)
+            if let container = try? open() { return container }
+            // Last resort: a store in memory. Nothing is saved, but the app runs.
+            do {
+                return try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
+            } catch {
+                fatalError("Cannot open even an in-memory store: \(error)")
+            }
         }
     }()
+
+    /// Renames the store and its journal files to `<name>.unreadable-<time>`.
+    private static func moveStoreAside(_ url: URL) {
+        let stamp = Int(Date().timeIntervalSince1970)
+        for suffix in ["", "-shm", "-wal"] {
+            let file = URL(fileURLWithPath: url.path + suffix)
+            guard FileManager.default.fileExists(atPath: file.path) else { continue }
+            try? FileManager.default.moveItem(at: file, to: URL(fileURLWithPath: file.path + ".unreadable-\(stamp)"))
+        }
+    }
 
     static func places() -> [ForecastService.Place] {
         let context = ModelContext(container)
@@ -79,6 +118,7 @@ final class AppRouter {
 
 struct RootView: View {
     @Environment(PressureSampler.self) private var sampler
+    @Environment(EntitlementManager.self) private var entitlements
     @State private var router = AppRouter()
     /// Set once the welcome screen was answered (or was never needed).
     @AppStorage("didOnboard") private var didOnboard = false
@@ -150,6 +190,13 @@ struct RootView: View {
                 }
             } else if phase == .background {
                 OfflineStore.scheduleBackgroundRefresh()
+            }
+        }
+        // Buying or losing Pro changes how many days alerts and widgets cover.
+        .onChange(of: entitlements.isPro) {
+            Task {
+                await BiteAlerts.reschedule()
+                await WidgetSnapshotWriter.update()
             }
         }
         // `initial: true` restarts sampling on launch when the toggle was left on.

@@ -80,3 +80,74 @@ struct ForecastShareCard: View {
         .background(Color(red: 0.027, green: 0.067, blue: 0.102))
     }
 }
+
+/// A finished trip as a picture: what the forecast said and what was caught. No spot name and
+/// no place, so sharing it gives nothing away.
+struct TripShare: Transferable {
+    let day: Date
+    let timeZone: TimeZone
+    let index: Double
+    let catches: Int
+    let hours: Double
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { share in
+            try await share.png()
+        }
+        .suggestedFileName { _ in "BiteCurve" }
+    }
+
+    @MainActor
+    private func png() throws -> Data {
+        let renderer = ImageRenderer(content: TripShareCard(share: self).environment(\.colorScheme, .dark))
+        renderer.scale = 3
+        guard let data = renderer.uiImage?.pngData() else { throw ForecastShare.RenderError.failed }
+        return data
+    }
+}
+
+/// The trip picture. Always the dark palette, like the forecast card.
+struct TripShareCard: View {
+    let share: TripShare
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(spacing: 8) {
+                Image(systemName: "fish.fill").foregroundStyle(Theme.accent)
+                Text(verbatim: "BiteCurve").font(.headline)
+                Spacer()
+                Text(verbatim: share.day.formatted(.dateTime.weekday(.wide).month().day(), in: share.timeZone))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            HStack(spacing: 18) {
+                IndexGauge(index: share.index, size: 96)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Forecast \(Int(share.index.rounded())) · \(BiteScale.label(share.index))")
+                        .font(.headline)
+                        .foregroundStyle(BiteScale.color(share.index))
+                    HStack(spacing: 8) {
+                        Image(systemName: share.catches == 0 ? "fish" : "fish.fill")
+                        if share.catches == 0 {
+                            Text("Blank")
+                        } else {
+                            Text(verbatim: "\(share.catches)").monospacedDigit()
+                        }
+                    }
+                    .font(.largeTitle.bold())
+                    Text(verbatim: Measurement(value: share.hours, unit: UnitDuration.hours)
+                        .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(1)))))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Text("Bite index 0–100. An estimate, not a guarantee.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(24)
+        .frame(width: 380, alignment: .leading)
+        .foregroundStyle(.white)
+        .background(Color(red: 0.027, green: 0.067, blue: 0.102))
+    }
+}

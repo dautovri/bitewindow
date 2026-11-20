@@ -23,14 +23,19 @@ const good = () => ({
 test("a valid trip is rebuilt from known fields only", () => {
   const trip = parseTrip({ ...good(), name: "Secret Lake", notes: "x" });
   assert.ok(trip);
-  assert.deepEqual(Object.keys(trip).sort(), Object.keys(good()).sort());
+  assert.deepEqual(Object.keys(trip).sort(), [...Object.keys(good()), "model", "planned"].sort());
+  assert.equal(trip.v, 2);
+  assert.equal(trip.model, "prior-1");
+  assert.equal(trip.planned, null);
   assert.equal(trip.waterTempC, 11.432);
   assert.deepEqual(totals(trip), { hours: 1.5, catches: 2 });
 });
 
 test("anything off is refused", () => {
   const bad: Array<(t: any) => void> = [
-    (t) => (t.v = 2),
+    (t) => (t.v = 3),
+    (t) => (t.model = "prior-1"),
+    (t) => (t.planned = true),
     (t) => (t.angler = "0123456789ABCDEF"),
     (t) => (t.angler = "abc"),
     (t) => (t.gh = "u1x0"),
@@ -72,4 +77,14 @@ test("angler ids and digests", async () => {
   assert.equal(await digest("a"), await digest("a"));
   assert.notEqual(await digest("a"), await digest("b"));
   assert.equal((await digest("a")).length, 64);
+});
+
+test("version 2 carries a known model and an optional planned answer", () => {
+  const v2 = { ...good(), v: 2, model: "prior-1", planned: true };
+  assert.deepEqual(parseTrip(v2)?.planned, true);
+  const unanswered: any = { ...good(), v: 2, model: "prior-1" };
+  assert.equal(parseTrip(unanswered)?.planned, null);
+  assert.equal(parseTrip({ ...good(), v: 2 }), null);
+  assert.equal(parseTrip({ ...good(), v: 2, model: "my-tracker-id" }), null);
+  assert.equal(parseTrip({ ...good(), v: 2, model: "prior-1", planned: "yes" }), null);
 });

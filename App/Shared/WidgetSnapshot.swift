@@ -1,6 +1,7 @@
 import Foundation
 import Security
 import SwiftUI
+import UIKit
 
 /// What the widgets show, written by the app each time forecasts are scored and read by the
 /// widget extension from a shared keychain group. The widget does no scoring or
@@ -116,16 +117,55 @@ struct WidgetSnapshot: Codable, Equatable {
     }
 }
 
-/// The app's four index colours, for the widgets (the app's own copy lives in `BiteScale`).
+/// The four bite-index steps, shared by the app (`BiteScale`) and the widgets. The colours
+/// differ in lightness as well as hue (viridian, cobalt, copper, slate), so they stay apart
+/// with red-green colour blindness, in polarised glasses and in greyscale; each step also
+/// has its own shape.
 enum WidgetPalette {
-    static let accent = Color(red: 0.05, green: 0.58, blue: 0.53)
+    static let accent = Color(light: 0x0F766E, dark: 0x38E2C7)
 
+    /// Steps go by the number shown, so a 49.6 that reads "50" is above average like any 50.
     static func color(_ index: Double) -> Color {
-        switch index {
-        case 65...: return Color(red: 0.02, green: 0.59, blue: 0.41)
-        case 50..<65: return Color(red: 0.03, green: 0.57, blue: 0.70)
-        case 35..<50: return Color(red: 0.85, green: 0.47, blue: 0.02)
-        default: return Color(red: 0.39, green: 0.45, blue: 0.55)
+        switch index.rounded() {
+        case 65...: return Color(light: 0x046A4E, dark: 0x2EE59D)
+        case 50..<65: return Color(light: 0x0062CC, dark: 0x52A8FF)
+        case 35..<50: return Color(light: 0xB54708, dark: 0xFB923C)
+        default: return Color(light: 0x5E6B7C, dark: 0x8B9BB0)
+        }
+    }
+
+    /// Text on a solid bite colour: white in light mode, near-black on the bright dark-mode fills.
+    static let onSolid = Color(light: 0xFFFFFF, dark: 0x041017)
+
+    /// A shape per step, so the scale reads without colour: diamond, circle, triangle, ring.
+    static func symbol(_ index: Double) -> String {
+        switch index.rounded() {
+        case 65...: return "diamond.fill"
+        case 50..<65: return "circle.fill"
+        case 35..<50: return "triangle.fill"
+        default: return "circle"
         }
     }
 }
+
+extension Color {
+    /// One colour for light and one for dark appearance, from 0xRRGGBB values.
+    init(light: UInt32, dark: UInt32, lightOpacity: Double = 1, darkOpacity: Double = 1) {
+        self.init(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(hex: dark, alpha: darkOpacity)
+                : UIColor(hex: light, alpha: lightOpacity)
+        })
+    }
+}
+
+extension UIColor {
+    convenience init(hex: UInt32, alpha: Double) {
+        self.init(red: CGFloat((hex >> 16) & 0xFF) / 255,
+                  green: CGFloat((hex >> 8) & 0xFF) / 255,
+                  blue: CGFloat(hex & 0xFF) / 255,
+                  alpha: alpha)
+    }
+}
+
+

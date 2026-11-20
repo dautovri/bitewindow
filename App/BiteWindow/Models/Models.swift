@@ -5,6 +5,20 @@ import SwiftData
 // CloudKit-compatible schema: every property has a default or is optional,
 // relationships are optional, and there are no unique constraints.
 
+/// The store's schema as shipped since 1.0 (fields added since then were all optional or
+/// defaulted, which SwiftData migrates on its own). Before any other kind of change (a rename,
+/// a new required field, a type change), freeze copies of today's models in this enum as
+/// nested types, add `BiteSchemaV2` with the new ones and a stage to `BiteMigrationPlan`.
+enum BiteSchemaV1: VersionedSchema {
+    static let versionIdentifier = Schema.Version(1, 0, 0)
+    static var models: [any PersistentModel.Type] { [Spot.self, Trip.self, PressureSample.self] }
+}
+
+enum BiteMigrationPlan: SchemaMigrationPlan {
+    static var schemas: [any VersionedSchema.Type] { [BiteSchemaV1.self] }
+    static var stages: [MigrationStage] { [] }
+}
+
 @Model
 final class Spot {
     var id: UUID = UUID()
@@ -139,6 +153,9 @@ final class Trip {
     var fitRecord: Data?
     /// When this trip was sent under opt-in sharing (see `TripSharing`); nil while it was not.
     var sharedAt: Date?
+    /// Whether the angler chose this time because of the forecast, as they answered on the
+    /// running trip; nil when they did not answer. Nothing is guessed.
+    var planned: Bool?
     var spot: Spot?
 
     init(spot: Spot?) {
@@ -194,6 +211,10 @@ struct TripFitRecord: Codable, Equatable {
     /// Whether the tide score came from a station (else from the moon phase alone).
     var hasTideStation: Bool
     var slices: [FactorSlice]
+    /// The scoring model the slices came from (`Forecaster.modelID`); nil in records made before 1.3.
+    var model: String? = Forecaster.modelID
+    /// See `Trip.planned`.
+    var planned: Bool? = nil
 }
 
 /// Raw station pressure from the phone barometer. Stays on the device.
