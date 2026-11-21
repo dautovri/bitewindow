@@ -154,3 +154,52 @@ test("worker: cache misses are rate limited per IP, hits are not", async () => {
   const wx = await worker.fetch(new Request("https://x/wx?gh=u33dc", { headers }), env);
   assert.equal(wx.status, 429);
 });
+
+test("worker /tide: says why there is no station, and keeps a constants gap for one day only", async () => {
+  const store = new Map<string, string>();
+  const ttls = new Map<string, number | undefined>();
+  const env = {
+    WX_CACHE: {
+      get: async (k: string) => store.get(k) ?? null,
+      put: async (k: string, v: string, o?: { expirationTtl?: number }) => void (store.set(k, v), ttls.set(k, o?.expirationTtl)),
+    },
+    WEATHERKIT_TEAM_ID: "T",
+    WEATHERKIT_SERVICE_ID: "S",
+    WEATHERKIT_KEY_ID: "K",
+    WEATHERKIT_PRIVATE_KEY: "",
+  };
+  let harconBody: unknown = { HarmonicConstituents: [{ name: "M4", amplitude: 0.01, phase_GMT: 10 }] };
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: any) => {
+    const u = String(input);
+    if (u.includes("stations.json")) return new Response(JSON.stringify(stationList));
+    if (u.includes("/harcon.json")) return new Response(JSON.stringify(harconBody));
+    if (u.includes("/datums.json")) return new Response(JSON.stringify(datums));
+    return new Response("", { status: 404 });
+  }) as typeof fetch;
+  try {
+    const gap = await (await worker.fetch(new Request("https://x/tide?gh=9q8zh"), env)).json();
+    assert.equal(gap.station, null);
+    assert.equal(gap.km, null); // unchanged for app 1.2.0
+    assert.equal(gap.status, "no_constituents");
+    assert.equal(gap.nearest.id, "9414290");
+    assert.ok(gap.nearest.km < 40);
+    assert.equal(ttls.get("tide:9q8zh"), 86_400);
+
+    const inland = await (await worker.fetch(new Request("https://x/tide?gh=9qdc4"), env)).json();
+    assert.equal(inland.station, null);
+    assert.equal(inland.status, "none_in_range");
+    assert.equal("nearest" in inland, false);
+    assert.equal(ttls.get("tide:9qdc4"), 30 * 86_400);
+
+    store.delete("tide:9q8zh");
+    harconBody = harcon;
+    const ok = await (await worker.fetch(new Request("https://x/tide?gh=9q8zh"), env)).json();
+    assert.equal(ok.status, "ok");
+    assert.equal(ok.station.id, "9414290");
+    assert.ok(ok.km < 40);
+    assert.equal(ttls.get("tide:9q8zh"), 30 * 86_400);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});

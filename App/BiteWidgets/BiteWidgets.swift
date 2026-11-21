@@ -67,6 +67,28 @@ struct BiteWidgetView: View {
     }
 }
 
+/// The bite index is scored from WeatherKit forecasts, so the home screen widgets carry the
+/// Apple Weather mark (guideline 5.2.5). WidgetKit allows a link only in the medium (and larger)
+/// families, so the medium widget links the legal page (the app opens it, see `RootView`); the
+/// small widget is one tap target that opens the app, where the mark and link are on every
+/// weather screen. The Lock Screen families have no room for it and accept no links.
+private struct WeatherMark: View {
+    static let legalURL = URL(string: "https://weatherkit.apple.com/legal-attribution.html")!
+    var linked = false
+
+    var body: some View {
+        let mark = Text(verbatim: "\u{F8FF}Weather")
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .accessibilityLabel(Text(verbatim: "Apple Weather"))
+        if linked {
+            Link(destination: Self.legalURL) { mark }
+        } else {
+            mark
+        }
+    }
+}
+
 private func clock(_ date: Date, _ timeZone: TimeZone) -> String {
     var style = Date.FormatStyle(date: .omitted, time: .shortened)
     style.timeZone = timeZone
@@ -139,6 +161,7 @@ private struct SmallView: View {
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+            WeatherMark()
         }
         .accessibilityElement(children: .combine)
     }
@@ -167,10 +190,15 @@ private struct MediumView: View {
                     }
                     Spacer(minLength: 0)
                 }
+                // The last row stops short of the Apple Weather mark in the corner.
+                .padding(.trailing, pick.spot.id == picks.last?.spot.id ? 64 : 0)
                 .accessibilityElement(children: .combine)
             }
             if picks.count < 3 { Spacer(minLength: 0) }
         }
+        // Bottom right, where the rows end in empty space.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay(alignment: .bottomTrailing) { WeatherMark(linked: true) }
     }
 }
 

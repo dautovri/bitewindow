@@ -11,6 +11,9 @@ id = "430a4ab434d74c16bce881ed7091d722"
 WEATHERKIT_TEAM_ID = "27EZNUVV57"
 WEATHERKIT_SERVICE_ID = "com.dautovri.bitewindow.weatherkit"
 WEATHERKIT_KEY_ID = "XBFDGDBMD6"
+# WeatherKit calls per UTC day across all clients (src/budget.ts). The 500k/month allowance is
+# shared with other apps (Houby ~20k/month); 5000/day is ~150k/month.
+DAILY_WEATHERKIT_BUDGET = "5000"
 
 # Secret: wrangler secret put WEATHERKIT_PRIVATE_KEY < AuthKey_XBFDGDBMD6.p8
 # (shared WeatherKit key, kept at ~/.config/weatherkit/; account limit allows no more keys)

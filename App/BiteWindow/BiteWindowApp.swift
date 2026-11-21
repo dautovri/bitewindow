@@ -125,6 +125,7 @@ struct RootView: View {
     @State private var showWelcome = false
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     @AppStorage(PressureSampler.enabledKey) private var livePressure = false
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
 
@@ -146,6 +147,11 @@ struct RootView: View {
         }
         .tint(Theme.accent)
         .environment(router)
+        // The medium widget's Apple Weather mark links the legal page; a widget link always
+        // opens the app first, which hands this one on to the browser.
+        .onOpenURL { url in
+            if url == AppleWeatherAttribution.legalURL { openURL(url) }
+        }
         .task {
             pruneSamples()
             #if DEBUG
@@ -244,6 +250,12 @@ extension RootView {
         montauk.species = .rainbowTrout
         montauk.water = .coldFreshwater
         [minnetonka, fork, montauk].forEach(modelContext.insert)
+        // `-BCSeedSaltSpot YES` adds a saltwater spot outside NOAA's tide stations (no tide data).
+        if UserDefaults.standard.bool(forKey: "BCSeedSaltSpot") {
+            let kiel = Spot(name: "Kiel Fjord", latitude: 54.37, longitude: 10.17)
+            kiel.water = .inshoreSalt
+            modelContext.insert(kiel)
+        }
         let day: TimeInterval = 86_400
         for (spot, daysAgo, hours, fish) in [(minnetonka, 2.0, 3.0, 4), (minnetonka, 9.0, 2.5, 0), (fork, 16.0, 3.0, 0),
                                              (fork, 5.0, 4.0, 6), (montauk, 12.0, 3.5, 2)] {

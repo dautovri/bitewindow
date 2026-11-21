@@ -4,10 +4,21 @@ import os
 
 struct Forecast {
     enum Source { case live, cached, sample }
+    /// Why a `.cached` forecast is shown instead of a live one.
+    enum Unavailable {
+        /// No network, or the server could not be reached.
+        case offline
+        /// The server answered but had no fresh forecast to give: too many requests (429),
+        /// today's weather budget spent (503 "budget"), or another error.
+        case serviceBusy
+    }
     let hours: [HourConditions]
     let source: Source
-    /// When the data was downloaded. Nil for sample weather and when nothing is saved.
+    /// When the data was downloaded from the weather service. Nil for sample weather and when
+    /// nothing is saved.
     var fetchedAt: Date? = nil
+    /// Set for `.cached`: why the live forecast could not be had.
+    var unavailable: Unavailable? = nil
 }
 
 /// Loads hourly weather from the cache worker (backend/), keyed by geohash-5.
@@ -26,6 +37,8 @@ final class ForecastService {
             let ta: Double
         }
         let gh: String
+        /// When the server got this forecast from WeatherKit (missing in very old saved files).
+        let fetchedAt: String?
         let hours: [Hour]
     }
 
@@ -109,13 +122,32 @@ final class ForecastService {
 
         var components = URLComponents(url: baseURL.appendingPathComponent("wx"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "gh", value: gh)]
+        var unavailable = Forecast.Unavailable.offline
         if let url = components?.url, let (data, response) = await download(url) {
-            if (response as? HTTPURLResponse)?.statusCode == 200, let hours = Self.decode(data), !hours.isEmpty {
+            // Any answer from the server means the network is there; 429 (rate limit) and
+            // 503 (daily weather budget spent) mean it has nothing fresh to give right now.
+            unavailable = .serviceBusy
+            let http = response as? HTTPURLResponse
+            if http?.statusCode == 200, case let (hours, fetchedAt)? = Self.decode(data), !hours.isEmpty {
+                if http?.value(forHTTPHeaderField: "x-cache") == "stale" {
+                    // The server's last good copy while its budget is spent: shown as saved data
+                    // with its own time, and kept only when it is newer than the copy on disk.
+                    let serverTime = fetchedAt ?? .distantPast
+                    // Read now, not before the request: another view may have saved a newer copy meanwhile.
+                    if let saved = cached(latitude: latitude, longitude: longitude), (saved.fetchedAt ?? .distantPast) >= serverTime {
+                        return Forecast(hours: saved.hours, source: .cached, fetchedAt: saved.fetchedAt, unavailable: .serviceBusy)
+                    }
+                    try? data.write(to: Self.cacheFile(gh), options: .atomic)
+                    return Forecast(hours: hours, source: .cached, fetchedAt: fetchedAt, unavailable: .serviceBusy)
+                }
                 try? data.write(to: Self.cacheFile(gh), options: .atomic)
-                return Forecast(hours: hours, source: .live, fetchedAt: Date())
+                return Forecast(hours: hours, source: .live, fetchedAt: fetchedAt ?? Date())
             }
         }
-        return cached(latitude: latitude, longitude: longitude) ?? Forecast(hours: [], source: .cached)
+        guard let saved = cached(latitude: latitude, longitude: longitude) else {
+            return Forecast(hours: [], source: .cached, unavailable: unavailable)
+        }
+        return Forecast(hours: saved.hours, source: .cached, fetchedAt: saved.fetchedAt, unavailable: unavailable)
     }
 
     /// One GET that finishes even when the caller is cancelled. Views load in `.task`, which
@@ -123,9 +155,13 @@ final class ForecastService {
     /// exactly that); a cancelled request left a new spot without weather until the next launch.
     private func download(_ url: URL) async -> (Data, URLResponse)? {
         let session = session
+        var request = URLRequest(url: url)
+        // Lets the worker answer with its last good copy (`x-cache: stale`) when its daily
+        // WeatherKit budget is spent; app 1.2.0 never sends this and gets a 503 instead.
+        request.setValue("1", forHTTPHeaderField: "x-accept-stale")
         return await Task.detached {
             do {
-                return try await session.data(from: url)
+                return try await session.data(for: request)
             } catch {
                 Logger(subsystem: "com.dautovri.bitecurve", category: "network")
                     .info("GET \(url.path, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
@@ -150,9 +186,11 @@ final class ForecastService {
     /// The forecast saved on disk for this location, without touching the network.
     func cached(latitude: Double, longitude: Double) -> Forecast? {
         let file = Self.cacheFile(Geohash.encode(latitude: latitude, longitude: longitude, precision: 5))
-        guard let data = try? Data(contentsOf: file), let hours = Self.decode(data), !hours.isEmpty else { return nil }
+        guard let data = try? Data(contentsOf: file), case let (hours, fetchedAt)? = Self.decode(data), !hours.isEmpty else { return nil }
+        // The server's own time when the file has it: a copy saved from the server's cache can
+        // be up to an hour older than the moment it was saved here.
         let attributes = try? FileManager.default.attributesOfItem(atPath: file.path)
-        return Forecast(hours: hours, source: .cached, fetchedAt: attributes?[.modificationDate] as? Date)
+        return Forecast(hours: hours, source: .cached, fetchedAt: fetchedAt ?? attributes?[.modificationDate] as? Date)
     }
 
     /// Downloads and saves the forecast (and tide constants for saltwater) for
@@ -315,16 +353,20 @@ final class ForecastService {
         return payload.station
     }
 
-    private static func decode(_ data: Data) -> [HourConditions]? {
+    /// The hours of a worker answer, and when the worker fetched them.
+    private static func decode(_ data: Data) -> ([HourConditions], Date?)? {
         guard let payload = try? JSONDecoder().decode(Payload.self, from: data) else { return nil }
         let plain = ISO8601DateFormatter()
         let fractional = ISO8601DateFormatter()
         fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return payload.hours.compactMap { h in
+        let fetchedAt = payload.fetchedAt.flatMap { plain.date(from: $0) ?? fractional.date(from: $0) }
+        let hours: [HourConditions] = payload.hours.compactMap { h in
             guard let time = plain.date(from: h.t) ?? fractional.date(from: h.t) else { return nil }
             return HourConditions(time: time, pressureHPa: h.p, cloudCover: h.c,
                                   windSpeedKmh: h.ws, windFromDeg: h.wd, airTempC: h.ta)
         }
+        // A time in the future would make a saved copy look fresher than it is.
+        return (hours, fetchedAt.map { min($0, Date()) })
     }
 
     private static func cacheFile(_ gh: String) -> URL {

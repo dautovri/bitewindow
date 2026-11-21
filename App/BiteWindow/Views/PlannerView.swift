@@ -84,6 +84,9 @@ struct PlannerView: View {
                 } else {
                     grid.card(padding: 12)
                     legend
+                    // The day scores come from WeatherKit forecasts (5.2.5).
+                    AppleWeatherAttribution()
+                        .padding(.horizontal, 4)
                     if !entitlements.isPro {
                         if weekendLooksStrong {
                             Label("A strong bite is forecast this weekend", systemImage: BiteScale.symbol(BiteAlerts.defaultThreshold))

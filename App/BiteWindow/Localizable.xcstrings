@@ -23108,6 +23108,18 @@
           }
         }
       }
+    },
+    "Tide (moon-phase estimate)": {
+      "comment": "Factor name in the score breakdown at a saltwater spot with no tide station: the tide term is estimated from the moon phase. TRANSLATION PENDING."
+    },
+    "No tide data here — estimate from moon phase": {
+      "comment": "Tide card heading at a saltwater spot with no tide station nearby. TRANSLATION PENDING."
+    },
+    "Weather service busy — forecast saved %@": {
+      "comment": "Shown when the weather server is rate limited or out of its daily budget. %@ is a relative time, e.g. '2 hours ago'. TRANSLATION PENDING."
+    },
+    "Weather service busy — no saved forecast. Sun, moon and tide only.": {
+      "comment": "Shown when the weather server is rate limited or out of its daily budget and nothing is saved on the phone. TRANSLATION PENDING."
     }
   },
   "version": "1.0"

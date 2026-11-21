@@ -60,6 +60,13 @@ struct SpotsView: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 8)
+                        // The cards show WeatherKit readings (5.2.5). Outside the cards: each card is
+                        // one button, and a link inside it could not be tapped on its own.
+                        AppleWeatherAttribution()
+                            .frame(maxWidth: Theme.readableWidth, alignment: .leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 8)
                     }
                     .screenBackground()
                 }
@@ -118,7 +125,9 @@ private struct SpotSnapshot {
     /// Today's curve, for the small chart.
     var points: [ScorePoint] = []
     var conditions: Conditions?
-    var isOffline = false
+    /// Why the card shows a saved forecast; nil while it is live (or still loading).
+    var unavailable: Forecast.Unavailable?
+    var savedAt: Date?
 
     init() {}
 
@@ -129,7 +138,10 @@ private struct SpotSnapshot {
         self.today = days[0].window
         self.tomorrow = days[1].window
         conditions = Conditions(at: now, hours: forecast.hours, latitude: spot.latitude, longitude: spot.longitude, calendar: calendar)
-        isOffline = forecast.source == .cached
+        if forecast.source == .cached {
+            unavailable = forecast.unavailable
+            savedAt = forecast.fetchedAt
+        }
     }
 }
 
@@ -202,10 +214,23 @@ private struct SpotCard: View {
                     WeatherStrip(conditions: conditions)
                     SunMoonStrip(conditions: conditions)
                 }
-                if snapshot.isOffline {
-                    Label("Offline", systemImage: "wifi.slash")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                if let unavailable = snapshot.unavailable {
+                    Group {
+                        if let saved = snapshot.savedAt {
+                            let ago = saved.formatted(.relative(presentation: .named))
+                            if unavailable == .serviceBusy {
+                                Label("Weather service busy — forecast saved \(ago)", systemImage: "clock.arrow.circlepath")
+                            } else {
+                                Label("Offline — forecast saved \(ago)", systemImage: "wifi.slash")
+                            }
+                        } else if unavailable == .serviceBusy {
+                            Label("Weather service busy — no saved forecast. Sun, moon and tide only.", systemImage: "clock.arrow.circlepath")
+                        } else {
+                            Label("Offline", systemImage: "wifi.slash")
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
             }
         }

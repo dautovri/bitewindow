@@ -174,9 +174,11 @@ struct SpotDetailView: View {
                              reading: conditions.pressure, readingSymbol: conditions.pressureTrendSymbol))
         }
         out.append(.init(name: String(localized: "Moon"), value: mean { $0.solunar }, symbol: conditions.moonSymbol, reading: nil))
-        // Without a station the tide term still counts: the moon phase stands in for spring and neap tides.
+        // Without a station the tide term still counts: the moon phase stands in for spring and neap
+        // tides. Its name says so, so the estimate never reads as tide data.
         if isSalt {
-            out.append(.init(name: String(localized: "Tide"), value: mean { $0.tide }, symbol: "water.waves", reading: nil))
+            out.append(.init(name: tide == nil ? String(localized: "Tide (moon-phase estimate)") : String(localized: "Tide"),
+                             value: mean { $0.tide }, symbol: tide == nil ? conditions.moonSymbol : "water.waves", reading: nil))
         }
         return out
     }
@@ -288,11 +290,18 @@ struct SpotDetailView: View {
                 if forecast.source == .sample {
                     Label("Sample weather — backend not configured", systemImage: "exclamationmark.triangle")
                         .foregroundStyle(.orange)
-                } else if forecast.source == .cached {
+                } else if forecast.source == .cached, forecast.unavailable != nil {
+                    // Not for the saved copy shown while the download is still on its way.
                     Group {
                         if let saved = forecast.fetchedAt, !forecast.hours.isEmpty {
-                            Label("Offline — forecast saved \(saved.formatted(.relative(presentation: .named)))",
-                                  systemImage: "wifi.slash")
+                            let ago = saved.formatted(.relative(presentation: .named))
+                            if forecast.unavailable == .serviceBusy {
+                                Label("Weather service busy — forecast saved \(ago)", systemImage: "clock.arrow.circlepath")
+                            } else {
+                                Label("Offline — forecast saved \(ago)", systemImage: "wifi.slash")
+                            }
+                        } else if forecast.unavailable == .serviceBusy {
+                            Label("Weather service busy — no saved forecast. Sun, moon and tide only.", systemImage: "clock.arrow.circlepath")
                         } else {
                             Label("No weather data — sun, moon and tide only", systemImage: "wifi.slash")
                         }
@@ -471,13 +480,17 @@ struct SpotDetailView: View {
                         }
                     }
                     LabeledContent("Tide station", value: tide.name)
+                    Text("Tide predictions from NOAA harmonic constants. Not for navigation.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 } else {
+                    // Outside NOAA's US stations: say plainly that there is no tide data, so the
+                    // moon-phase estimate in the score is not taken for one.
+                    Label("No tide data here — estimate from moon phase", systemImage: "moon.haze")
+                        .font(.subheadline.weight(.semibold))
                     Text("No tide station found near this spot. The score estimates tide strength from the moon phase: spring tides at new and full moon.")
                         .foregroundStyle(.secondary)
                 }
-                Text("Tide predictions from NOAA harmonic constants. Not for navigation.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
             }
             .font(.subheadline)
             .card()

@@ -10,6 +10,7 @@ import {
   type StationRef,
 } from "./tide.ts";
 import { digest, isAngler, MAX_BODY, parseTrip, totals } from "./trip.ts";
+import { dailyBudget, secondsToReset, spend } from "./budget.ts";
 
 interface KV {
   get(key: string): Promise<string | null>;
@@ -28,6 +29,8 @@ export interface Env {
   /** Opt-in shared trips (D1, see schema.sql). */
   TRIPS?: D1;
   TRIP_LIMITER?: RateLimit;
+  /** WeatherKit calls allowed per UTC day across all clients (budget.ts). Default 5000. */
+  DAILY_WEATHERKIT_BUDGET?: string;
 }
 
 interface D1 {
@@ -53,6 +56,29 @@ const tooMany = () => json({ error: "rate limited" }, 429, { "retry-after": "60"
 
 const DAY = 86_400;
 
+/**
+ * Reserves WeatherKit calls from the account-wide daily budget (budget.ts). Each forecast is
+ * one call, a modelled water temperature three.
+ */
+const spendWeatherKit = (env: Env, cost: number, now: Date) =>
+  spend(env.WX_CACHE, dailyBudget(env.DAILY_WEATHERKIT_BUDGET), cost, now);
+
+/** Today's WeatherKit budget is spent and nothing is saved for this cell. Never cached. */
+const budgetSpent = (now: Date) => {
+  const retry = secondsToReset(now);
+  return json({ error: "budget", retryAfter: retry }, 503, { "retry-after": String(retry), "cache-control": "no-store" });
+};
+
+/**
+ * Saved answers are served only to clients that ask for them with `x-accept-stale: 1`: app
+ * 1.2.0 cannot tell a saved answer from a fresh one, so it gets the 503 and uses its own copy.
+ */
+const acceptsStale = (req: Request) => req.headers.get("x-accept-stale") === "1";
+
+/** Last good answers, kept past their hourly/daily keys to stand in while the budget is spent. */
+const lastWxKey = (gh: string) => `wxlast:${gh}`;
+const lastWaterKey = (kind: WaterKind, gh: string) => `waterlast:${kind}:${gh}`;
+
 /** JSON API only: nothing may be rendered, framed or sniffed as another type. */
 const SECURITY_HEADERS = {
   "strict-transport-security": "max-age=31536000; includeSubDomains",
@@ -73,6 +99,12 @@ async function weather(gh: string, req: Request, env: Env): Promise<Response> {
   const cached = await env.WX_CACHE.get(key);
   if (cached) return json(cached, 200, { "x-cache": "hit", "cache-control": "public, max-age=900" });
   if (!(await allowUpstream(req, env))) return tooMany();
+  if (!(await spendWeatherKit(env, 1, now))) {
+    // The saved copy carries its own `fetchedAt`, so the app can say how old it is.
+    const stale = acceptsStale(req) ? await env.WX_CACHE.get(lastWxKey(gh)) : null;
+    if (stale) return json(stale, 200, { "x-cache": "stale", "cache-control": "no-store" });
+    return budgetSpent(now);
+  }
 
   const token = await weatherKitToken(env, now);
   const upstream = await fetch(weatherKitUrl(gh, now), { headers: { authorization: `Bearer ${token}` } });
@@ -84,6 +116,7 @@ async function weather(gh: string, req: Request, env: Env): Promise<Response> {
   const body = JSON.stringify(slimmed);
   // Entry is keyed by hour; keep it a little past the hour for slow clocks.
   await env.WX_CACHE.put(key, body, { expirationTtl: 3900 });
+  await env.WX_CACHE.put(lastWxKey(gh), body, { expirationTtl: 3 * DAY });
   return json(body, 200, { "x-cache": "miss", "cache-control": "public, max-age=900" });
 }
 
@@ -100,10 +133,16 @@ async function stations(env: Env): Promise<StationRef[] | null> {
   return list;
 }
 
+/** Why `/tide` answered the way it did. Added after app 1.2.0, which reads `station` only. */
+export type TideStatus = "ok" | "none_in_range" | "no_constituents";
+
 /**
  * Harmonic constants for the nearest NOAA station to a geohash-5 cell.
- * `{ station: null }` means no station within range (not an error), so the app
- * can stop asking. Constants change rarely: cached 30 days per cell.
+ * `{ station: null }` is not an error, so the app can stop asking; `status` says why:
+ * `none_in_range` (no harmonic station within 40 km) or `no_constituents` (the nearest
+ * station has none of the constituents the engine evaluates; `nearest` names it).
+ * Constants change rarely: cached 30 days per cell, one day for `no_constituents`, which
+ * may be a gap in NOAA's data that gets filled.
  */
 async function tide(gh: string, req: Request, env: Env): Promise<Response> {
   const key = `tide:${gh}`;
@@ -118,6 +157,7 @@ async function tide(gh: string, req: Request, env: Env): Promise<Response> {
   const near = nearestStation(list, lat, lon);
 
   let station = null;
+  let status: TideStatus = "none_in_range";
   if (near) {
     const [h, d] = await Promise.all([fetch(harconUrl(near.station.id)), fetch(datumsUrl(near.station.id))]);
     if (!h.ok) return json({ error: "upstream", status: h.status }, 502);
@@ -125,9 +165,18 @@ async function tide(gh: string, req: Request, env: Env): Promise<Response> {
     // fail now rather than cache a wrong station for 30 days.
     if (!d.ok) return json({ error: "upstream", status: d.status }, 502);
     station = toTideStation(near.station, await h.json(), await d.json());
+    status = station ? "ok" : "no_constituents";
   }
-  const body = JSON.stringify({ gh, station, km: station && near ? Math.round(near.km * 10) / 10 : null });
-  await env.WX_CACHE.put(key, body, { expirationTtl: 30 * DAY });
+  const km = near ? Math.round(near.km * 10) / 10 : null;
+  const body = JSON.stringify({
+    gh,
+    station,
+    // Kept as before (null without a usable station) for app 1.2.0.
+    km: station ? km : null,
+    status,
+    ...(status === "no_constituents" && near ? { nearest: { id: near.station.id, name: near.station.name, km } } : {}),
+  });
+  await env.WX_CACHE.put(key, body, { expirationTtl: status === "no_constituents" ? DAY : 30 * DAY });
   return json(body, 200, { ...headers, "x-cache": "miss" });
 }
 
@@ -174,11 +223,18 @@ async function water(gh: string, kind: WaterKind, req: Request, env: Env): Promi
     }
   }
   if (answer.tempC === null) {
+    // The air model costs three WeatherKit calls.
+    if (!(await spendWeatherKit(env, 3, now))) {
+      const stale = acceptsStale(req) ? await env.WX_CACHE.get(lastWaterKey(kind, gh)) : null;
+      if (stale) return json(stale, 200, { "x-cache": "stale", "cache-control": "no-store" });
+      return budgetSpent(now);
+    }
     const modelled = await modelledFromAir(gh, env, now);
     if (modelled !== null) Object.assign(answer, { tempC: modelled, source: "air" });
   }
   const body = JSON.stringify(answer);
   await env.WX_CACHE.put(key, body, { expirationTtl: answer.tempC === null ? 2 * 3600 : 24 * 3600 });
+  if (answer.tempC !== null) await env.WX_CACHE.put(lastWaterKey(kind, gh), body, { expirationTtl: 10 * DAY });
   return json(body, 200, { ...headers, "x-cache": "miss" });
 }
 
