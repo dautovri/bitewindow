@@ -24,18 +24,15 @@ export interface CounterKV {
 }
 
 /** The configured daily budget; the default when the variable is missing or not a whole number >= 0. */
-export function dailyBudget(raw: string | undefined, fallback = DEFAULT_DAILY_BUDGET): number {
-  if (raw === undefined || raw.trim() === "") return fallback;
+export function dailyBudget(raw: string | undefined): number {
+  if (raw === undefined || raw.trim() === "") return DEFAULT_DAILY_BUDGET;
   const n = Number(raw);
-  return Number.isInteger(n) && n >= 0 ? n : fallback;
+  return Number.isInteger(n) && n >= 0 ? n : DEFAULT_DAILY_BUDGET;
 }
 
-/** The forecast web pages' own daily share (decided 2026-11-22), counted apart from the apps'. */
-export const DEFAULT_WEB_DAILY_BUDGET = 1500;
-
-/** One counter per UTC day; the web pages count under their own prefix. */
-export function budgetKey(now: Date, prefix = "wkbudget"): string {
-  return `${prefix}:${now.toISOString().slice(0, 10)}`;
+/** One counter per UTC day. */
+export function budgetKey(now: Date): string {
+  return `wkbudget:${now.toISOString().slice(0, 10)}`;
 }
 
 /** Seconds until the next UTC midnight, when the budget starts again. */
@@ -49,8 +46,8 @@ export function secondsToReset(now: Date): number {
  * counted), false when today's budget is spent. Counted before the calls are made, so a call
  * that fails upstream still counts: Apple counts it too.
  */
-export async function spend(kv: CounterKV, budget: number, cost: number, now: Date, prefix = "wkbudget"): Promise<boolean> {
-  const key = budgetKey(now, prefix);
+export async function spend(kv: CounterKV, budget: number, cost: number, now: Date): Promise<boolean> {
+  const key = budgetKey(now);
   const used = Number(await kv.get(key)) || 0;
   if (used + cost > budget) return false;
   try {

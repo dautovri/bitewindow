@@ -10,14 +10,18 @@ routes = [
   { pattern = "apps.dautov.dev/bitecurve/fishing/*", zone_name = "dautov.dev" },
 ]
 
-# Results only (bite windows, sun and moon times, tides, day summaries), 3-day expiry.
-# Create with `npx wrangler kv namespace create bitecurve-web-pages` and put the id here.
-[[kv_namespaces]]
+# Results only (bite windows, sun and moon times, tides, day summaries), the refresh queue and
+# the web's WeatherKit counter. R2, not KV: KV allows 1,000 writes a day on the free plan,
+# shared with the app backend. Create it and its expiry rule before the first deploy:
+#   npx wrangler r2 bucket create bitecurve-web-pages
+#   npx wrangler r2 bucket lifecycle add bitecurve-web-pages pages-3-days pages/ --expire-days 3
+#   npx wrangler r2 bucket lifecycle add bitecurve-web-pages budget-3-days budget/ --expire-days 3
+[[r2_buckets]]
 binding = "PAGES"
-id = "REPLACE_WITH_KV_ID"
+bucket_name = "bitecurve-web-pages"
 
-# The BiteCurve backend's WebForecast entrypoint (backend/src/web.ts): the web's own WeatherKit
-# budget (WEB_DAILY_WEATHERKIT_BUDGET there), no per-IP limit, saved copies when it is spent.
+# The BiteCurve backend's WebForecast entrypoint (backend/src/web.ts): no per-IP limit and no
+# app budget; this worker reserves from its own budget before it asks.
 [[services]]
 binding = "BACKEND"
 service = "bitewindow-wx"
@@ -29,3 +33,5 @@ crons = ["*/5 * * * *"]
 
 [vars]
 PAGES_PER_RUN = "1"
+# The web's share of the account's WeatherKit allowance (decided 2026-11-22).
+WEB_DAILY_WEATHERKIT_BUDGET = "1500"

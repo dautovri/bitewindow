@@ -167,8 +167,9 @@ export interface Inputs {
   station: TideStation | null;
 }
 
-/** Today and tomorrow at the water, in its own time zone. */
-export function computePage(water: Water, path: string, input: Inputs, now: number, days = 2): PageData {
+/** Today, tomorrow and the day after at the water, in its own time zone. The page shows two;
+ *  the third keeps "Tomorrow" on a page made late in the evening until the next refresh. */
+export function computePage(water: Water, path: string, input: Inputs, now: number, days = 3): PageData {
   const hours = toHours(input.forecast);
   const starts: number[] = [startOfLocalDay(water.tz, now)];
   for (let i = 1; i <= days; i++) starts.push(nextDayStart(water.tz, starts[i - 1]));

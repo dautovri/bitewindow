@@ -1,8 +1,9 @@
 // The forecast web pages' door into this worker: an RPC entrypoint reached only through a
 // service binding from the `bitecurve-web` worker (web/), never from the internet. It runs the
-// same cached lookups as the app routes under `webPolicy`: the web's own daily WeatherKit
-// budget, no per-IP limit and the last good copy once that budget is spent. A cache hit (an
-// app or the web asked within the hour or day) costs no WeatherKit call.
+// same cached lookups as the app routes under `webPolicy` (index.ts): the web worker keeps its
+// own daily WeatherKit budget and reserves before it asks, so nothing is counted against the
+// apps' budget here. `cache` tells the caller what an answer cost: "hit" nothing, "miss" one
+// call for a forecast and three for a modelled lake temperature.
 
 import { WorkerEntrypoint } from "cloudflare:workers";
 import { isGeohash5 } from "./lib.ts";
@@ -11,7 +12,7 @@ import { tide, water, weather, webPolicy, type Env } from "./index.ts";
 
 export interface WebAnswer {
   status: number;
-  /** "hit", "miss" or "stale" (a saved copy served because the web budget is spent). */
+  /** "hit" or "miss"; with `data.source` ("air" or "sst") it says what the answer cost. */
   cache: string | null;
   data: unknown;
 }
@@ -40,16 +41,16 @@ const guarded = async (run: () => Promise<Response>): Promise<WebAnswer> => {
 export class WebForecast extends WorkerEntrypoint<Env> {
   async forecast(gh: string): Promise<WebAnswer> {
     if (!isGeohash5(gh)) return bad("gh");
-    return guarded(() => weather(gh, this.env, webPolicy(this.env)));
+    return guarded(() => weather(gh, this.env, webPolicy));
   }
 
   async water(gh: string, kind: string): Promise<WebAnswer> {
     if (!isGeohash5(gh) || !isWaterKind(kind)) return bad("gh or kind");
-    return guarded(() => water(gh, kind, this.env, webPolicy(this.env)));
+    return guarded(() => water(gh, kind, this.env, webPolicy));
   }
 
   async tide(gh: string): Promise<WebAnswer> {
     if (!isGeohash5(gh)) return bad("gh");
-    return guarded(() => tide(gh, this.env, webPolicy(this.env)));
+    return guarded(() => tide(gh, this.env, webPolicy));
   }
 }

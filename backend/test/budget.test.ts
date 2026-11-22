@@ -183,40 +183,32 @@ test("budget: a refused counter write (KV per-key limit) does not fail the reque
   assert.equal(await spend(kv, 7, 1, new Date()), false);
 });
 
-test("web policy: own daily counter, no per-IP limit, saved copy once its budget is spent", async () => {
-  const { kv, store } = memoryKV();
-  const env = { ...(await envWith(kv, "1")), WEB_DAILY_WEATHERKIT_BUDGET: "2" };
-  // A limiter that refuses everything: the web path must not consult it.
-  const refusing = { UPSTREAM_LIMITER: { limit: async () => ({ success: false }) } };
+test("web policy: no app budget or per-IP limit, only the 24-hour water answer is written", async () => {
+  const { kv, store, puts } = memoryKV();
+  // App budget 0 and a limiter that refuses everything: the web path must use neither.
+  const env = { ...(await envWith(kv, "0")), UPSTREAM_LIMITER: { limit: async () => ({ success: false }) } };
   const { calls, fn } = fakeFetch();
   const realFetch = globalThis.fetch;
   globalThis.fetch = fn;
   try {
     const day = new Date().toISOString().slice(0, 10);
-    const first = await weather("u33dc", { ...env, ...refusing }, webPolicy(env));
-    assert.equal(first.status, 200);
+    const f = await weather("u33dc", env, webPolicy);
+    assert.equal(f.status, 200);
+    assert.equal(f.headers.get("x-cache"), "miss");
     assert.equal(calls.weatherkit, 1);
-    assert.equal(store.get(`wkbudget-web:${day}`), "1");
-    assert.equal(store.get(`wkbudget:${day}`), undefined, "the app budget is untouched");
+    assert.equal(store.get(`wkbudget:${day}`), undefined, "nothing counted against the apps");
+    assert.ok(!puts.some((p) => p.key.startsWith("wx:") || p.key.startsWith("wxlast:")), "no hourly key, no saved copy");
 
-    // The app's own budget of 1 is still whole after the web spent one.
-    const app = await worker.fetch(new Request("https://x/wx?gh=u33dd"), env);
-    assert.equal(app.status, 200);
-    assert.equal(store.get(`wkbudget:${day}`), "1");
+    const w = await water("u33dc", "fresh", env, webPolicy);
+    assert.equal(w.status, 200);
+    assert.equal(calls.weatherkit, 4, "the air model costs three calls");
+    assert.deepEqual(puts.map((p) => p.key), ["water:fresh:u33dc"]);
+    // The next refresh gets the water answer from the cache for free.
+    assert.equal((await water("u33dc", "fresh", env, webPolicy)).headers.get("x-cache"), "hit");
+    assert.equal(calls.weatherkit, 4);
 
-    // Web: the air model needs 3 calls, only 1 is left: no saved copy yet, so the 503.
-    const lake = await water("u33dc", "fresh", env, webPolicy(env));
-    assert.equal(lake.status, 503);
-    assert.equal(calls.weatherkit, 2);
-
-    // Next hour, web budget left 1: one more forecast, then the saved copy, never a call.
-    for (const k of [...store.keys()]) if (k.startsWith("wx:u33dc:")) store.delete(k);
-    assert.equal((await weather("u33dc", env, webPolicy(env))).status, 200);
-    for (const k of [...store.keys()]) if (k.startsWith("wx:u33dc:")) store.delete(k);
-    const stale = await weather("u33dc", env, webPolicy(env));
-    assert.equal(stale.status, 200);
-    assert.equal(stale.headers.get("x-cache"), "stale");
-    assert.equal(calls.weatherkit, 3);
+    // The app routes still apply the per-IP limit.
+    assert.equal((await worker.fetch(new Request("https://x/wx?gh=u33dd"), env)).status, 429);
   } finally {
     globalThis.fetch = realFetch;
   }

@@ -10,7 +10,7 @@ import {
   type StationRef,
 } from "./tide.ts";
 import { digest, isAngler, MAX_BODY, parseTrip, totals } from "./trip.ts";
-import { DEFAULT_WEB_DAILY_BUDGET, dailyBudget, secondsToReset, spend } from "./budget.ts";
+import { dailyBudget, secondsToReset, spend } from "./budget.ts";
 
 interface KV {
   get(key: string): Promise<string | null>;
@@ -31,34 +31,40 @@ export interface Env {
   TRIP_LIMITER?: RateLimit;
   /** WeatherKit calls allowed per UTC day across all app clients (budget.ts). Default 5000. */
   DAILY_WEATHERKIT_BUDGET?: string;
-  /** The forecast web pages' own daily share, reached only through `WebForecast` (web.ts). Default 1500. */
-  WEB_DAILY_WEATHERKIT_BUDGET?: string;
 }
 
 /**
  * Who is asking. The apps: misses limited per IP, the app budget, saved copies only on request
- * (`x-accept-stale`). The forecast web pages (web.ts, reachable only through a service binding):
- * their own daily budget, no per-IP limit (their cron paces them) and always the saved copy
- * when the budget is spent, since a page shows its age.
+ * (`x-accept-stale`), and every answer kept (hourly key plus the saved copy).
+ *
+ * The forecast web pages (web.ts, reachable only through a service binding): no per-IP limit
+ * and no spend here, because the web worker keeps its own daily budget and reserves before it
+ * asks (web/src/budget.ts); never a saved copy (a page keeps its own last result). Only the
+ * 24-hour water answer is written for them, which saves three calls on the next refresh; the
+ * hourly forecast keys would never be read again, so they are not written (KV writes are the
+ * scarce resource on the free plan).
  */
 export interface Policy {
   allow(): Promise<boolean>;
   spend(cost: number, now: Date): Promise<boolean>;
   acceptStale: boolean;
+  /** Write the hourly forecast key and the saved copies (`wxlast:`, `waterlast:`). */
+  keepCopies: boolean;
 }
 
 const appPolicy = (req: Request, env: Env): Policy => ({
   allow: () => allowUpstream(req, env),
   spend: (cost, now) => spendWeatherKit(env, cost, now),
   acceptStale: acceptsStale(req),
+  keepCopies: true,
 });
 
-export const webPolicy = (env: Env): Policy => ({
+export const webPolicy: Policy = {
   allow: async () => true,
-  spend: (cost, now) =>
-    spend(env.WX_CACHE, dailyBudget(env.WEB_DAILY_WEATHERKIT_BUDGET, DEFAULT_WEB_DAILY_BUDGET), cost, now, "wkbudget-web"),
-  acceptStale: true,
-});
+  spend: async () => true,
+  acceptStale: false,
+  keepCopies: false,
+};
 
 interface D1 {
   prepare(sql: string): { bind(...values: unknown[]): { run(): Promise<unknown> } };
@@ -141,9 +147,11 @@ export async function weather(gh: string, env: Env, policy: Policy): Promise<Res
   // An empty forecast is unusable to the app; do not pin it in the cache for an hour.
   if (slimmed.hours.length === 0) return json({ error: "upstream", status: "empty" }, 502);
   const body = JSON.stringify(slimmed);
-  // Entry is keyed by hour; keep it a little past the hour for slow clocks.
-  await env.WX_CACHE.put(key, body, { expirationTtl: 3900 });
-  await env.WX_CACHE.put(lastWxKey(gh), body, { expirationTtl: 3 * DAY });
+  if (policy.keepCopies) {
+    // Entry is keyed by hour; keep it a little past the hour for slow clocks.
+    await env.WX_CACHE.put(key, body, { expirationTtl: 3900 });
+    await env.WX_CACHE.put(lastWxKey(gh), body, { expirationTtl: 3 * DAY });
+  }
   return json(body, 200, { "x-cache": "miss", "cache-control": "public, max-age=900" });
 }
 
@@ -261,7 +269,7 @@ export async function water(gh: string, kind: WaterKind, env: Env, policy: Polic
   }
   const body = JSON.stringify(answer);
   await env.WX_CACHE.put(key, body, { expirationTtl: answer.tempC === null ? 2 * 3600 : 24 * 3600 });
-  if (answer.tempC !== null) await env.WX_CACHE.put(lastWaterKey(kind, gh), body, { expirationTtl: 10 * DAY });
+  if (answer.tempC !== null && policy.keepCopies) await env.WX_CACHE.put(lastWaterKey(kind, gh), body, { expirationTtl: 10 * DAY });
   return json(body, 200, { ...headers, "x-cache": "miss" });
 }
 
