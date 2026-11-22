@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { budgetKey, DEFAULT_DAILY_BUDGET, dailyBudget, secondsToReset, spend } from "../src/budget.ts";
-import worker from "../src/index.ts";
+import worker, { weather, water, webPolicy } from "../src/index.ts";
 
 type Put = { key: string; value: string; ttl?: number };
 
@@ -181,4 +181,43 @@ test("budget: a refused counter write (KV per-key limit) does not fail the reque
   };
   assert.equal(await spend(kv, 10, 1, new Date()), true);
   assert.equal(await spend(kv, 7, 1, new Date()), false);
+});
+
+test("web policy: own daily counter, no per-IP limit, saved copy once its budget is spent", async () => {
+  const { kv, store } = memoryKV();
+  const env = { ...(await envWith(kv, "1")), WEB_DAILY_WEATHERKIT_BUDGET: "2" };
+  // A limiter that refuses everything: the web path must not consult it.
+  const refusing = { UPSTREAM_LIMITER: { limit: async () => ({ success: false }) } };
+  const { calls, fn } = fakeFetch();
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = fn;
+  try {
+    const day = new Date().toISOString().slice(0, 10);
+    const first = await weather("u33dc", { ...env, ...refusing }, webPolicy(env));
+    assert.equal(first.status, 200);
+    assert.equal(calls.weatherkit, 1);
+    assert.equal(store.get(`wkbudget-web:${day}`), "1");
+    assert.equal(store.get(`wkbudget:${day}`), undefined, "the app budget is untouched");
+
+    // The app's own budget of 1 is still whole after the web spent one.
+    const app = await worker.fetch(new Request("https://x/wx?gh=u33dd"), env);
+    assert.equal(app.status, 200);
+    assert.equal(store.get(`wkbudget:${day}`), "1");
+
+    // Web: the air model needs 3 calls, only 1 is left: no saved copy yet, so the 503.
+    const lake = await water("u33dc", "fresh", env, webPolicy(env));
+    assert.equal(lake.status, 503);
+    assert.equal(calls.weatherkit, 2);
+
+    // Next hour, web budget left 1: one more forecast, then the saved copy, never a call.
+    for (const k of [...store.keys()]) if (k.startsWith("wx:u33dc:")) store.delete(k);
+    assert.equal((await weather("u33dc", env, webPolicy(env))).status, 200);
+    for (const k of [...store.keys()]) if (k.startsWith("wx:u33dc:")) store.delete(k);
+    const stale = await weather("u33dc", env, webPolicy(env));
+    assert.equal(stale.status, 200);
+    assert.equal(stale.headers.get("x-cache"), "stale");
+    assert.equal(calls.weatherkit, 3);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
 });

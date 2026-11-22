@@ -1,0 +1,2532 @@
+[
+ {
+  "slug": "dauphin-island",
+  "state": "AL",
+  "name": "Dauphin Island",
+  "kind": "coast",
+  "lat": 30.25,
+  "lon": -88.075,
+  "gh": "dj3k5",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8735180",
+  "stationName": "Dauphin Island",
+  "source": "NOAA CO-OPS station 8735180 (Dauphin Island)"
+ },
+ {
+  "slug": "lake-eufaula-walter-f-george",
+  "state": "AL",
+  "name": "Lake Eufaula (Walter F. George)",
+  "kind": "lake",
+  "lat": 31.6969,
+  "lon": -85.1099,
+  "gh": "djekr",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Walter F. George Reservoir, Fort Gaines, Clay County, Georgia, United States"
+ },
+ {
+  "slug": "lake-guntersville",
+  "state": "AL",
+  "name": "Lake Guntersville",
+  "kind": "lake",
+  "lat": 34.6646,
+  "lon": -85.9461,
+  "gh": "dn4vh",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Guntersville Lake, Scottsboro, Jackson County, East Tennessee, Alabama, United States"
+ },
+ {
+  "slug": "lake-jordan",
+  "state": "AL",
+  "name": "Lake Jordan",
+  "kind": "lake",
+  "lat": 32.7104,
+  "lon": -86.3538,
+  "gh": "djfd4",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Jordan Lake, Holtville, Elmore County, Alabama, United States"
+ },
+ {
+  "slug": "lake-martin",
+  "state": "AL",
+  "name": "Lake Martin",
+  "kind": "lake",
+  "lat": 32.8039,
+  "lon": -85.8939,
+  "gh": "djfft",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Martin, Alexander City, Tallapoosa County, Alabama, 36861, United States"
+ },
+ {
+  "slug": "lewis-smith-lake",
+  "state": "AL",
+  "name": "Lewis Smith Lake",
+  "kind": "lake",
+  "lat": 34.07,
+  "lon": -86.9791,
+  "gh": "dn41u",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lewis Smith Lake, Double Springs, Cullman County, Alabama, 35541, United States"
+ },
+ {
+  "slug": "logan-martin-lake",
+  "state": "AL",
+  "name": "Logan Martin Lake",
+  "kind": "lake",
+  "lat": 33.5154,
+  "lon": -86.2803,
+  "gh": "djfws",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Logan Martin Lake, Pell City, St. Clair County, Alabama, 35054, United States"
+ },
+ {
+  "slug": "mobile-bay",
+  "state": "AL",
+  "name": "Mobile Bay",
+  "kind": "coast",
+  "lat": 30.7046,
+  "lon": -88.0396,
+  "gh": "dj3qs",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8737048",
+  "stationName": "Mobile State Docks",
+  "source": "NOAA CO-OPS station 8737048 (Mobile State Docks)"
+ },
+ {
+  "slug": "pickwick-lake",
+  "state": "AL",
+  "name": "Pickwick Lake",
+  "kind": "lake",
+  "lat": 34.908,
+  "lon": -88.0387,
+  "gh": "dn1qs",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Pickwick Lake, Florence, Lauderdale County, West Tennessee, Alabama, United States"
+ },
+ {
+  "slug": "weiss-lake",
+  "state": "AL",
+  "name": "Weiss Lake",
+  "kind": "lake",
+  "lat": 34.202,
+  "lon": -85.6621,
+  "gh": "dn54d",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Weiss Lake, Centre, Cherokee County, Alabama, United States"
+ },
+ {
+  "slug": "wheeler-lake",
+  "state": "AL",
+  "name": "Wheeler Lake",
+  "kind": "lake",
+  "lat": 32.9223,
+  "lon": -85.3877,
+  "gh": "djg72",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Wheeler Lake, LaFayette, Chambers County, Alabama, United States"
+ },
+ {
+  "slug": "wilson-lake",
+  "state": "AL",
+  "name": "Wilson Lake",
+  "kind": "lake",
+  "lat": 33.4009,
+  "lon": -86.7719,
+  "gh": "djfq1",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Wilson Lake, Charlston Lane, Chestnut Ridge, Cedar Crest, Jefferson County, Alabama, 35216, United States"
+ },
+ {
+  "slug": "bull-shoals-lake",
+  "state": "AR",
+  "name": "Bull Shoals Lake",
+  "kind": "lake",
+  "lat": 36.5111,
+  "lon": -93.0251,
+  "gh": "9ymze",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Bull Shoals Lake, Forsyth, Taney County, Missouri, United States"
+ },
+ {
+  "slug": "degray-lake",
+  "state": "AR",
+  "name": "DeGray Lake",
+  "kind": "lake",
+  "lat": 34.2603,
+  "lon": -93.2059,
+  "gh": "9yjdz",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: DeGray Lake, Clark County, Arkansas, United States"
+ },
+ {
+  "slug": "greers-ferry-lake",
+  "state": "AR",
+  "name": "Greers Ferry Lake",
+  "kind": "lake",
+  "lat": 35.5479,
+  "lon": -92.328,
+  "gh": "9yq65",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Greers Ferry Lake, Fairfield Bay, Van Buren County, Arkansas, United States"
+ },
+ {
+  "slug": "lake-chicot",
+  "state": "AR",
+  "name": "Lake Chicot",
+  "kind": "lake",
+  "lat": 33.325,
+  "lon": -91.2776,
+  "gh": "9vzjd",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Chicot, Lake Village, Chicot County, Arkansas, United States"
+ },
+ {
+  "slug": "lake-dardanelle",
+  "state": "AR",
+  "name": "Lake Dardanelle",
+  "kind": "lake",
+  "lat": 35.3393,
+  "lon": -93.3423,
+  "gh": "9ym95",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Dardanelle, Knoxville, Johnson County, Arkansas, 72845, United States"
+ },
+ {
+  "slug": "lake-hamilton",
+  "state": "AR",
+  "name": "Lake Hamilton",
+  "kind": "lake",
+  "lat": 34.4353,
+  "lon": -93.1321,
+  "gh": "9yjgb",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Hamilton, Garland County, Arkansas, United States"
+ },
+ {
+  "slug": "lake-ouachita",
+  "state": "AR",
+  "name": "Lake Ouachita",
+  "kind": "lake",
+  "lat": 34.6157,
+  "lon": -93.4129,
+  "gh": "9yjsf",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Ouachita, Montgomery County, Arkansas, 71956, United States"
+ },
+ {
+  "slug": "millwood-lake",
+  "state": "AR",
+  "name": "Millwood Lake",
+  "kind": "lake",
+  "lat": 33.7471,
+  "lon": -93.9796,
+  "gh": "9vvpv",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Millwood Lake, Little River County, Arkansas, United States"
+ },
+ {
+  "slug": "bartlett-lake",
+  "state": "AZ",
+  "name": "Bartlett Lake",
+  "kind": "lake",
+  "lat": 33.8685,
+  "lon": -111.6137,
+  "gh": "9w08s",
+  "tz": "America/Phoenix",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Bartlett Reservoir, Maricopa County, Arizona, United States"
+ },
+ {
+  "slug": "lake-pleasant",
+  "state": "AZ",
+  "name": "Lake Pleasant",
+  "kind": "lake",
+  "lat": 33.9108,
+  "lon": -112.2782,
+  "gh": "9w00v",
+  "tz": "America/Phoenix",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Pleasant, Peoria, Yavapai County, Arizona, United States"
+ },
+ {
+  "slug": "roosevelt-lake",
+  "state": "AZ",
+  "name": "Roosevelt Lake",
+  "kind": "lake",
+  "lat": 33.7028,
+  "lon": -111.1623,
+  "gh": "9tbzw",
+  "tz": "America/Phoenix",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Theodore Roosevelt Lake, Gila County, Arizona, 85545, United States"
+ },
+ {
+  "slug": "saguaro-lake",
+  "state": "AZ",
+  "name": "Saguaro Lake",
+  "kind": "lake",
+  "lat": 33.5672,
+  "lon": -111.5236,
+  "gh": "9tbwy",
+  "tz": "America/Phoenix",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Saguaro Lake, Maricopa County, Arizona, United States"
+ },
+ {
+  "slug": "castaic-lake",
+  "state": "CA",
+  "name": "Castaic Lake",
+  "kind": "lake",
+  "lat": 34.5406,
+  "lon": -118.587,
+  "gh": "9q5sm",
+  "tz": "America/Los_Angeles",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Castaic Lake, Los Angeles County, California, United States"
+ },
+ {
+  "slug": "clear-lake",
+  "state": "CA",
+  "name": "Clear Lake",
+  "kind": "lake",
+  "lat": 39.0319,
+  "lon": -122.7995,
+  "gh": "9qbwj",
+  "tz": "America/Los_Angeles",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Clear Lake, Lakeport, Lake County, California, United States"
+ },
+ {
+  "slug": "diamond-valley-lake",
+  "state": "CA",
+  "name": "Diamond Valley Lake",
+  "kind": "lake",
+  "lat": 33.6799,
+  "lon": -117.0282,
+  "gh": "9muz8",
+  "tz": "America/Los_Angeles",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Diamond Valley Lake, Winchester, Riverside County, California, United States"
+ },
+ {
+  "slug": "la-jolla",
+  "state": "CA",
+  "name": "La Jolla",
+  "kind": "coast",
+  "lat": 32.8669,
+  "lon": -117.2571,
+  "gh": "9mudg",
+  "tz": "America/Los_Angeles",
+  "water": "inshoreSalt",
+  "species": [
+   "general"
+  ],
+  "stationId": "9410230",
+  "stationName": "La Jolla",
+  "source": "NOAA CO-OPS station 9410230 (La Jolla)"
+ },
+ {
+  "slug": "lake-casitas",
+  "state": "CA",
+  "name": "Lake Casitas",
+  "kind": "lake",
+  "lat": 34.3891,
+  "lon": -119.3339,
+  "gh": "9q55s",
+  "tz": "America/Los_Angeles",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Casitas, Ventura County, California, United States"
+ },
+ {
+  "slug": "san-diego-bay",
+  "state": "CA",
+  "name": "San Diego Bay",
+  "kind": "coast",
+  "lat": 32.7156,
+  "lon": -117.1767,
+  "gh": "9mudj",
+  "tz": "America/Los_Angeles",
+  "water": "inshoreSalt",
+  "species": [
+   "general"
+  ],
+  "stationId": "9410170",
+  "stationName": "San Diego",
+  "source": "NOAA CO-OPS station 9410170 (San Diego)"
+ },
+ {
+  "slug": "apalachicola",
+  "state": "FL",
+  "name": "Apalachicola",
+  "kind": "coast",
+  "lat": 29.7244,
+  "lon": -84.9805,
+  "gh": "dj794",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8728690",
+  "stationName": "Apalachicola",
+  "source": "NOAA CO-OPS station 8728690 (Apalachicola)"
+ },
+ {
+  "slug": "cedar-key",
+  "state": "FL",
+  "name": "Cedar Key",
+  "kind": "coast",
+  "lat": 29.135,
+  "lon": -83.0317,
+  "gh": "djhvw",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8727520",
+  "stationName": "Cedar Key",
+  "source": "NOAA CO-OPS station 8727520 (Cedar Key)"
+ },
+ {
+  "slug": "clearwater-beach",
+  "state": "FL",
+  "name": "Clearwater Beach",
+  "kind": "coast",
+  "lat": 27.9783,
+  "lon": -82.8317,
+  "gh": "dhvp5",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8726724",
+  "stationName": "Clearwater Beach",
+  "source": "NOAA CO-OPS station 8726724 (Clearwater Beach)"
+ },
+ {
+  "slug": "daytona-beach-shores",
+  "state": "FL",
+  "name": "Daytona Beach Shores",
+  "kind": "coast",
+  "lat": 29.1467,
+  "lon": -80.9633,
+  "gh": "djnmv",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8721120",
+  "stationName": "DAYTONA BEACH SHORES",
+  "source": "NOAA CO-OPS station 8721120 (DAYTONA BEACH SHORES)"
+ },
+ {
+  "slug": "fernandina-beach",
+  "state": "FL",
+  "name": "Fernandina Beach",
+  "kind": "coast",
+  "lat": 30.6714,
+  "lon": -81.4658,
+  "gh": "djqn6",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8720030",
+  "stationName": "Fernandina Beach",
+  "source": "NOAA CO-OPS station 8720030 (Fernandina Beach)"
+ },
+ {
+  "slug": "fort-myers",
+  "state": "FL",
+  "name": "Fort Myers",
+  "kind": "coast",
+  "lat": 26.6478,
+  "lon": -81.8711,
+  "gh": "dhtz8",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8725520",
+  "stationName": "Fort Myers",
+  "source": "NOAA CO-OPS station 8725520 (Fort Myers)"
+ },
+ {
+  "slug": "key-west",
+  "state": "FL",
+  "name": "Key West",
+  "kind": "coast",
+  "lat": 24.5557,
+  "lon": -81.8079,
+  "gh": "dhmgd",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8724580",
+  "stationName": "Key West",
+  "source": "NOAA CO-OPS station 8724580 (Key West)"
+ },
+ {
+  "slug": "lake-george",
+  "state": "FL",
+  "name": "Lake George",
+  "kind": "lake",
+  "lat": 29.2986,
+  "lon": -81.5921,
+  "gh": "djjyx",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake George, Volusia County, Florida, United States"
+ },
+ {
+  "slug": "lake-harris",
+  "state": "FL",
+  "name": "Lake Harris",
+  "kind": "lake",
+  "lat": 28.7559,
+  "lon": -81.8085,
+  "gh": "djjgd",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Harris, Yalaha, Lake County, Florida, 34748, United States"
+ },
+ {
+  "slug": "lake-istokpoga",
+  "state": "FL",
+  "name": "Lake Istokpoga",
+  "kind": "lake",
+  "lat": 27.3719,
+  "lon": -81.2878,
+  "gh": "dhy5w",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Istokpoga, Highlands County, Florida, United States"
+ },
+ {
+  "slug": "lake-kissimmee",
+  "state": "FL",
+  "name": "Lake Kissimmee",
+  "kind": "lake",
+  "lat": 27.9001,
+  "lon": -81.2665,
+  "gh": "dhynw",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Kissimmee, Osceola County, Florida, United States"
+ },
+ {
+  "slug": "lake-monroe",
+  "state": "FL",
+  "name": "Lake Monroe",
+  "kind": "lake",
+  "lat": 28.8405,
+  "lon": -81.2673,
+  "gh": "djnhn",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Monroe, Deltona, Volusia County, Florida, United States"
+ },
+ {
+  "slug": "lake-okeechobee",
+  "state": "FL",
+  "name": "Lake Okeechobee",
+  "kind": "lake",
+  "lat": 26.9442,
+  "lon": -80.8029,
+  "gh": "dhy93",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Okeechobee, Palm Beach County, Florida, United States"
+ },
+ {
+  "slug": "lake-talquin",
+  "state": "FL",
+  "name": "Lake Talquin",
+  "kind": "lake",
+  "lat": 30.4352,
+  "lon": -84.564,
+  "gh": "dj7v5",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Talquin, Gadsden County, Florida, United States"
+ },
+ {
+  "slug": "lake-tohopekaliga",
+  "state": "FL",
+  "name": "Lake Tohopekaliga",
+  "kind": "lake",
+  "lat": 28.2181,
+  "lon": -81.3945,
+  "gh": "djn0e",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Tohopekaliga, Kissimmee, Osceola County, Florida, United States"
+ },
+ {
+  "slug": "lake-weohyakapka",
+  "state": "FL",
+  "name": "Lake Weohyakapka",
+  "kind": "lake",
+  "lat": 27.8219,
+  "lon": -81.4118,
+  "gh": "dhyn7",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Weohyakapka, Polk County, Florida, United States"
+ },
+ {
+  "slug": "lake-worth-pier",
+  "state": "FL",
+  "name": "Lake Worth Pier",
+  "kind": "coast",
+  "lat": 26.6128,
+  "lon": -80.0342,
+  "gh": "dhxp6",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8722670",
+  "stationName": "Lake Worth Pier, Atlantic Ocean",
+  "source": "NOAA CO-OPS station 8722670 (Lake Worth Pier, Atlantic Ocean)"
+ },
+ {
+  "slug": "marathon-vaca-key",
+  "state": "FL",
+  "name": "Marathon (Vaca Key)",
+  "kind": "coast",
+  "lat": 24.711,
+  "lon": -81.1065,
+  "gh": "dhqkd",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8723970",
+  "stationName": "Vaca Key, Florida Bay",
+  "source": "NOAA CO-OPS station 8723970 (Vaca Key, Florida Bay)"
+ },
+ {
+  "slug": "mayport",
+  "state": "FL",
+  "name": "Mayport",
+  "kind": "coast",
+  "lat": 30.3982,
+  "lon": -81.4279,
+  "gh": "djqhg",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8720218",
+  "stationName": "Mayport (Bar Pilots Dock)",
+  "source": "NOAA CO-OPS station 8720218 (Mayport (Bar Pilots Dock))"
+ },
+ {
+  "slug": "naples",
+  "state": "FL",
+  "name": "Naples",
+  "kind": "coast",
+  "lat": 26.1317,
+  "lon": -81.8075,
+  "gh": "dhtud",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8725110",
+  "stationName": "Naples",
+  "source": "NOAA CO-OPS station 8725110 (Naples)"
+ },
+ {
+  "slug": "orange-lake",
+  "state": "FL",
+  "name": "Orange Lake",
+  "kind": "lake",
+  "lat": 29.4628,
+  "lon": -82.1767,
+  "gh": "djjxd",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Orange Lake, Alachua County, Florida, United States"
+ },
+ {
+  "slug": "panama-city",
+  "state": "FL",
+  "name": "Panama City",
+  "kind": "coast",
+  "lat": 30.1497,
+  "lon": -85.6644,
+  "gh": "dj75d",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8729108",
+  "stationName": "Panama City",
+  "source": "NOAA CO-OPS station 8729108 (Panama City)"
+ },
+ {
+  "slug": "pensacola-beach",
+  "state": "FL",
+  "name": "Pensacola Beach",
+  "kind": "coast",
+  "lat": 30.3275,
+  "lon": -87.1419,
+  "gh": "dj6h9",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8729807",
+  "stationName": "Pensacola Beach Pier",
+  "source": "NOAA CO-OPS station 8729807 (Pensacola Beach Pier)"
+ },
+ {
+  "slug": "port-canaveral",
+  "state": "FL",
+  "name": "Port Canaveral",
+  "kind": "coast",
+  "lat": 28.4158,
+  "lon": -80.5931,
+  "gh": "djn9w",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8721604",
+  "stationName": "Trident Pier, Port Canaveral",
+  "source": "NOAA CO-OPS station 8721604 (Trident Pier, Port Canaveral)"
+ },
+ {
+  "slug": "port-everglades",
+  "state": "FL",
+  "name": "Port Everglades",
+  "kind": "coast",
+  "lat": 26.0817,
+  "lon": -80.1167,
+  "gh": "dhxh2",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8722956",
+  "stationName": "South Port Everglades",
+  "source": "NOAA CO-OPS station 8722956 (South Port Everglades)"
+ },
+ {
+  "slug": "rodman-reservoir",
+  "state": "FL",
+  "name": "Rodman Reservoir",
+  "kind": "lake",
+  "lat": 29.4569,
+  "lon": -81.9256,
+  "gh": "djjxx",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Rodman Reservoir, Marion County, Florida, United States"
+ },
+ {
+  "slug": "siesta-key",
+  "state": "FL",
+  "name": "Siesta Key",
+  "kind": "coast",
+  "lat": 27.2839,
+  "lon": -82.565,
+  "gh": "dhv71",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8726034",
+  "stationName": "Siesta Key, Big Sarasota Pass",
+  "source": "NOAA CO-OPS station 8726034 (Siesta Key, Big Sarasota Pass)"
+ },
+ {
+  "slug": "st-augustine-beach",
+  "state": "FL",
+  "name": "St. Augustine Beach",
+  "kind": "coast",
+  "lat": 29.8567,
+  "lon": -81.2633,
+  "gh": "djq1y",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8720587",
+  "stationName": "St. Augustine Beach",
+  "source": "NOAA CO-OPS station 8720587 (St. Augustine Beach)"
+ },
+ {
+  "slug": "st-petersburg",
+  "state": "FL",
+  "name": "St. Petersburg",
+  "kind": "coast",
+  "lat": 27.7606,
+  "lon": -82.6269,
+  "gh": "dhvjz",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8726520",
+  "stationName": "St. Petersburg",
+  "source": "NOAA CO-OPS station 8726520 (St. Petersburg)"
+ },
+ {
+  "slug": "venice",
+  "state": "FL",
+  "name": "Venice",
+  "kind": "coast",
+  "lat": 27.0717,
+  "lon": -82.4533,
+  "gh": "dhv65",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8725858",
+  "stationName": "VENICE",
+  "source": "NOAA CO-OPS station 8725858 (VENICE)"
+ },
+ {
+  "slug": "virginia-key-miami",
+  "state": "FL",
+  "name": "Virginia Key (Miami)",
+  "kind": "coast",
+  "lat": 25.7314,
+  "lon": -80.1618,
+  "gh": "dhwfr",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8723214",
+  "stationName": "Virginia Key",
+  "source": "NOAA CO-OPS station 8723214 (Virginia Key)"
+ },
+ {
+  "slug": "clarks-hill-lake",
+  "state": "GA",
+  "name": "Clarks Hill Lake",
+  "kind": "lake",
+  "lat": 33.8006,
+  "lon": -82.2969,
+  "gh": "dnj2r",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Clarks Hill Lake, McCormick County, South Carolina, United States"
+ },
+ {
+  "slug": "lake-allatoona",
+  "state": "GA",
+  "name": "Lake Allatoona",
+  "kind": "lake",
+  "lat": 34.1328,
+  "lon": -84.6296,
+  "gh": "dn5f4",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Allatoona Lake, Acworth, Cherokee County, Georgia, United States"
+ },
+ {
+  "slug": "lake-hartwell",
+  "state": "GA",
+  "name": "Lake Hartwell",
+  "kind": "lake",
+  "lat": 34.5492,
+  "lon": -83.1135,
+  "gh": "dnhus",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Hartwell, Anderson, Stephens County, Georgia, 30643, United States"
+ },
+ {
+  "slug": "lake-lanier",
+  "state": "GA",
+  "name": "Lake Lanier",
+  "kind": "lake",
+  "lat": 34.2931,
+  "lon": -83.9382,
+  "gh": "dnh71",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Lanier, Cumming, Forsyth County, Georgia, United States"
+ },
+ {
+  "slug": "lake-oconee",
+  "state": "GA",
+  "name": "Lake Oconee",
+  "kind": "lake",
+  "lat": 33.5046,
+  "lon": -83.2828,
+  "gh": "djuy8",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Oconee, Greene County, Georgia, United States"
+ },
+ {
+  "slug": "lake-seminole",
+  "state": "GA",
+  "name": "Lake Seminole",
+  "kind": "lake",
+  "lat": 30.8415,
+  "lon": -84.8471,
+  "gh": "dj7xm",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Seminole, Paradise Acres, Seminole County, Georgia, United States"
+ },
+ {
+  "slug": "lake-sinclair",
+  "state": "GA",
+  "name": "Lake Sinclair",
+  "kind": "lake",
+  "lat": 33.245,
+  "lon": -83.2557,
+  "gh": "djuv1",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Sinclair, Crooked Creek, Putnam County, Georgia, United States"
+ },
+ {
+  "slug": "savannah-fort-pulaski",
+  "state": "GA",
+  "name": "Savannah (Fort Pulaski)",
+  "kind": "coast",
+  "lat": 32.0347,
+  "lon": -80.903,
+  "gh": "djwqp",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8670870",
+  "stationName": "Fort Pulaski",
+  "source": "NOAA CO-OPS station 8670870 (Fort Pulaski)"
+ },
+ {
+  "slug": "west-point-lake",
+  "state": "GA",
+  "name": "West Point Lake",
+  "kind": "lake",
+  "lat": 33.0826,
+  "lon": -85.1131,
+  "gh": "djgkp",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: West Point Lake;Willow Crest Lake, LaGrange, Troup County, Georgia, United States"
+ },
+ {
+  "slug": "caddo-lake",
+  "state": "LA",
+  "name": "Caddo Lake",
+  "kind": "lake",
+  "lat": 32.7407,
+  "lon": -94.0305,
+  "gh": "9vv4k",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Caddo Lake, Oil City, Caddo Parish, Louisiana, United States"
+ },
+ {
+  "slug": "cross-lake",
+  "state": "LA",
+  "name": "Cross Lake",
+  "kind": "lake",
+  "lat": 32.5131,
+  "lon": -93.8706,
+  "gh": "9vv0z",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Cross Lake, Shreveport, Caddo Parish, Louisiana, United States"
+ },
+ {
+  "slug": "false-river",
+  "state": "LA",
+  "name": "False River",
+  "kind": "lake",
+  "lat": 30.6492,
+  "lon": -91.4837,
+  "gh": "9vqyq",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: False River, New Roads, Pointe Coupee Parish, Louisiana, United States"
+ },
+ {
+  "slug": "grand-isle",
+  "state": "LA",
+  "name": "Grand Isle",
+  "kind": "coast",
+  "lat": 29.2633,
+  "lon": -89.9567,
+  "gh": "dj0n2",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8761724",
+  "stationName": "Grand Isle",
+  "source": "NOAA CO-OPS station 8761724 (Grand Isle)"
+ },
+ {
+  "slug": "lake-bistineau",
+  "state": "LA",
+  "name": "Lake Bistineau",
+  "kind": "lake",
+  "lat": 32.4317,
+  "lon": -93.3658,
+  "gh": "9vv8e",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Bistineau, Webster Parish, Louisiana, United States"
+ },
+ {
+  "slug": "lake-claiborne",
+  "state": "LA",
+  "name": "Lake Claiborne",
+  "kind": "lake",
+  "lat": 32.7587,
+  "lon": -92.9659,
+  "gh": "9vvfk",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Claiborne, Claiborne Parish, Louisiana, United States"
+ },
+ {
+  "slug": "lake-darbonne",
+  "state": "LA",
+  "name": "Lake D'Arbonne",
+  "kind": "lake",
+  "lat": 32.7605,
+  "lon": -92.4323,
+  "gh": "9vy62",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake D'Arbonne, Farmerville, Union Parish, Louisiana, United States"
+ },
+ {
+  "slug": "port-fourchon",
+  "state": "LA",
+  "name": "Port Fourchon",
+  "kind": "coast",
+  "lat": 29.1142,
+  "lon": -90.1993,
+  "gh": "9vpve",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8762075",
+  "stationName": "Port Fourchon, Belle Pass",
+  "source": "NOAA CO-OPS station 8762075 (Port Fourchon, Belle Pass)"
+ },
+ {
+  "slug": "shell-beach",
+  "state": "LA",
+  "name": "Shell Beach",
+  "kind": "coast",
+  "lat": 29.8681,
+  "lon": -89.6732,
+  "gh": "dj21z",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8761305",
+  "stationName": "Shell Beach",
+  "source": "NOAA CO-OPS station 8761305 (Shell Beach)"
+ },
+ {
+  "slug": "venice-grand-pass",
+  "state": "LA",
+  "name": "Venice (Grand Pass)",
+  "kind": "coast",
+  "lat": 29.2733,
+  "lon": -89.3517,
+  "gh": "dj0qw",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8760849",
+  "stationName": "VENICE, GRAND PASS",
+  "source": "NOAA CO-OPS station 8760849 (VENICE, GRAND PASS)"
+ },
+ {
+  "slug": "bay-st-louis-waveland",
+  "state": "MS",
+  "name": "Bay St. Louis (Waveland)",
+  "kind": "coast",
+  "lat": 30.3263,
+  "lon": -89.3258,
+  "gh": "dj2kx",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8747437",
+  "stationName": "Bay Waveland Yacht Club",
+  "source": "NOAA CO-OPS station 8747437 (Bay Waveland Yacht Club)"
+ },
+ {
+  "slug": "enid-lake",
+  "state": "MS",
+  "name": "Enid Lake",
+  "kind": "lake",
+  "lat": 34.142,
+  "lon": -89.8696,
+  "gh": "dn044",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Enid Lake, Yalobusha County, Mississippi, United States"
+ },
+ {
+  "slug": "grenada-lake",
+  "state": "MS",
+  "name": "Grenada Lake",
+  "kind": "lake",
+  "lat": 33.8519,
+  "lon": -89.718,
+  "gh": "dn00w",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Grenada Lake, Grenada County, Mississippi, United States"
+ },
+ {
+  "slug": "gulfport",
+  "state": "MS",
+  "name": "Gulfport",
+  "kind": "coast",
+  "lat": 30.36,
+  "lon": -89.0817,
+  "gh": "dj2ss",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8745557",
+  "stationName": "Gulfport Harbor",
+  "source": "NOAA CO-OPS station 8745557 (Gulfport Harbor)"
+ },
+ {
+  "slug": "lake-washington",
+  "state": "MS",
+  "name": "Lake Washington",
+  "kind": "lake",
+  "lat": 33.0605,
+  "lon": -91.0439,
+  "gh": "9vzk0",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Washington, Washington County, Mississippi, United States"
+ },
+ {
+  "slug": "pascagoula",
+  "state": "MS",
+  "name": "Pascagoula",
+  "kind": "coast",
+  "lat": 30.3222,
+  "lon": -88.508,
+  "gh": "dj3h3",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8740993",
+  "stationName": "Pascagoula, South Side",
+  "source": "NOAA CO-OPS station 8740993 (Pascagoula, South Side)"
+ },
+ {
+  "slug": "ross-barnett-reservoir",
+  "state": "MS",
+  "name": "Ross Barnett Reservoir",
+  "kind": "lake",
+  "lat": 31.8332,
+  "lon": -89.5895,
+  "gh": "dj8m1",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Ross Barnett, Smith Co Rd 50-A, Smith County, Mississippi, 39116, United States"
+ },
+ {
+  "slug": "sardis-lake",
+  "state": "MS",
+  "name": "Sardis Lake",
+  "kind": "lake",
+  "lat": 34.4686,
+  "lon": -89.6778,
+  "gh": "dn0hp",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Sardis Lake, Lafayette County, Mississippi, United States"
+ },
+ {
+  "slug": "badin-lake",
+  "state": "NC",
+  "name": "Badin Lake",
+  "kind": "lake",
+  "lat": 35.4599,
+  "lon": -80.1139,
+  "gh": "dnr18",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Badin Lake, Stanly County, North Carolina, United States"
+ },
+ {
+  "slug": "beaufort",
+  "state": "NC",
+  "name": "Beaufort",
+  "kind": "coast",
+  "lat": 34.7173,
+  "lon": -76.6707,
+  "gh": "dq1mx",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8656483",
+  "stationName": "Beaufort, Duke Marine Lab",
+  "source": "NOAA CO-OPS station 8656483 (Beaufort, Duke Marine Lab)"
+ },
+ {
+  "slug": "falls-lake",
+  "state": "NC",
+  "name": "Falls Lake",
+  "kind": "lake",
+  "lat": 36.0161,
+  "lon": -78.7503,
+  "gh": "dnruz",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Falls Lake, Durham County, North Carolina, United States"
+ },
+ {
+  "slug": "high-rock-lake",
+  "state": "NC",
+  "name": "High Rock Lake",
+  "kind": "lake",
+  "lat": 35.668,
+  "lon": -80.3084,
+  "gh": "dnqfu",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: High Rock Lake, Davidson County, North Carolina, United States"
+ },
+ {
+  "slug": "jordan-lake",
+  "state": "NC",
+  "name": "Jordan Lake",
+  "kind": "lake",
+  "lat": 35.7556,
+  "lon": -79.0296,
+  "gh": "dnrg3",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Jordan Lake, Carolina Meadows, Chatham County, North Carolina, United States"
+ },
+ {
+  "slug": "kerr-lake",
+  "state": "NC",
+  "name": "Kerr Lake",
+  "kind": "lake",
+  "lat": 36.5589,
+  "lon": -78.3203,
+  "gh": "dq2rc",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Kerr Lake;Buggs Island Lake, Clarksville, Mecklenburg County, Virginia, United States"
+ },
+ {
+  "slug": "lake-gaston",
+  "state": "NC",
+  "name": "Lake Gaston",
+  "kind": "lake",
+  "lat": 36.5441,
+  "lon": -78.113,
+  "gh": "dq2ry",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Gaston, Bracey, Mecklenburg County, Virginia, 27850, United States"
+ },
+ {
+  "slug": "lake-norman",
+  "state": "NC",
+  "name": "Lake Norman",
+  "kind": "lake",
+  "lat": 35.5924,
+  "lon": -80.933,
+  "gh": "dnq6q",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Norman, Mooresville, Iredell County, North Carolina, United States"
+ },
+ {
+  "slug": "oregon-inlet",
+  "state": "NC",
+  "name": "Oregon Inlet",
+  "kind": "coast",
+  "lat": 35.7957,
+  "lon": -75.5482,
+  "gh": "dq678",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8652587",
+  "stationName": "Oregon Inlet Marina",
+  "source": "NOAA CO-OPS station 8652587 (Oregon Inlet Marina)"
+ },
+ {
+  "slug": "wrightsville-beach",
+  "state": "NC",
+  "name": "Wrightsville Beach",
+  "kind": "coast",
+  "lat": 34.2133,
+  "lon": -77.7867,
+  "gh": "dq0dt",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8658163",
+  "stationName": "Wrightsville Beach",
+  "source": "NOAA CO-OPS station 8658163 (Wrightsville Beach)"
+ },
+ {
+  "slug": "broken-bow-lake",
+  "state": "OK",
+  "name": "Broken Bow Lake",
+  "kind": "lake",
+  "lat": 34.2566,
+  "lon": -94.6745,
+  "gh": "9yhdv",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Broken Bow Lake, McCurtain County, Oklahoma, United States"
+ },
+ {
+  "slug": "grand-lake",
+  "state": "OK",
+  "name": "Grand Lake",
+  "kind": "lake",
+  "lat": 36.613,
+  "lon": -94.8403,
+  "gh": "9ys83",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Grand Lake o' the Cherokees, Grove, Delaware County, Oklahoma, 74340, United States"
+ },
+ {
+  "slug": "lake-eufaula",
+  "state": "OK",
+  "name": "Lake Eufaula",
+  "kind": "lake",
+  "lat": 35.1399,
+  "lon": -95.6056,
+  "gh": "9yhpb",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Eufaula, Crowder, Pittsburg County, Oklahoma, United States"
+ },
+ {
+  "slug": "lake-tenkiller",
+  "state": "OK",
+  "name": "Lake Tenkiller",
+  "kind": "lake",
+  "lat": 35.7083,
+  "lon": -94.9657,
+  "gh": "9yk7p",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Tenkiller Ferry Lake, Paradise Hill, Cherokee County, Oklahoma, United States"
+ },
+ {
+  "slug": "robert-s-kerr-reservoir",
+  "state": "OK",
+  "name": "Robert S. Kerr Reservoir",
+  "kind": "lake",
+  "lat": 35.3496,
+  "lon": -94.8535,
+  "gh": "9yk91",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Robert S Kerr Reservoir, Tamaha, Haskell County, Oklahoma, United States"
+ },
+ {
+  "slug": "charleston",
+  "state": "SC",
+  "name": "Charleston",
+  "kind": "coast",
+  "lat": 32.7808,
+  "lon": -79.9236,
+  "gh": "djz4m",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8665530",
+  "stationName": "Charleston",
+  "source": "NOAA CO-OPS station 8665530 (Charleston)"
+ },
+ {
+  "slug": "lake-greenwood",
+  "state": "SC",
+  "name": "Lake Greenwood",
+  "kind": "lake",
+  "lat": 34.2658,
+  "lon": -82.0493,
+  "gh": "dnjdu",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Greenwood, Greenwood County, South Carolina, 29384, United States"
+ },
+ {
+  "slug": "lake-marion",
+  "state": "SC",
+  "name": "Lake Marion",
+  "kind": "lake",
+  "lat": 33.5322,
+  "lon": -80.4592,
+  "gh": "djyyc",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Marion, Orangeburg County, South Carolina, United States"
+ },
+ {
+  "slug": "lake-moultrie",
+  "state": "SC",
+  "name": "Lake Moultrie",
+  "kind": "lake",
+  "lat": 33.3131,
+  "lon": -80.0746,
+  "gh": "djzj9",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Moultrie, Bonneau, Berkeley County, South Carolina, 29469, United States"
+ },
+ {
+  "slug": "lake-murray",
+  "state": "SC",
+  "name": "Lake Murray",
+  "kind": "lake",
+  "lat": 34.085,
+  "lon": -81.2743,
+  "gh": "dnn1y",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Murray, Lexington County, South Carolina, United States"
+ },
+ {
+  "slug": "lake-wateree",
+  "state": "SC",
+  "name": "Lake Wateree",
+  "kind": "lake",
+  "lat": 34.4375,
+  "lon": -80.8583,
+  "gh": "dnneb",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Wateree, Kershaw County, South Carolina, United States"
+ },
+ {
+  "slug": "lake-wylie",
+  "state": "SC",
+  "name": "Lake Wylie",
+  "kind": "lake",
+  "lat": 35.1313,
+  "lon": -81.0468,
+  "gh": "dnnrg",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Wylie, Charlotte, Mecklenburg County, North Carolina, United States"
+ },
+ {
+  "slug": "myrtle-beach-springmaid-pier",
+  "state": "SC",
+  "name": "Myrtle Beach (Springmaid Pier)",
+  "kind": "coast",
+  "lat": 33.655,
+  "lon": -78.9183,
+  "gh": "djzzk",
+  "tz": "America/New_York",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8661070",
+  "stationName": "Springmaid Pier",
+  "source": "NOAA CO-OPS station 8661070 (Springmaid Pier)"
+ },
+ {
+  "slug": "douglas-lake",
+  "state": "TN",
+  "name": "Douglas Lake",
+  "kind": "lake",
+  "lat": 36.0136,
+  "lon": -83.3987,
+  "gh": "dnksy",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Douglas Lake, Dandridge, Jefferson County, East Tennessee, Tennessee, 37725, United States"
+ },
+ {
+  "slug": "kentucky-lake",
+  "state": "TN",
+  "name": "Kentucky Lake",
+  "kind": "lake",
+  "lat": 36.3047,
+  "lon": -87.9612,
+  "gh": "dn3qw",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Kentucky Lake, Benton County, West Tennessee, Tennessee, United States"
+ },
+ {
+  "slug": "old-hickory-lake",
+  "state": "TN",
+  "name": "Old Hickory Lake",
+  "kind": "lake",
+  "lat": 36.3184,
+  "lon": -86.5447,
+  "gh": "dn6qw",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Old Hickory Lake, Mount Juliet, Wilson County, Middle Tennessee, Tennessee, United States"
+ },
+ {
+  "slug": "percy-priest-lake",
+  "state": "TN",
+  "name": "Percy Priest Lake",
+  "kind": "lake",
+  "lat": 36.0804,
+  "lon": -86.5304,
+  "gh": "dn6mq",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: J. Percy Priest Lake, Nashville, Davidson County, Middle Tennessee, Tennessee, United States"
+ },
+ {
+  "slug": "reelfoot-lake",
+  "state": "TN",
+  "name": "Reelfoot Lake",
+  "kind": "lake",
+  "lat": 36.416,
+  "lon": -89.354,
+  "gh": "dn2rn",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Reelfoot Lake, Samburg, Obion County, West Tennessee, Tennessee, United States"
+ },
+ {
+  "slug": "watts-bar-lake",
+  "state": "TN",
+  "name": "Watts Bar Lake",
+  "kind": "lake",
+  "lat": 35.7983,
+  "lon": -84.6155,
+  "gh": "dn7gd",
+  "tz": "America/New_York",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Watts Bar Lake, Rockwood, Roane County, East Tennessee, Tennessee, United States"
+ },
+ {
+  "slug": "bob-hall-pier-corpus-christi",
+  "state": "TX",
+  "name": "Bob Hall Pier (Corpus Christi)",
+  "kind": "coast",
+  "lat": 27.58,
+  "lon": -97.2167,
+  "gh": "9ufug",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8775870",
+  "stationName": "Bob Hall Pier, Corpus Christi",
+  "source": "NOAA CO-OPS station 8775870 (Bob Hall Pier, Corpus Christi)"
+ },
+ {
+  "slug": "cedar-creek-reservoir",
+  "state": "TX",
+  "name": "Cedar Creek Reservoir",
+  "kind": "lake",
+  "lat": 32.2976,
+  "lon": -96.1517,
+  "gh": "9vexs",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Cedar Creek Reservoir, Gun Barrel City, Henderson County, Texas, United States"
+ },
+ {
+  "slug": "choke-canyon-reservoir",
+  "state": "TX",
+  "name": "Choke Canyon Reservoir",
+  "kind": "lake",
+  "lat": 28.4981,
+  "lon": -98.3097,
+  "gh": "9v444",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Choke Canyon Reservoir, Live Oak County, Texas, United States"
+ },
+ {
+  "slug": "freeport",
+  "state": "TX",
+  "name": "Freeport",
+  "kind": "coast",
+  "lat": 28.9483,
+  "lon": -95.3083,
+  "gh": "9vhhx",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8772440",
+  "stationName": "Freeport",
+  "source": "NOAA CO-OPS station 8772440 (Freeport)"
+ },
+ {
+  "slug": "galveston-jetties",
+  "state": "TX",
+  "name": "Galveston Jetties",
+  "kind": "coast",
+  "lat": 29.3575,
+  "lon": -94.7247,
+  "gh": "9vhxh",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8771341",
+  "stationName": "Galveston Bay Entrance, North Jetty",
+  "source": "NOAA CO-OPS station 8771341 (Galveston Bay Entrance, North Jetty)"
+ },
+ {
+  "slug": "lake-amistad",
+  "state": "TX",
+  "name": "Lake Amistad",
+  "kind": "lake",
+  "lat": 29.6238,
+  "lon": -100.9323,
+  "gh": "9v20x",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Amistad Reservoir, Val Verde County, Texas, United States"
+ },
+ {
+  "slug": "lake-buchanan",
+  "state": "TX",
+  "name": "Lake Buchanan",
+  "kind": "lake",
+  "lat": 30.8459,
+  "lon": -98.415,
+  "gh": "9v6p2",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Buchanan, Burnet County, Texas, United States"
+ },
+ {
+  "slug": "lake-conroe",
+  "state": "TX",
+  "name": "Lake Conroe",
+  "kind": "lake",
+  "lat": 30.4625,
+  "lon": -95.588,
+  "gh": "9vkj2",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Conroe, Conroe, Montgomery County, Texas, United States"
+ },
+ {
+  "slug": "lake-fork",
+  "state": "TX",
+  "name": "Lake Fork",
+  "kind": "lake",
+  "lat": 32.886,
+  "lon": -95.642,
+  "gh": "9vggp",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Fork Reservoir, Wood County, Texas, United States"
+ },
+ {
+  "slug": "lake-houston",
+  "state": "TX",
+  "name": "Lake Houston",
+  "kind": "lake",
+  "lat": 30.0001,
+  "lon": -95.127,
+  "gh": "9vk6e",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Houston, Houston, Harris County, Texas, United States"
+ },
+ {
+  "slug": "lake-lewisville",
+  "state": "TX",
+  "name": "Lake Lewisville",
+  "kind": "lake",
+  "lat": 33.1508,
+  "lon": -97.0035,
+  "gh": "9vgh8",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lewisville Lake, Oak Point, Denton County, Texas, United States"
+ },
+ {
+  "slug": "lake-livingston",
+  "state": "TX",
+  "name": "Lake Livingston",
+  "kind": "lake",
+  "lat": 30.8141,
+  "lon": -95.165,
+  "gh": "9vkr6",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Livingston, Polk County, Texas, United States"
+ },
+ {
+  "slug": "lake-o-the-pines",
+  "state": "TX",
+  "name": "Lake O' the Pines",
+  "kind": "lake",
+  "lat": 32.8208,
+  "lon": -94.6605,
+  "gh": "9vudt",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake O' the Pines, Marion County, Texas, United States"
+ },
+ {
+  "slug": "lake-palestine",
+  "state": "TX",
+  "name": "Lake Palestine",
+  "kind": "lake",
+  "lat": 32.1837,
+  "lon": -95.4809,
+  "gh": "9vsp5",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Palestine, Coffee City, Henderson County, Texas, United States"
+ },
+ {
+  "slug": "lake-ray-hubbard",
+  "state": "TX",
+  "name": "Lake Ray Hubbard",
+  "kind": "lake",
+  "lat": 32.903,
+  "lon": -96.4922,
+  "gh": "9vg7h",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Ray Hubbard, Dallas, Rockwall County, Texas, United States"
+ },
+ {
+  "slug": "lake-tawakoni",
+  "state": "TX",
+  "name": "Lake Tawakoni",
+  "kind": "lake",
+  "lat": 32.9031,
+  "lon": -95.9823,
+  "gh": "9vgep",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Tawakoni, West Tawakoni, Hunt County, Texas, United States"
+ },
+ {
+  "slug": "lake-texoma",
+  "state": "TX",
+  "name": "Lake Texoma",
+  "kind": "lake",
+  "lat": 33.9161,
+  "lon": -96.6427,
+  "gh": "9y52b",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Texoma, Marshall County, Oklahoma, United States"
+ },
+ {
+  "slug": "lake-travis",
+  "state": "TX",
+  "name": "Lake Travis",
+  "kind": "lake",
+  "lat": 30.4646,
+  "lon": -98.0783,
+  "gh": "9v6m2",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Travis, Briarcliff, Travis County, Texas, 78663, United States"
+ },
+ {
+  "slug": "lake-whitney",
+  "state": "TX",
+  "name": "Lake Whitney",
+  "kind": "lake",
+  "lat": 31.9799,
+  "lon": -97.3848,
+  "gh": "9vdtz",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Lake Whitney, Bosque County, Texas, United States"
+ },
+ {
+  "slug": "matagorda",
+  "state": "TX",
+  "name": "Matagorda",
+  "kind": "coast",
+  "lat": 28.71,
+  "lon": -95.9139,
+  "gh": "9v5g3",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8773146",
+  "stationName": "Matagorda City",
+  "source": "NOAA CO-OPS station 8773146 (Matagorda City)"
+ },
+ {
+  "slug": "oh-ivie-lake",
+  "state": "TX",
+  "name": "O.H. Ivie Lake",
+  "kind": "lake",
+  "lat": 31.5464,
+  "lon": -99.6782,
+  "gh": "9v957",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: O. H. Ivie Lake, Concho County, Texas, 76862, United States"
+ },
+ {
+  "slug": "port-aransas",
+  "state": "TX",
+  "name": "Port Aransas",
+  "kind": "coast",
+  "lat": 27.8397,
+  "lon": -97.0725,
+  "gh": "9ufyr",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8775237",
+  "stationName": "Port Aransas",
+  "source": "NOAA CO-OPS station 8775237 (Port Aransas)"
+ },
+ {
+  "slug": "port-bolivar",
+  "state": "TX",
+  "name": "Port Bolivar",
+  "kind": "coast",
+  "lat": 29.365,
+  "lon": -94.78,
+  "gh": "9vhx5",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8771328",
+  "stationName": "Port Bolivar",
+  "source": "NOAA CO-OPS station 8771328 (Port Bolivar)"
+ },
+ {
+  "slug": "port-isabel",
+  "state": "TX",
+  "name": "Port Isabel",
+  "kind": "coast",
+  "lat": 26.0612,
+  "lon": -97.2155,
+  "gh": "9udu7",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8779770",
+  "stationName": "Port Isabel",
+  "source": "NOAA CO-OPS station 8779770 (Port Isabel)"
+ },
+ {
+  "slug": "port-lavaca",
+  "state": "TX",
+  "name": "Port Lavaca",
+  "kind": "coast",
+  "lat": 28.6406,
+  "lon": -96.6098,
+  "gh": "9v56c",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8773259",
+  "stationName": "Port Lavaca",
+  "source": "NOAA CO-OPS station 8773259 (Port Lavaca)"
+ },
+ {
+  "slug": "port-oconnor",
+  "state": "TX",
+  "name": "Port O'Connor",
+  "kind": "coast",
+  "lat": 28.4517,
+  "lon": -96.3883,
+  "gh": "9v53y",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8773701",
+  "stationName": "Port O'Connor",
+  "source": "NOAA CO-OPS station 8773701 (Port O'Connor)"
+ },
+ {
+  "slug": "possum-kingdom-lake",
+  "state": "TX",
+  "name": "Possum Kingdom Lake",
+  "kind": "lake",
+  "lat": 32.9121,
+  "lon": -98.4652,
+  "gh": "9vcgp",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Possum Kingdom Lake, Palo Pinto County, Texas, United States"
+ },
+ {
+  "slug": "ray-roberts-lake",
+  "state": "TX",
+  "name": "Ray Roberts Lake",
+  "kind": "lake",
+  "lat": 33.4374,
+  "lon": -96.9837,
+  "gh": "9vgn1",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Ray Roberts Lake, Tioga, Cooke County, Texas, United States"
+ },
+ {
+  "slug": "richland-chambers-reservoir",
+  "state": "TX",
+  "name": "Richland-Chambers Reservoir",
+  "kind": "lake",
+  "lat": 32.0094,
+  "lon": -96.2086,
+  "gh": "9vew4",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Richland-Chambers Reservoir, Eureka, Navarro County, Texas, United States"
+ },
+ {
+  "slug": "rockport",
+  "state": "TX",
+  "name": "Rockport",
+  "kind": "coast",
+  "lat": 28.0217,
+  "lon": -97.0467,
+  "gh": "9ufzr",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8774770",
+  "stationName": "Rockport",
+  "source": "NOAA CO-OPS station 8774770 (Rockport)"
+ },
+ {
+  "slug": "sabine-pass",
+  "state": "TX",
+  "name": "Sabine Pass",
+  "kind": "coast",
+  "lat": 29.7284,
+  "lon": -93.8701,
+  "gh": "9vm1p",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8770570",
+  "stationName": "Sabine Pass North",
+  "source": "NOAA CO-OPS station 8770570 (Sabine Pass North)"
+ },
+ {
+  "slug": "sam-rayburn-reservoir",
+  "state": "TX",
+  "name": "Sam Rayburn Reservoir",
+  "kind": "lake",
+  "lat": 31.2482,
+  "lon": -94.3563,
+  "gh": "9vscu",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Sam Rayburn Reservoir, Nacogdoches County, Texas, United States"
+ },
+ {
+  "slug": "sargent",
+  "state": "TX",
+  "name": "Sargent",
+  "kind": "coast",
+  "lat": 28.7716,
+  "lon": -95.6168,
+  "gh": "9vh58",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8772985",
+  "stationName": "Sargent",
+  "source": "NOAA CO-OPS station 8772985 (Sargent)"
+ },
+ {
+  "slug": "south-padre-island",
+  "state": "TX",
+  "name": "South Padre Island",
+  "kind": "coast",
+  "lat": 26.0683,
+  "lon": -97.1567,
+  "gh": "9udum",
+  "tz": "America/Chicago",
+  "water": "inshoreSalt",
+  "species": [
+   "redDrum",
+   "general"
+  ],
+  "stationId": "8779750",
+  "stationName": "South Padre Island, Brazos Santiago Pass",
+  "source": "NOAA CO-OPS station 8779750 (South Padre Island, Brazos Santiago Pass)"
+ },
+ {
+  "slug": "toledo-bend-reservoir",
+  "state": "TX",
+  "name": "Toledo Bend Reservoir",
+  "kind": "lake",
+  "lat": 31.569,
+  "lon": -93.7891,
+  "gh": "9vt79",
+  "tz": "America/Chicago",
+  "water": "warmFreshwater",
+  "species": [
+   "largemouthBass",
+   "general"
+  ],
+  "source": "OpenStreetMap: Toledo Bend Reservoir, Sabine Parish, Louisiana, United States"
+ }
+]

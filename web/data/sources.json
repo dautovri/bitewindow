@@ -1,0 +1,717 @@
+{
+ "_note": "Hand-picked pilot list (2026-11-22). tools/build-waters.ts resolves lakes through OpenStreetMap Nominatim and coasts through NOAA CO-OPS metadata and writes waters.json. Southern lakes only: the lake model has no ice, so northern lakes wait for an ice flag. Dropped 2026-11-22 because OpenStreetMap has no water body for them: Falcon Lake, Stick Marsh, Chickamauga Lake.",
+ "lakes": [
+  [
+   "Lake Fork",
+   "Lake Fork Reservoir",
+   "TX"
+  ],
+  [
+   "Sam Rayburn Reservoir",
+   "Sam Rayburn Reservoir",
+   "TX"
+  ],
+  [
+   "Toledo Bend Reservoir",
+   "Toledo Bend Reservoir",
+   "TX"
+  ],
+  [
+   "Lake Conroe",
+   "Lake Conroe",
+   "TX"
+  ],
+  [
+   "Lake Amistad",
+   "Amistad Reservoir",
+   "TX"
+  ],
+  [
+   "Lake Travis",
+   "Lake Travis",
+   "TX"
+  ],
+  [
+   "Lake Livingston",
+   "Lake Livingston",
+   "TX"
+  ],
+  [
+   "Richland-Chambers Reservoir",
+   "Richland-Chambers Reservoir",
+   "TX"
+  ],
+  [
+   "Lake O' the Pines",
+   "Lake O' the Pines",
+   "TX"
+  ],
+  [
+   "Lake Palestine",
+   "Lake Palestine",
+   "TX"
+  ],
+  [
+   "Cedar Creek Reservoir",
+   "Cedar Creek Reservoir",
+   "TX"
+  ],
+  [
+   "Lake Ray Hubbard",
+   "Lake Ray Hubbard",
+   "TX"
+  ],
+  [
+   "Lake Lewisville",
+   "Lewisville Lake",
+   "TX"
+  ],
+  [
+   "Choke Canyon Reservoir",
+   "Choke Canyon Reservoir",
+   "TX"
+  ],
+  [
+   "Lake Buchanan",
+   "Lake Buchanan",
+   "TX"
+  ],
+  [
+   "Lake Tawakoni",
+   "Lake Tawakoni",
+   "TX"
+  ],
+  [
+   "O.H. Ivie Lake",
+   "O. H. Ivie Lake",
+   "TX"
+  ],
+  [
+   "Ray Roberts Lake",
+   "Ray Roberts Lake",
+   "TX"
+  ],
+  [
+   "Lake Whitney",
+   "Lake Whitney",
+   "TX"
+  ],
+  [
+   "Possum Kingdom Lake",
+   "Possum Kingdom Lake",
+   "TX"
+  ],
+  [
+   "Lake Texoma",
+   "Lake Texoma",
+   "TX"
+  ],
+  [
+   "Caddo Lake",
+   "Caddo Lake",
+   "LA"
+  ],
+  [
+   "Lake D'Arbonne",
+   "Lake D'Arbonne",
+   "LA"
+  ],
+  [
+   "Lake Bistineau",
+   "Lake Bistineau",
+   "LA"
+  ],
+  [
+   "Cross Lake",
+   "Cross Lake Shreveport",
+   "LA"
+  ],
+  [
+   "False River",
+   "False River",
+   "LA"
+  ],
+  [
+   "Lake Claiborne",
+   "Lake Claiborne",
+   "LA"
+  ],
+  [
+   "Ross Barnett Reservoir",
+   "Ross Barnett Reservoir",
+   "MS"
+  ],
+  [
+   "Sardis Lake",
+   "Sardis Lake",
+   "MS"
+  ],
+  [
+   "Grenada Lake",
+   "Grenada Lake",
+   "MS"
+  ],
+  [
+   "Enid Lake",
+   "Enid Lake",
+   "MS"
+  ],
+  [
+   "Lake Washington",
+   "Lake Washington, Washington County",
+   "MS"
+  ],
+  [
+   "Lake Guntersville",
+   "Guntersville Lake",
+   "AL"
+  ],
+  [
+   "Lake Eufaula (Walter F. George)",
+   "Walter F. George Lake",
+   "AL"
+  ],
+  [
+   "Wheeler Lake",
+   "Wheeler Lake",
+   "AL"
+  ],
+  [
+   "Wilson Lake",
+   "Wilson Lake",
+   "AL"
+  ],
+  [
+   "Pickwick Lake",
+   "Pickwick Lake",
+   "AL"
+  ],
+  [
+   "Lake Martin",
+   "Lake Martin",
+   "AL"
+  ],
+  [
+   "Logan Martin Lake",
+   "Logan Martin Lake",
+   "AL"
+  ],
+  [
+   "Weiss Lake",
+   "Weiss Lake",
+   "AL"
+  ],
+  [
+   "Lewis Smith Lake",
+   "Lewis Smith Lake",
+   "AL"
+  ],
+  [
+   "Lake Lanier",
+   "Lake Sidney Lanier",
+   "GA"
+  ],
+  [
+   "Lake Seminole",
+   "Lake Seminole",
+   "GA"
+  ],
+  [
+   "West Point Lake",
+   "West Point Lake",
+   "GA"
+  ],
+  [
+   "Clarks Hill Lake",
+   "Clarks Hill Lake",
+   "GA"
+  ],
+  [
+   "Lake Hartwell",
+   "Lake Hartwell",
+   "GA"
+  ],
+  [
+   "Lake Oconee",
+   "Lake Oconee",
+   "GA"
+  ],
+  [
+   "Lake Sinclair",
+   "Lake Sinclair",
+   "GA"
+  ],
+  [
+   "Lake Allatoona",
+   "Allatoona Lake",
+   "GA"
+  ],
+  [
+   "Lake Okeechobee",
+   "Lake Okeechobee",
+   "FL"
+  ],
+  [
+   "Lake Kissimmee",
+   "Lake Kissimmee",
+   "FL"
+  ],
+  [
+   "Rodman Reservoir",
+   "Rodman Reservoir",
+   "FL"
+  ],
+  [
+   "Lake Tohopekaliga",
+   "Lake Tohopekaliga",
+   "FL"
+  ],
+  [
+   "Lake Istokpoga",
+   "Lake Istokpoga",
+   "FL"
+  ],
+  [
+   "Lake George",
+   "Lake George Florida",
+   "FL"
+  ],
+  [
+   "Lake Harris",
+   "Lake Harris Florida",
+   "FL"
+  ],
+  [
+   "Orange Lake",
+   "Orange Lake, Alachua County",
+   "FL"
+  ],
+  [
+   "Lake Talquin",
+   "Lake Talquin",
+   "FL"
+  ],
+  [
+   "Lake Monroe",
+   "Lake Monroe Sanford",
+   "FL"
+  ],
+  [
+   "Lake Weohyakapka",
+   "Lake Weohyakapka",
+   "FL"
+  ],
+  [
+   "Lake Marion",
+   "Lake Marion",
+   "SC"
+  ],
+  [
+   "Lake Moultrie",
+   "Lake Moultrie",
+   "SC"
+  ],
+  [
+   "Lake Murray",
+   "Lake Murray",
+   "SC"
+  ],
+  [
+   "Lake Wateree",
+   "Lake Wateree",
+   "SC"
+  ],
+  [
+   "Lake Greenwood",
+   "Lake Greenwood",
+   "SC"
+  ],
+  [
+   "Lake Wylie",
+   "Lake Wylie",
+   "SC"
+  ],
+  [
+   "Lake Norman",
+   "Lake Norman",
+   "NC"
+  ],
+  [
+   "High Rock Lake",
+   "High Rock Lake",
+   "NC"
+  ],
+  [
+   "Falls Lake",
+   "Falls Lake",
+   "NC"
+  ],
+  [
+   "Jordan Lake",
+   "B. Everett Jordan Lake",
+   "NC"
+  ],
+  [
+   "Lake Gaston",
+   "Lake Gaston",
+   "NC"
+  ],
+  [
+   "Badin Lake",
+   "Badin Lake",
+   "NC"
+  ],
+  [
+   "Kerr Lake",
+   "John H. Kerr Reservoir",
+   "NC"
+  ],
+  [
+   "Kentucky Lake",
+   "Kentucky Lake",
+   "TN"
+  ],
+  [
+   "Old Hickory Lake",
+   "Old Hickory Lake",
+   "TN"
+  ],
+  [
+   "Percy Priest Lake",
+   "J. Percy Priest Lake",
+   "TN"
+  ],
+  [
+   "Watts Bar Lake",
+   "Watts Bar Lake",
+   "TN"
+  ],
+  [
+   "Douglas Lake",
+   "Douglas Lake",
+   "TN"
+  ],
+  [
+   "Reelfoot Lake",
+   "Reelfoot Lake",
+   "TN"
+  ],
+  [
+   "Lake Ouachita",
+   "Lake Ouachita",
+   "AR"
+  ],
+  [
+   "Bull Shoals Lake",
+   "Bull Shoals Lake",
+   "AR"
+  ],
+  [
+   "DeGray Lake",
+   "DeGray Lake",
+   "AR"
+  ],
+  [
+   "Lake Chicot",
+   "Lake Chicot",
+   "AR"
+  ],
+  [
+   "Greers Ferry Lake",
+   "Greers Ferry Lake",
+   "AR"
+  ],
+  [
+   "Millwood Lake",
+   "Millwood Lake",
+   "AR"
+  ],
+  [
+   "Lake Dardanelle",
+   "Lake Dardanelle",
+   "AR"
+  ],
+  [
+   "Grand Lake",
+   "Grand Lake o' the Cherokees",
+   "OK"
+  ],
+  [
+   "Lake Eufaula",
+   "Eufaula Lake",
+   "OK"
+  ],
+  [
+   "Broken Bow Lake",
+   "Broken Bow Lake",
+   "OK"
+  ],
+  [
+   "Lake Tenkiller",
+   "Tenkiller Ferry Lake",
+   "OK"
+  ],
+  [
+   "Robert S. Kerr Reservoir",
+   "Robert S. Kerr Reservoir",
+   "OK"
+  ],
+  [
+   "Roosevelt Lake",
+   "Theodore Roosevelt Lake",
+   "AZ"
+  ],
+  [
+   "Lake Pleasant",
+   "Lake Pleasant Arizona",
+   "AZ"
+  ],
+  [
+   "Saguaro Lake",
+   "Saguaro Lake",
+   "AZ"
+  ],
+  [
+   "Bartlett Lake",
+   "Bartlett Lake Arizona",
+   "AZ"
+  ],
+  [
+   "Lake Casitas",
+   "Lake Casitas",
+   "CA"
+  ],
+  [
+   "Diamond Valley Lake",
+   "Diamond Valley Lake",
+   "CA"
+  ],
+  [
+   "Castaic Lake",
+   "Castaic Lake",
+   "CA"
+  ],
+  [
+   "Clear Lake",
+   "Clear Lake California",
+   "CA"
+  ],
+  [
+   "Lake Hamilton",
+   "Lake Hamilton",
+   "AR"
+  ],
+  [
+   "Lake Jordan",
+   "Jordan Lake Elmore County",
+   "AL"
+  ],
+  [
+   "Lake Houston",
+   "Lake Houston",
+   "TX"
+  ]
+ ],
+ "coasts": [
+  [
+   "Key West",
+   "8724580"
+  ],
+  [
+   "Marathon (Vaca Key)",
+   "8723970"
+  ],
+  [
+   "Naples",
+   "8725110"
+  ],
+  [
+   "Fort Myers",
+   "8725520"
+  ],
+  [
+   "Venice",
+   "8725858"
+  ],
+  [
+   "Siesta Key",
+   "8726034"
+  ],
+  [
+   "St. Petersburg",
+   "8726520"
+  ],
+  [
+   "Clearwater Beach",
+   "8726724"
+  ],
+  [
+   "Cedar Key",
+   "8727520"
+  ],
+  [
+   "Apalachicola",
+   "8728690"
+  ],
+  [
+   "Panama City",
+   "8729108"
+  ],
+  [
+   "Pensacola Beach",
+   "8729807"
+  ],
+  [
+   "Fernandina Beach",
+   "8720030"
+  ],
+  [
+   "Mayport",
+   "8720218"
+  ],
+  [
+   "St. Augustine Beach",
+   "8720587"
+  ],
+  [
+   "Daytona Beach Shores",
+   "8721120"
+  ],
+  [
+   "Port Canaveral",
+   "8721604"
+  ],
+  [
+   "Lake Worth Pier",
+   "8722670"
+  ],
+  [
+   "Virginia Key (Miami)",
+   "8723214"
+  ],
+  [
+   "Port Everglades",
+   "8722956"
+  ],
+  [
+   "Dauphin Island",
+   "8735180"
+  ],
+  [
+   "Mobile Bay",
+   "8737048"
+  ],
+  [
+   "Bay St. Louis (Waveland)",
+   "8747437"
+  ],
+  [
+   "Gulfport",
+   "8745557"
+  ],
+  [
+   "Pascagoula",
+   "8740993"
+  ],
+  [
+   "Grand Isle",
+   "8761724"
+  ],
+  [
+   "Shell Beach",
+   "8761305"
+  ],
+  [
+   "Port Fourchon",
+   "8762075"
+  ],
+  [
+   "Venice (Grand Pass)",
+   "8760849"
+  ],
+  [
+   "Galveston Jetties",
+   "8771341"
+  ],
+  [
+   "Port Bolivar",
+   "8771328"
+  ],
+  [
+   "Sabine Pass",
+   "8770570"
+  ],
+  [
+   "Freeport",
+   "8772440"
+  ],
+  [
+   "Sargent",
+   "8772985"
+  ],
+  [
+   "Matagorda",
+   "8773146"
+  ],
+  [
+   "Port O'Connor",
+   "8773701"
+  ],
+  [
+   "Port Lavaca",
+   "8773259"
+  ],
+  [
+   "Rockport",
+   "8774770"
+  ],
+  [
+   "Port Aransas",
+   "8775237"
+  ],
+  [
+   "Bob Hall Pier (Corpus Christi)",
+   "8775870"
+  ],
+  [
+   "Port Isabel",
+   "8779770"
+  ],
+  [
+   "South Padre Island",
+   "8779750"
+  ],
+  [
+   "Savannah (Fort Pulaski)",
+   "8670870"
+  ],
+  [
+   "Charleston",
+   "8665530"
+  ],
+  [
+   "Myrtle Beach (Springmaid Pier)",
+   "8661070"
+  ],
+  [
+   "Wrightsville Beach",
+   "8658163"
+  ],
+  [
+   "Beaufort",
+   "8656483"
+  ],
+  [
+   "Oregon Inlet",
+   "8652587"
+  ],
+  [
+   "San Diego Bay",
+   "9410170"
+  ],
+  [
+   "La Jolla",
+   "9410230"
+  ]
+ ]
+}

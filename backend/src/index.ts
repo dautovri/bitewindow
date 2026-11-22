@@ -10,7 +10,7 @@ import {
   type StationRef,
 } from "./tide.ts";
 import { digest, isAngler, MAX_BODY, parseTrip, totals } from "./trip.ts";
-import { dailyBudget, secondsToReset, spend } from "./budget.ts";
+import { DEFAULT_WEB_DAILY_BUDGET, dailyBudget, secondsToReset, spend } from "./budget.ts";
 
 interface KV {
   get(key: string): Promise<string | null>;
@@ -29,9 +29,36 @@ export interface Env {
   /** Opt-in shared trips (D1, see schema.sql). */
   TRIPS?: D1;
   TRIP_LIMITER?: RateLimit;
-  /** WeatherKit calls allowed per UTC day across all clients (budget.ts). Default 5000. */
+  /** WeatherKit calls allowed per UTC day across all app clients (budget.ts). Default 5000. */
   DAILY_WEATHERKIT_BUDGET?: string;
+  /** The forecast web pages' own daily share, reached only through `WebForecast` (web.ts). Default 1500. */
+  WEB_DAILY_WEATHERKIT_BUDGET?: string;
 }
+
+/**
+ * Who is asking. The apps: misses limited per IP, the app budget, saved copies only on request
+ * (`x-accept-stale`). The forecast web pages (web.ts, reachable only through a service binding):
+ * their own daily budget, no per-IP limit (their cron paces them) and always the saved copy
+ * when the budget is spent, since a page shows its age.
+ */
+export interface Policy {
+  allow(): Promise<boolean>;
+  spend(cost: number, now: Date): Promise<boolean>;
+  acceptStale: boolean;
+}
+
+const appPolicy = (req: Request, env: Env): Policy => ({
+  allow: () => allowUpstream(req, env),
+  spend: (cost, now) => spendWeatherKit(env, cost, now),
+  acceptStale: acceptsStale(req),
+});
+
+export const webPolicy = (env: Env): Policy => ({
+  allow: async () => true,
+  spend: (cost, now) =>
+    spend(env.WX_CACHE, dailyBudget(env.WEB_DAILY_WEATHERKIT_BUDGET, DEFAULT_WEB_DAILY_BUDGET), cost, now, "wkbudget-web"),
+  acceptStale: true,
+});
 
 interface D1 {
   prepare(sql: string): { bind(...values: unknown[]): { run(): Promise<unknown> } };
@@ -93,15 +120,15 @@ const json = (body: unknown, status = 200, extra: Record<string, string> = {}) =
     headers: { "content-type": "application/json; charset=utf-8", ...SECURITY_HEADERS, ...extra },
   });
 
-async function weather(gh: string, req: Request, env: Env): Promise<Response> {
+export async function weather(gh: string, env: Env, policy: Policy): Promise<Response> {
   const now = new Date();
   const key = cacheKey(gh, now);
   const cached = await env.WX_CACHE.get(key);
   if (cached) return json(cached, 200, { "x-cache": "hit", "cache-control": "public, max-age=900" });
-  if (!(await allowUpstream(req, env))) return tooMany();
-  if (!(await spendWeatherKit(env, 1, now))) {
+  if (!(await policy.allow())) return tooMany();
+  if (!(await policy.spend(1, now))) {
     // The saved copy carries its own `fetchedAt`, so the app can say how old it is.
-    const stale = acceptsStale(req) ? await env.WX_CACHE.get(lastWxKey(gh)) : null;
+    const stale = policy.acceptStale ? await env.WX_CACHE.get(lastWxKey(gh)) : null;
     if (stale) return json(stale, 200, { "x-cache": "stale", "cache-control": "no-store" });
     return budgetSpent(now);
   }
@@ -144,12 +171,12 @@ export type TideStatus = "ok" | "none_in_range" | "no_constituents";
  * Constants change rarely: cached 30 days per cell, one day for `no_constituents`, which
  * may be a gap in NOAA's data that gets filled.
  */
-async function tide(gh: string, req: Request, env: Env): Promise<Response> {
+export async function tide(gh: string, env: Env, policy: Policy): Promise<Response> {
   const key = `tide:${gh}`;
   const headers = { "cache-control": "public, max-age=86400" };
   const cached = await env.WX_CACHE.get(key);
   if (cached) return json(cached, 200, { ...headers, "x-cache": "hit" });
-  if (!(await allowUpstream(req, env))) return tooMany();
+  if (!(await policy.allow())) return tooMany();
 
   const list = await stations(env);
   if (!list) return json({ error: "upstream" }, 502);
@@ -203,12 +230,12 @@ async function modelledFromAir(gh: string, env: Env, now: Date): Promise<number 
  * answer, so one free upstream is never the only source. Changes by tenths of a degree a
  * day: cached 24 hours, 2 hours when there is no estimate.
  */
-async function water(gh: string, kind: WaterKind, req: Request, env: Env): Promise<Response> {
+export async function water(gh: string, kind: WaterKind, env: Env, policy: Policy): Promise<Response> {
   const key = `water:${kind}:${gh}`;
   const headers = { "cache-control": "public, max-age=3600" };
   const cached = await env.WX_CACHE.get(key);
   if (cached) return json(cached, 200, { ...headers, "x-cache": "hit" });
-  if (!(await allowUpstream(req, env))) return tooMany();
+  if (!(await policy.allow())) return tooMany();
 
   const now = new Date();
   const answer: WaterAnswer = { gh, kind, tempC: null, source: null, asOf: now.toISOString() };
@@ -224,8 +251,8 @@ async function water(gh: string, kind: WaterKind, req: Request, env: Env): Promi
   }
   if (answer.tempC === null) {
     // The air model costs three WeatherKit calls.
-    if (!(await spendWeatherKit(env, 3, now))) {
-      const stale = acceptsStale(req) ? await env.WX_CACHE.get(lastWaterKey(kind, gh)) : null;
+    if (!(await policy.spend(3, now))) {
+      const stale = policy.acceptStale ? await env.WX_CACHE.get(lastWaterKey(kind, gh)) : null;
       if (stale) return json(stale, 200, { "x-cache": "stale", "cache-control": "no-store" });
       return budgetSpent(now);
     }
@@ -303,8 +330,9 @@ export default {
     const kind = url.searchParams.get("kind");
     if (url.pathname === "/water" && !isWaterKind(kind)) return json({ error: "kind must be salt or fresh" }, 400);
     try {
-      if (url.pathname === "/water") return await water(gh, kind as WaterKind, req, env);
-      return await (url.pathname === "/wx" ? weather(gh, req, env) : tide(gh, req, env));
+      const policy = appPolicy(req, env);
+      if (url.pathname === "/water") return await water(gh, kind as WaterKind, env, policy);
+      return await (url.pathname === "/wx" ? weather(gh, env, policy) : tide(gh, env, policy));
     } catch {
       // Upstream reset, timed out or sent something that is not JSON.
       return json({ error: "upstream" }, 502);

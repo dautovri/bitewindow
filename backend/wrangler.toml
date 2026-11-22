@@ -1,5 +1,5 @@
 name = "bitewindow-wx"
-main = "src/index.ts"
+main = "src/entry.ts"
 compatibility_date = "2026-10-01"
 account_id = "c9bf1ac36bfc945e9deb740689086223"
 
@@ -14,6 +14,8 @@ WEATHERKIT_KEY_ID = "XBFDGDBMD6"
 # WeatherKit calls per UTC day across all clients (src/budget.ts). The 500k/month allowance is
 # shared with other apps (Houby ~20k/month); 5000/day is ~150k/month.
 DAILY_WEATHERKIT_BUDGET = "5000"
+# The forecast web pages' own share (decided 2026-11-22), reached only through WebForecast.
+WEB_DAILY_WEATHERKIT_BUDGET = "1500"
 
 # Secret: wrangler secret put WEATHERKIT_PRIVATE_KEY < AuthKey_XBFDGDBMD6.p8
 # (shared WeatherKit key, kept at ~/.config/weatherkit/; account limit allows no more keys)

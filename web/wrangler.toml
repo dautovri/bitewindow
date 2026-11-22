@@ -1,0 +1,31 @@
+name = "bitecurve-web"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+account_id = "c9bf1ac36bfc945e9deb740689086223"
+workers_dev = false
+
+# The forecast pages live under the existing site; every other path stays with the Pages project.
+routes = [
+  { pattern = "apps.dautov.dev/bitecurve/fishing", zone_name = "dautov.dev" },
+  { pattern = "apps.dautov.dev/bitecurve/fishing/*", zone_name = "dautov.dev" },
+]
+
+# Results only (bite windows, sun and moon times, tides, day summaries), 3-day expiry.
+# Create with `npx wrangler kv namespace create bitecurve-web-pages` and put the id here.
+[[kv_namespaces]]
+binding = "PAGES"
+id = "REPLACE_WITH_KV_ID"
+
+# The BiteCurve backend's WebForecast entrypoint (backend/src/web.ts): the web's own WeatherKit
+# budget (WEB_DAILY_WEATHERKIT_BUDGET there), no per-IP limit, saved copies when it is spent.
+[[services]]
+binding = "BACKEND"
+service = "bitewindow-wx"
+entrypoint = "WebForecast"
+
+# About two refreshes a day for each of the 152 pages, one page per run.
+[triggers]
+crons = ["*/5 * * * *"]
+
+[vars]
+PAGES_PER_RUN = "1"
