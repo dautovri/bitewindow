@@ -123,6 +123,7 @@ test("render: fresh page has windows, conditions, attribution, notices and the a
   assert.match(html, /Tomorrow, Monday, Nov 23/);
   assert.match(html, /Red drum<\/strong>: (best window|best window left|the good windows are over)/);
   assert.match(html, /Tides<\/th><td>(High|Low) /);
+  assert.doesNotMatch(html, /-0\.0 ft/);
   assert.match(html, /Apple_Weather_blk_en_2X/);
   assert.match(html, /developer\.apple\.com\/weatherkit\/data-source-attribution/);
   assert.match(html, /WEATHER DATA MAY NOT BE ACCURATE/);
@@ -145,9 +146,13 @@ test("render: today shows the best window still ahead, and says when the day's b
   assert.ok(best && second);
   const before = renderWater(lake, p, Math.min(best.start, second.start) - 3600);
   assert.match(before, /best window /);
-  const after = renderWater(lake, { ...p, days: [{ ...today, species: [{ species: s.species, windows: [best, { ...second, start: best.end + 3600, end: best.end + 3 * 3600 }] }] }] }, best.end + 60);
+  const after = renderWater(lake, { ...p, days: [{ ...today, species: [{ species: s.species, windows: [{ ...best, index: second.index + 5 }, { ...second, start: best.end + 3600, end: best.end + 3 * 3600 }] }] }] }, best.end + 60);
   assert.match(after, /best window left/);
   assert.match(after, /the day(&#39;|')s best/);
+  // Same score after rounding: no note.
+  const same = renderWater(lake, { ...p, days: [{ ...today, species: [{ species: s.species, windows: [{ ...best, index: 60.2 }, { ...second, index: 59.8, start: best.end + 3600, end: best.end + 3 * 3600 }] }] }] }, best.end + 60);
+  assert.match(same, /best window left/);
+  assert.doesNotMatch(same, /the day(&#39;|')s best/);
   const late = renderWater(lake, { ...p, days: [{ ...today, species: [{ species: s.species, windows: [best] }] }] }, best.end + 60);
   assert.match(late, /over for the day/);
 });

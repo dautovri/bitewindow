@@ -40,7 +40,11 @@ const zoneName = (tz: string, t: number) =>
 const weekday = (tz: string, t: number) => fmt(tz, { weekday: "long", month: "short", day: "numeric" }).format(new Date(t * 1000));
 const fahrenheit = (c: number) => Math.round((c * 9) / 5 + 32);
 const mph = (kmh: number) => Math.round(kmh * 0.621371);
-const feet = (m: number) => (m * 3.28084).toFixed(1);
+/** One decimal, without a "-0.0" for heights that round to zero. */
+const feet = (m: number) => {
+  const v = Math.round(m * 32.8084) / 10;
+  return (v === 0 ? 0 : v).toFixed(1);
+};
 
 /** The app's wording and colour steps for the bite index (BiteScale in the app). */
 export function biteLabel(index: number): { label: string; step: "strong" | "above" | "below" | "slow" } {
@@ -169,7 +173,8 @@ function windowLine(tz: string, now: number, species: string, windows: Win[]): s
   }
   const { label, step } = biteLabel(ahead.index);
   const lead = ahead === best ? "best window" : "best window left";
-  const missed = ahead === best ? "" : ` <span class="note">(the day's best, ${clock(tz, best.start)}–${clock(tz, best.end)} at ${Math.round(best.index)}, is over)</span>`;
+  // The note is worth it only when the missed window was clearly better.
+  const missed = ahead === best || Math.round(best.index) <= Math.round(ahead.index) ? "" : ` <span class="note">(the day's best, ${clock(tz, best.start)}–${clock(tz, best.end)} at ${Math.round(best.index)}, is over)</span>`;
   const now_ = ahead.start <= now ? " <strong>now</strong>" : "";
   return `<li class="win"><span class="pill ${step}">${Math.round(ahead.index)}</span><span><strong>${esc(species)}</strong>: ${lead} ${clock(tz, ahead.start)}–${clock(tz, ahead.end)}${now_}, ${label.toLowerCase()}${missed}</span></li>`;
 }
