@@ -153,6 +153,7 @@ struct RootView: View {
             if url == AppleWeatherAttribution.legalURL { openURL(url) }
         }
         .task {
+            CrossPromo.recordLaunch()
             pruneSamples()
             #if DEBUG
             seedSampleSpotsIfAsked()

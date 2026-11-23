@@ -1,4 +1,5 @@
 import BiteCore
+import StoreKit
 import SwiftData
 import XCTest
 @testable import BiteWindow
@@ -94,5 +95,36 @@ final class StructureTests: XCTestCase {
         XCTAssertTrue(again.allSatisfy { $0.window == nil })
         XCTAssertEqual(again.count, first.count - ids.count)
     }
-}
 
+    // MARK: Houby card
+
+    func testHoubyCardOnlyOnAGoodWindowFromTheThirdLaunch() {
+        // First and second runs never.
+        XCTAssertFalse(CrossPromo.offersOnSpot(windowIndex: 80, launches: 1, didOnboard: true, done: false))
+        XCTAssertFalse(CrossPromo.offersOnSpot(windowIndex: 80, launches: 2, didOnboard: true, done: false))
+        XCTAssertTrue(CrossPromo.offersOnSpot(windowIndex: 80, launches: 3, didOnboard: true, done: false))
+        XCTAssertTrue(CrossPromo.offersOnSpot(windowIndex: BiteAlerts.defaultThreshold, launches: 9, didOnboard: true, done: false))
+        // Only on a good window.
+        XCTAssertFalse(CrossPromo.offersOnSpot(windowIndex: 64, launches: 9, didOnboard: true, done: false))
+        XCTAssertFalse(CrossPromo.offersOnSpot(windowIndex: nil, launches: 9, didOnboard: true, done: false))
+        // Never before the welcome screen is answered, never again once dismissed or tapped.
+        XCTAssertFalse(CrossPromo.offersOnSpot(windowIndex: 80, launches: 9, didOnboard: false, done: false))
+        XCTAssertFalse(CrossPromo.offersOnSpot(windowIndex: 80, launches: 9, didOnboard: true, done: true))
+    }
+
+    func testLaunchesAreCounted() throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "launch-count-test"))
+        defaults.removePersistentDomain(forName: "launch-count-test")
+        CrossPromo.recordLaunch(in: defaults)
+        CrossPromo.recordLaunch(in: defaults)
+        XCTAssertEqual(defaults.integer(forKey: CrossPromo.launchCountKey), 2)
+        defaults.removePersistentDomain(forName: "launch-count-test")
+    }
+
+    func testHoubyOverlayCarriesTheTokens() throws {
+        let configuration = try XCTUnwrap(CrossPromo.overlayConfiguration as? SKOverlay.AppConfiguration)
+        XCTAssertEqual(configuration.appIdentifier, "6829188074")
+        XCTAssertEqual(configuration.campaignToken, "app-bitecurve")
+        XCTAssertEqual(configuration.providerToken, "127464313")
+    }
+}

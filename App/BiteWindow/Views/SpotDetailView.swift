@@ -33,6 +33,10 @@ struct SpotDetailView: View {
     /// A small picture of the share card for the share sheet's header.
     @State private var shareThumbnail: Image?
     @AppStorage(ForecastService.lastPrefetchKey) private var lastPrefetch = 0.0
+    @AppStorage(CrossPromo.launchCountKey) private var launchCount = 0
+    @AppStorage(CrossPromo.promoDoneKey) private var houbyPromoDone = false
+    @AppStorage("didOnboard") private var didOnboard = false
+    @State private var showHouby = false
 
     /// How far the day strip reaches.
     private static let horizonDays = 10
@@ -215,6 +219,15 @@ struct SpotDetailView: View {
                         FactorBreakdown(factors: factors(day, window, conditions)).card()
                     }
                     tideCard(day)
+                    if CrossPromo.offersOnSpot(windowIndex: day.window?.meanIndex, launches: launchCount,
+                                               didOnboard: didOnboard, done: houbyPromoDone) {
+                        HoubySpotPromo {
+                            houbyPromoDone = true
+                            showHouby = true
+                        } onDismiss: {
+                            withAnimation { houbyPromoDone = true }
+                        }
+                    }
                 }
 
                 recordCard
@@ -279,6 +292,7 @@ struct SpotDetailView: View {
             }
         }
         .sheet(isPresented: $showPaywall) { PaywallView() }
+        .appStoreOverlay(isPresented: $showHouby) { CrossPromo.overlayConfiguration }
     }
 
     // MARK: Cards
