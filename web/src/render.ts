@@ -12,6 +12,8 @@ const PT = "127464313";
 export const appStoreUrl = (ct: string) => `https://apps.apple.com/app/id${APP_ID}?pt=${PT}&ct=${ct}&mt=8`;
 /** One campaign token per app: App Store Connect hides campaigns with fewer than 5 of anything. */
 export const CAMPAIGN = "web-bitecurve";
+/** Sister app. Its own token, counted in Houby's App Store analytics. */
+export const HOUBY_URL = `https://apps.apple.com/app/id6829188074?pt=${PT}&ct=web-xpromo&mt=8`;
 
 const APPLE_WEATHER_LEGAL = "https://developer.apple.com/weatherkit/data-source-attribution/";
 const LOGO_LIGHT = "https://weatherkit.apple.com/assets/branding/en/Apple_Weather_blk_en_2X_090122.png";
@@ -127,7 +129,7 @@ ${body}
 </main>
 <footer class="site">
 <div class="wrap">
-<p><a href="/bitecurve/">BiteCurve support</a> · <a href="/bitecurve/privacy/">BiteCurve privacy</a> · <a href="/">All apps</a></p>
+<p><a href="/bitecurve/">BiteCurve support</a> · <a href="/bitecurve/privacy/">BiteCurve privacy</a> · <a href="${esc(HOUBY_URL)}">Houby mushroom forecast</a> · <a href="/">All apps</a></p>
 <p>Impressum / Legal notice: Ruslan Dautov, Germany · <a href="mailto:dautovri@outlook.com">dautovri@outlook.com</a></p>
 </div>
 </footer>
@@ -151,6 +153,7 @@ const appCta = (h: string) => `<section class="app-cta">
 <h2>${h}</h2>
 <p>BiteCurve on iPhone shows the hourly bite curve, the 10-day outlook and the tide curve for your own spots, learns from the trips you log, and works offline with the last forecast.</p>
 <p class="cta"><a class="btn" href="${esc(appStoreUrl(CAMPAIGN))}">Get BiteCurve on the App Store</a></p>
+<p class="note">Foraging too? <a href="${esc(HOUBY_URL)}">Houby</a>, from the same developer, forecasts when mushrooms come up in the forests near you.</p>
 </section>`;
 
 // MARK: Water page
