@@ -254,4 +254,9 @@
     <string name="start_trip_here">Start sessie hier</string>
     <string name="alerts_up_to_7_days_ahead">Meldingen tot 7 dagen vooruit</string>
     <string name="log_pro_card">%1$d vistrips gelogd. Met BiteCurve Pro wordt de verwachte vangst afgestemd op je eigen logboek en toont de planner 10 dagen.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Meer van de ontwikkelaar</string>
+    <string name="sister_app_tagline">Paddenstoelenverwachting voor bossen bij jou in de buurt</string>
+    <string name="sister_app_open_hint">Opent Houby in Google Play</string>
+    <string name="sister_app_hide">Verberg</string>
 </resources>

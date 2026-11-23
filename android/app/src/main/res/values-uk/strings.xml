@@ -254,4 +254,9 @@
     <string name="start_trip_here">Почати риболовлю тут</string>
     <string name="alerts_up_to_7_days_ahead">Сповіщення до 7 днів наперед</string>
     <string name="log_pro_card">Записано риболовель: %1$d. Із BiteCurve Pro прогноз улову налаштовується за вашим журналом, а планувальник показує 10 днів.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Інші застосунки розробника</string>
+    <string name="sister_app_tagline">Грибний прогноз для лісів поблизу</string>
+    <string name="sister_app_open_hint">Відкриває Houby у Google Play</string>
+    <string name="sister_app_hide">Сховати</string>
 </resources>

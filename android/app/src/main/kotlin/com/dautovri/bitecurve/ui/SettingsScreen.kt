@@ -207,6 +207,16 @@ fun SettingsScreen(onBack: () -> Unit, onPaywall: (PaywallContext) -> Unit, onHo
                     LinkRow(stringResource(R.string.how_the_score_works), onHowItWorks)
                 }
 
+                if (SisterApp.isEnabled) {
+                    Section(header = stringResource(R.string.more_from_the_developer)) {
+                        HoubyPromoCard(onOpen = {
+                            // Seen here, so the one-time card on a spot stays away.
+                            app.prefs.setHoubyPromoDone()
+                            SisterApp.openListing(context)
+                        })
+                    }
+                }
+
                 Section {
                     LinkRow(stringResource(R.string.support)) { open(context, Legal.support) }
                     Hairline()

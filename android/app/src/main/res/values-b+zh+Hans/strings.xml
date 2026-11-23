@@ -254,4 +254,9 @@
     <string name="start_trip_here">在此开始出钓</string>
     <string name="alerts_up_to_7_days_ahead">最多提前 7 天提醒</string>
     <string name="log_pro_card">已记录 %1$d 次作钓。升级 BiteCurve Pro 后，可根据你的记录校准预期渔获，规划视图支持查看 10 天。</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">同一开发者的更多应用</string>
+    <string name="sister_app_tagline">你附近森林的蘑菇预报</string>
+    <string name="sister_app_open_hint">在 Google Play 中打开 Houby</string>
+    <string name="sister_app_hide">隐藏</string>
 </resources>

@@ -254,4 +254,9 @@
     <string name="start_trip_here">Starta tur här</string>
     <string name="alerts_up_to_7_days_ahead">Notiser upp till 7 dagar i förväg</string>
     <string name="log_pro_card">%1$d turer loggade. Med BiteCurve Pro anpassas förväntad fångst efter din egen logg och planeraren visar 10 dagar.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Mer från utvecklaren</string>
+    <string name="sister_app_tagline">Svampprognos för skogarna nära dig</string>
+    <string name="sister_app_open_hint">Öppnar Houby på Google Play</string>
+    <string name="sister_app_hide">Dölj</string>
 </resources>

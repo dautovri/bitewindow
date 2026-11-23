@@ -22,6 +22,8 @@ import com.dautovri.bitecurve.data.nowSeconds
  * - `BCSkipWelcome`: keeps the welcome screen away.
  * - `BCSamplePlans`: the paywall shows made-up plans instead of asking Google Play (nothing can be bought).
  * - `BCAlertNow`: shows the next planned bite alert at once, to see it without waiting for it.
+ * - `BCSisterApp`: shows the Houby cards while `SisterApp.IS_LIVE` is false.
+ * - `BCHoubyAnyWindow`: any window counts as good for the one-time Houby card.
  */
 object DebugFlags {
     var skipWelcome = false
@@ -34,6 +36,8 @@ object DebugFlags {
         if (extras.containsKey("BCPro")) app.entitlements.debugPro = extras.getBoolean("BCPro")
         if (extras.containsKey("BCAPIBase")) app.apiBaseOverride = extras.getString("BCAPIBase")?.takeIf { it.isNotBlank() }
         if (extras.containsKey("BCSkipWelcome")) skipWelcome = extras.getBoolean("BCSkipWelcome")
+        if (extras.containsKey("BCSisterApp")) com.dautovri.bitecurve.ui.SisterApp.debugForceLive = extras.getBoolean("BCSisterApp")
+        if (extras.containsKey("BCHoubyAnyWindow")) com.dautovri.bitecurve.ui.SisterApp.debugAnyWindow = extras.getBoolean("BCHoubyAnyWindow")
         if (extras.containsKey("BCSamplePlans")) samplePlans = extras.getBoolean("BCSamplePlans")
         if (extras.getBoolean("BCAlertNow")) {
             app.scope.launch {

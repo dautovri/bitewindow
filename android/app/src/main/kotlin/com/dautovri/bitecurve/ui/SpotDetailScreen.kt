@@ -117,6 +117,8 @@ fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, on
     val data by app.store.data.collectAsStateWithLifecycle()
     val isPro by app.entitlements.isPro.collectAsStateWithLifecycle()
     val lastPrefetch by app.forecasts.lastPrefetch.collectAsStateWithLifecycle()
+    val didOnboard by app.prefs.didOnboard.collectAsStateWithLifecycle()
+    val houbyPromoDone by app.prefs.houbyPromoDone.collectAsStateWithLifecycle()
     val spot = data.spots.firstOrNull { it.id == spotId }
     if (spot == null) {
         LaunchedEffect(Unit) { onBack() }
@@ -391,6 +393,17 @@ fun SpotDetailScreen(spotId: String, initialDay: Double?, onBack: () -> Unit, on
                                     Text(stringResource(R.string.tide_predictions_from_noaa_harmonic_constants_no), style = MaterialTheme.typography.bodySmall, color = colors.secondaryText)
                                 }
                             }
+                        }
+
+                        // The one-time Houby card, inline under a strong bite day's forecast.
+                        if (SisterApp.offersOnSpot(SisterApp.isEnabled, day.window?.meanIndex, app.prefs.launchCount, didOnboard, houbyPromoDone, SisterApp.debugAnyWindow)) {
+                            HoubySpotPromo(
+                                onOpen = {
+                                    app.prefs.setHoubyPromoDone()
+                                    SisterApp.openListing(context)
+                                },
+                                onDismiss = { app.prefs.setHoubyPromoDone() },
+                            )
                         }
                     }
 

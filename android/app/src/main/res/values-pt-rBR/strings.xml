@@ -254,4 +254,9 @@
     <string name="start_trip_here">Iniciar pescaria aqui</string>
     <string name="alerts_up_to_7_days_ahead">Alertas com até 7 dias de antecedência</string>
     <string name="log_pro_card">%1$d pescarias registradas. Com o BiteCurve Pro, a captura esperada se ajusta ao seu registro e o planejador mostra 10 dias.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Mais do desenvolvedor</string>
+    <string name="sister_app_tagline">Previsão de cogumelos para as florestas perto de você</string>
+    <string name="sister_app_open_hint">Abre o Houby no Google Play</string>
+    <string name="sister_app_hide">Ocultar</string>
 </resources>

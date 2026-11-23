@@ -254,4 +254,9 @@
     <string name="start_trip_here">ここで釣行を開始</string>
     <string name="alerts_up_to_7_days_ahead">最大7日先までの通知</string>
     <string name="log_pro_card">%1$d件の釣行を記録済み。BiteCurve Proなら、自分のログに合わせて予想釣果が調整され、プランナーで10日先まで表示できます。</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">同じデベロッパのアプリ</string>
+    <string name="sister_app_tagline">近くの森のキノコ予報</string>
+    <string name="sister_app_open_hint">Google Play で Houby を開きます</string>
+    <string name="sister_app_hide">非表示</string>
 </resources>

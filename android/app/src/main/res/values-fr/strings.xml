@@ -254,4 +254,9 @@
     <string name="start_trip_here">Démarrer la sortie ici</string>
     <string name="alerts_up_to_7_days_ahead">Alertes jusqu\'à 7 jours à l\'avance</string>
     <string name="log_pro_card">%1$d sorties enregistrées. Avec BiteCurve Pro, les prises attendues s\'ajustent à votre carnet et le planificateur affiche 10 jours.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Du même développeur</string>
+    <string name="sister_app_tagline">Prévisions champignons pour les forêts près de chez vous</string>
+    <string name="sister_app_open_hint">Ouvre Houby sur Google Play</string>
+    <string name="sister_app_hide">Masquer</string>
 </resources>

@@ -254,4 +254,9 @@
     <string name="start_trip_here">여기서 출조 시작</string>
     <string name="alerts_up_to_7_days_ahead">최대 7일 전 알림</string>
     <string name="log_pro_card">조행 %1$d건 기록됨. BiteCurve Pro에서는 내 기록에 맞춰 예상 조과가 조정되고, 플래너에서 10일 치를 볼 수 있습니다.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">같은 개발자의 앱</string>
+    <string name="sister_app_tagline">가까운 숲의 버섯 예보</string>
+    <string name="sister_app_open_hint">Google Play에서 Houby를 엽니다</string>
+    <string name="sister_app_hide">숨기기</string>
 </resources>

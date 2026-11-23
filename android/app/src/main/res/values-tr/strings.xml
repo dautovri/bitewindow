@@ -254,4 +254,9 @@
     <string name="start_trip_here">Ava burada başla</string>
     <string name="alerts_up_to_7_days_ahead">7 gün öncesine kadar bildirimler</string>
     <string name="log_pro_card">%1$d av kaydedildi. BiteCurve Pro ile beklenen av kendi günlüğüne göre ayarlanır ve planlayıcı 10 günü gösterir.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Geliştiricinin diğer uygulamaları</string>
+    <string name="sister_app_tagline">Yakınınızdaki ormanlar için mantar tahmini</string>
+    <string name="sister_app_open_hint">Houby\'yi Google Play\'de açar</string>
+    <string name="sister_app_hide">Gizle</string>
 </resources>

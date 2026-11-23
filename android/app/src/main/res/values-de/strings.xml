@@ -254,4 +254,9 @@
     <string name="start_trip_here">Tour hier starten</string>
     <string name="alerts_up_to_7_days_ahead">Beißalarme bis zu 7 Tage im Voraus</string>
     <string name="log_pro_card">%1$d Touren erfasst. Mit BiteCurve Pro wird der erwartete Fang an dein eigenes Fangbuch angepasst, und der Planer zeigt 10 Tage.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Mehr vom Entwickler</string>
+    <string name="sister_app_tagline">Pilzprognose für Wälder in deiner Nähe</string>
+    <string name="sister_app_open_hint">Öffnet Houby bei Google Play</string>
+    <string name="sister_app_hide">Ausblenden</string>
 </resources>

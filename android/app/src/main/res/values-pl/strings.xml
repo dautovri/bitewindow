@@ -254,4 +254,9 @@
     <string name="start_trip_here">Rozpocznij wyprawę tutaj</string>
     <string name="alerts_up_to_7_days_ahead">Alerty do 7 dni naprzód</string>
     <string name="log_pro_card">Zapisane wyprawy: %1$d. Z BiteCurve Pro prognoza połowu dopasowuje się do Twojego dziennika, a planer pokazuje 10 dni.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Więcej od twórcy</string>
+    <string name="sister_app_tagline">Prognoza grzybowa dla lasów w Twojej okolicy</string>
+    <string name="sister_app_open_hint">Otwiera Houby w Google Play</string>
+    <string name="sister_app_hide">Ukryj</string>
 </resources>

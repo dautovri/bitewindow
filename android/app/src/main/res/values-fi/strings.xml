@@ -254,4 +254,9 @@
     <string name="start_trip_here">Aloita reissu täällä</string>
     <string name="alerts_up_to_7_days_ahead">Ilmoitukset jopa 7 päivää etukäteen</string>
     <string name="log_pro_card">Tallennettuja reissuja: %1$d. BiteCurve Pro säätää saalisodotuksen oman lokisi mukaan ja näyttää 10 päivän suunnittelijan.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">Lisää samalta kehittäjältä</string>
+    <string name="sister_app_tagline">Sieniennuste lähimetsiisi</string>
+    <string name="sister_app_open_hint">Avaa Houbyn Google Playssa</string>
+    <string name="sister_app_hide">Piilota</string>
 </resources>

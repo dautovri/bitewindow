@@ -256,4 +256,9 @@
     <string name="start_trip_here">Start trip here</string>
     <string name="alerts_up_to_7_days_ahead">Alerts up to 7 days ahead</string>
     <string name="log_pro_card">%1$d trips logged. With BiteCurve Pro the expected catch is tuned to your own log, and the planner shows 10 days.</string>
+    <!-- Cross-promotion of the developer's mushroom app. "Houby" is a name and is never translated. -->
+    <string name="more_from_the_developer">More from the developer</string>
+    <string name="sister_app_tagline">Mushroom forecast for forests near you</string>
+    <string name="sister_app_open_hint">Opens Houby on Google Play</string>
+    <string name="sister_app_hide">Hide</string>
 </resources>

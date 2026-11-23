@@ -59,6 +59,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val app = application as BiteCurveApp
+        // One launch per fresh start, not per rotation or process restore.
+        if (savedInstanceState == null) app.prefs.recordLaunch()
         if (BuildConfig.DEBUG) DebugFlags.apply(app, intent)
         setContent { BiteTheme { Root() } }
     }

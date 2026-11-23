@@ -44,6 +44,21 @@ class Prefs(context: Context) {
         get() = store.getBoolean("logProCardDismissed", false)
         set(value) = store.edit().putBoolean("logProCardDismissed", value).apply()
 
+    /** Times the app was opened (this phone only); the Houby card waits for the third. */
+    val launchCount: Int get() = store.getInt("launchCount", 0)
+
+    fun recordLaunch() = store.edit().putInt("launchCount", launchCount + 1).apply()
+
+    private val houbyDone = MutableStateFlow(store.getBoolean("houbyPromoDone", false))
+
+    /** The one-time Houby card was tapped or dismissed, or the Settings card was tapped. */
+    val houbyPromoDone: StateFlow<Boolean> = houbyDone
+
+    fun setHoubyPromoDone() {
+        store.edit().putBoolean("houbyPromoDone", true).apply()
+        houbyDone.value = true
+    }
+
     /** Request codes of the alarms laid out last time, so they can be cancelled. */
     var pendingAlertCount: Int
         get() = store.getInt("pendingAlertCount", 0)
