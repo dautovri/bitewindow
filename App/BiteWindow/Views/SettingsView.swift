@@ -19,6 +19,8 @@ struct SettingsView: View {
     @Query private var allTrips: [Trip]
     @State private var deletingShared = false
     @State private var deleteFailed = false
+    @State private var showHouby = false
+    @AppStorage(CrossPromo.promoDoneKey) private var houbyPromoDone = false
 
     var body: some View {
         NavigationStack {
@@ -155,6 +157,17 @@ struct SettingsView: View {
                 .listRowBackground(Theme.card)
 
                 Section {
+                    HoubyPromoCard {
+                        // Seen here, so the one-time card on a spot stays away.
+                        houbyPromoDone = true
+                        showHouby = true
+                    }
+                } header: {
+                    Text("More from the developer")
+                }
+                .listRowBackground(Theme.card)
+
+                Section {
                     Link("Support", destination: Legal.support)
                     Link("Privacy Policy", destination: Legal.privacy)
                     Link("Terms of Use", destination: Legal.terms)
@@ -167,6 +180,7 @@ struct SettingsView: View {
             .tint(Theme.accent)
             .navigationTitle("Settings")
             .sheet(isPresented: $showPaywall) { PaywallView() }
+            .appStoreOverlay(isPresented: $showHouby) { CrossPromo.overlayConfiguration }
         }
     }
 }
