@@ -5,12 +5,15 @@ Simulator take of the real Debug app (iOS 27, iPhone 17 Pro Max) with the
 three -BCSeedSpots sample spots and the live forecast for today. Captions
 are the screenshot captions (../captions.json), teal canvas, white ink.
 Cuts are calibrated on the first tap (the push to the spot detail).
-Silent stereo AAC track, as App Store Connect expects.
+App Review 2.3.4 (Random Walk, 2026-11-28): no
+framing around the capture and no device frame, so the take fills the whole
+886x1920 frame and the caption is a translucent panel laid over it (textual
+overlays are allowed). Silent stereo AAC track, as App Store Connect expects.
 
 Usage: python3 compose.py en de
 """
 import os, subprocess, sys, tempfile
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, ".."))
@@ -19,9 +22,8 @@ import shotkit
 from shotkit import Slide
 
 W, H, FPS = 886, 1920, 30
-APP_W = 640
-APP_H = round(APP_W * 2868 / 1320 / 2) * 2
-APP_X, APP_Y = (W - APP_W) // 2, 440
+CAP_Y = 150  # default caption panel top (below the status bar); segments set their own
+# y so the panel sits over the least important part of each screen
 FADE = 0.35
 YELLOW, GLOW = (0, 137, 150), (48, 190, 201)
 INK, SUB = (255, 255, 255), None
@@ -57,28 +59,36 @@ def cfr(src, dst, end):
 
 
 def segments(marks, results=None):
-    """(start in the take, seconds shown, caption key)."""
+    """(start in the take, seconds shown, caption key[, caption panel top y])."""
     o = OFFSET
     return [
-        (max(0.0, o + marks["list"] + 0.5), 4.0, "list"),
-        (o + marks["detail"] + 1.0, 5.0, "detail"),
-        (o + marks["factors"] + 1.3, 4.0, "factors"),
-        (o + marks["planner"] + 1.0, 4.5, "planner"),
-        (o + marks["map"] + 1.5, 4.0, "map"),
-        (o + marks["log"] + 0.8, 4.0, "log"),
+        (max(0.0, o + marks["list"] + 0.5), 4.0, "list", 1480),
+        (o + marks["detail"] + 1.0, 5.0, "detail", 1480),
+        (o + marks["factors"] + 1.3, 4.0, "factors", 1480),
+        (o + marks["planner"] + 1.0, 4.5, "planner", 1480),
+        (o + marks["map"] + 1.5, 4.0, "map", 1100),
+        (o + marks["log"] + 0.8, 4.0, "log", 1480),
     ]
 
 
-def card(eyebrow, headline, path):
+def caption(eyebrow, headline, path, y=None):
+    """Transparent full-frame overlay: the screenshot-style caption on a
+    rounded brand-colour panel (98% opaque), cropped to the text."""
+    y = CAP_Y if y is None else y
+    blank = Slide(color=YELLOW, glow=GLOW, ink=INK, sub_ink=SUB).img.resize((W, H), Image.LANCZOS)
     s = Slide(color=YELLOW, glow=GLOW, ink=INK, sub_ink=SUB)
     s.text(eyebrow, headline, top=130)
-    s.img.resize((W, H), Image.LANCZOS).save(path)
-
-
-def mask(path):
-    m = Image.new("L", (APP_W, APP_H), 0)
-    ImageDraw.Draw(m).rounded_rectangle((0, 0, APP_W - 1, APP_H - 1), radius=58, fill=255)
-    m.save(path)
+    full = s.img.resize((W, H), Image.LANCZOS)
+    x0, y0, x1, y1 = ImageChops.difference(full, blank).convert("L").point(lambda v: 255 if v > 24 else 0).getbbox()
+    pad = 30
+    box = (max(0, x0 - pad), max(0, y0 - pad), min(W, x1 + pad), min(H, y1 + pad))
+    panel = full.crop(box).convert("RGBA")
+    m = Image.new("L", panel.size, 0)
+    ImageDraw.Draw(m).rounded_rectangle((0, 0, panel.width - 1, panel.height - 1), radius=40, fill=250)
+    panel.putalpha(m)
+    ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ov.paste(panel, ((W - panel.width) // 2, y), panel)
+    ov.save(path)
 
 
 def render(lang, tmp):
@@ -94,19 +104,18 @@ def render(lang, tmp):
     OFFSET = calibrate(video, marks["detail"])
     print(lang, "offset", round(OFFSET, 2))
     segs = segments(marks)
-    m = f"{tmp}/mask.png"; mask(m)
     inputs, chains = [], []
-    for i, (ss, secs, key) in enumerate(segs):
-        bg = f"{tmp}/{lang}-{key}.png"
-        if not os.path.exists(bg): card(*CAPTIONS[lang][key], bg)
-        inputs += ["-loop", "1", "-t", str(secs), "-i", bg, "-ss", f"{ss:.3f}", "-t", str(secs + 1), "-i", video, "-loop", "1", "-i", m]
-        b, v, k = 3 * i, 3 * i + 1, 3 * i + 2
+    for i, (ss, secs, key, *cy) in enumerate(segs):
+        ov = f"{tmp}/{lang}-{i}.png"
+        caption(*CAPTIONS[lang][key], ov, cy[0] if cy else None)
+        inputs += ["-ss", f"{ss:.3f}", "-t", str(secs + 1), "-i", video, "-loop", "1", "-t", str(secs), "-i", ov]
+        v, o = 2 * i, 2 * i + 1
+        # Fill the frame (cover) and centre-crop the few pixels the aspect differs by.
         chains.append(
-            f"[{v}:v]fps={FPS},scale={APP_W}:{APP_H},tpad=stop_mode=clone:stop_duration={secs},"
-            f"trim=duration={secs},setpts=PTS-STARTPTS,format=rgba[v{i}];"
-            f"[{k}:v]format=gray,trim=duration={secs}[m{i}];[v{i}][m{i}]alphamerge[a{i}];"
-            f"[{b}:v]fps={FPS},format=rgba,trim=duration={secs},setpts=PTS-STARTPTS[b{i}];"
-            f"[b{i}][a{i}]overlay={APP_X}:{APP_Y}:shortest=1,format=yuv420p[s{i}]")
+            f"[{v}:v]fps={FPS},scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
+            f"tpad=stop_mode=clone:stop_duration={secs},trim=duration={secs},setpts=PTS-STARTPTS[v{i}];"
+            f"[{o}:v]fps={FPS},format=rgba,trim=duration={secs},setpts=PTS-STARTPTS[o{i}];"
+            f"[v{i}][o{i}]overlay=0:0:shortest=1,format=yuv420p[s{i}]")
     graph = ";".join(chains)
     prev, offset = "s0", 0.0
     for i in range(1, len(segs)):
@@ -118,7 +127,7 @@ def render(lang, tmp):
     os.makedirs(os.path.dirname(out), exist_ok=True)
     subprocess.run(["ffmpeg", "-v", "error", "-y", *inputs,
                     "-f", "lavfi", "-t", f"{total:.3f}", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
-                    "-filter_complex", graph, "-map", f"[{prev}]", "-map", f"{3 * len(segs)}:a",
+                    "-filter_complex", graph, "-map", f"[{prev}]", "-map", f"{2 * len(segs)}:a",
                     "-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p", "-r", str(FPS),
                     "-b:v", "10M", "-maxrate", "12M", "-bufsize", "20M",
                     "-c:a", "aac", "-b:a", "256k", "-t", f"{total:.3f}", "-movflags", "+faststart", out], check=True)
