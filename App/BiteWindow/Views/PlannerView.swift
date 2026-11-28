@@ -57,7 +57,7 @@ struct PlannerView: View {
     private var best: (spot: Spot, day: DayOutlook)? {
         var out: (spot: Spot, day: DayOutlook)?
         for spot in spots {
-            for column in 0..<visibleDays {
+            for column in 0..<visibleDays where !isLocked(spot, column: column) {
                 guard let day = day(for: spot, column: column), let index = day.index else { continue }
                 if out == nil || index > (out?.day.index ?? 0) { out = (spot, day) }
             }
@@ -188,7 +188,7 @@ struct PlannerView: View {
     @ViewBuilder
     private func dayCell(spot: Spot, offset: Int) -> some View {
         let day = day(for: spot, column: offset)
-        if offset >= visibleDays {
+        if isLocked(spot, column: offset) {
             Button {
                 showPaywall = true
             } label: {
@@ -232,6 +232,17 @@ struct PlannerView: View {
                 .background(Theme.well.opacity(0.4), in: .rect(cornerRadius: Theme.cellRadius, style: .continuous))
                 .accessibilityHidden(true)
         }
+    }
+
+    /// Free users see the spot's own today and tomorrow, as on its detail screen. A spot whose
+    /// clock is behind the phone's can put its day after tomorrow under the phone's tomorrow.
+    private func isLocked(_ spot: Spot, column: Int) -> Bool {
+        if column >= visibleDays { return true }
+        guard !entitlements.isPro, let day = day(for: spot, column: column) else { return false }
+        let calendar = spot.calendar
+        let offset = calendar.dateComponents([.day], from: calendar.startOfDay(for: Date()),
+                                             to: calendar.startOfDay(for: day.date)).day ?? 0
+        return offset >= Self.freeDays
     }
 
     /// The spot's day that falls on the header column's calendar date.

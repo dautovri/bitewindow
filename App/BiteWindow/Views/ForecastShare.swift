@@ -70,9 +70,16 @@ struct ForecastShareCard: View {
                         .foregroundStyle(BiteScale.color(index))
                 }
             }
-            Text("Bite index 0–100. An estimate, not a guarantee.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            HStack(alignment: .firstTextBaseline) {
+                Text("Bite index 0–100. An estimate, not a guarantee.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                // The index is scored from WeatherKit data, so the picture carries the mark too.
+                Text(verbatim: "\u{F8FF}Weather")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(24)
         .frame(width: 380, alignment: .leading)
@@ -141,9 +148,16 @@ struct TripShareCard: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Text("Bite index 0–100. An estimate, not a guarantee.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            HStack(alignment: .firstTextBaseline) {
+                Text("Bite index 0–100. An estimate, not a guarantee.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                // The index is scored from WeatherKit data, so the picture carries the mark too.
+                Text(verbatim: "\u{F8FF}Weather")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(24)
         .frame(width: 380, alignment: .leading)

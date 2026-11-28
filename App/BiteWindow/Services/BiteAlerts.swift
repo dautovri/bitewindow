@@ -74,14 +74,15 @@ enum BiteAlerts {
         let center = UNUserNotificationCenter.current()
         let spots = (try? OfflineStore.container.mainContext.fetch(FetchDescriptor<Spot>())) ?? []
         let busy = Set(spots.filter { $0.activeTrip != nil }.map(\.id))
+        let existing = Set(spots.map(\.id))
         // An "after" notification whose window was already alerted stays as it is: once the
         // window has begun, today's forecast no longer offers it, so it could not be planned again.
-        // Dropped only when that spot now has a running trip.
+        // Dropped only when that spot now has a running trip or no longer exists.
         var kept: Set<String> = []
         for request in await center.pendingNotificationRequests() where request.identifier.hasPrefix(prefix + "after.") {
             let info = request.content.userInfo
             guard let start = info["start"] as? Double,
-                  let spot = (info["spotID"] as? String).flatMap(UUID.init(uuidString:)), !busy.contains(spot),
+                  let spot = (info["spotID"] as? String).flatMap(UUID.init(uuidString:)), existing.contains(spot), !busy.contains(spot),
                   start - 3600 <= now.timeIntervalSince1970 + 300 else { continue }
             kept.insert(request.identifier)
         }

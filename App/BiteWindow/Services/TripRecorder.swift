@@ -68,9 +68,12 @@ enum TripRecorder {
         trip.startedAt = start
         trip.catchCount = min(max(catches, 0), 500)
         context.insert(trip)
+        let ending = Self.end(trip, at: end, keepsForecastRecords: false)
+        // Saved with its end time before the downloads: if iOS suspends the app meanwhile, the
+        // trip is already finished, not left running.
         try? context.save()
         // Waited for: iOS may suspend the app as soon as the notification action returns.
-        await Self.end(trip, at: end, keepsForecastRecords: false).value
+        await ending.value
         return trip
     }
 }

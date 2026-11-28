@@ -23110,16 +23110,432 @@
       }
     },
     "Tide (moon-phase estimate)": {
-      "comment": "Factor name in the score breakdown at a saltwater spot with no tide station: the tide term is estimated from the moon phase. TRANSLATION PENDING."
+      "comment": "Factor name in the score breakdown at a saltwater spot with no tide station: the tide term is estimated from the moon phase.",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidevand (skøn ud fra månefasen)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tide (Schätzung aus der Mondphase)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marea (estimación por fase lunar)"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vuorovesi (arvio kuun vaiheesta)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marée (estimation selon la phase lunaire)"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marea (stima dalla fase lunare)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "潮汐（月齢からの推定）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "조석 (달의 위상으로 추정)"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidevann (anslag fra månefasen)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Getij (schatting uit de maanfase)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pływy (szacunek z fazy Księżyca)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maré (estimativa pela fase da lua)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прилив (оценка по фазе Луны)"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidvatten (uppskattat från månfasen)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gelgit (ay evresinden tahmin)"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приплив (оцінка за фазою Місяця)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "潮汐（按月相估算）"
+          }
+        }
+      }
     },
     "No tide data here — estimate from moon phase": {
-      "comment": "Tide card heading at a saltwater spot with no tide station nearby. TRANSLATION PENDING."
+      "comment": "Tide card heading at a saltwater spot with no tide station nearby.",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen tidevandsdata her — skøn ud fra månefasen"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier keine Gezeitendaten — Schätzung aus der Mondphase"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin datos de marea aquí — estimación por fase lunar"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ei vuorovesitietoja täällä — arvio kuun vaiheesta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de données de marée ici — estimation selon la phase lunaire"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessun dato di marea qui — stima dalla fase lunare"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この場所の潮汐データなし — 月齢から推定"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이곳의 조석 데이터 없음 — 달의 위상으로 추정"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen tidevannsdata her — anslag fra månefasen"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen getijgegevens hier — schatting uit de maanfase"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak danych o pływach — szacunek z fazy Księżyca"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem dados de maré aqui — estimativa pela fase da lua"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь нет данных о приливах — оценка по фазе Луны"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inga tidvattendata här — uppskattat från månfasen"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burada gelgit verisi yok — ay evresinden tahmin"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тут немає даних про припливи — оцінка за фазою Місяця"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此处无潮汐数据 — 按月相估算"
+          }
+        }
+      }
     },
     "Weather service busy — forecast saved %@": {
-      "comment": "Shown when the weather server is rate limited or out of its daily budget. %@ is a relative time, e.g. '2 hours ago'. TRANSLATION PENDING."
+      "comment": "Shown when the weather server is rate limited or out of its daily budget. %@ is a relative time, e.g. '2 hours ago'.",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vejrtjenesten er optaget — prognose gemt %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wetterdienst ausgelastet — Vorhersage gespeichert %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servicio meteorológico saturado — pronóstico guardado %@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Säätiedot ruuhkautuneet — ennuste tallennettu %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service météo saturé — prévisions enregistrées %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servizio meteo occupato — previsioni salvate %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "気象サービスが混雑中 — 予報の保存：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "날씨 서비스 혼잡 — 예보 저장: %@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Værtjenesten er opptatt — varsel lagret %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weerdienst bezet — voorspelling bewaard %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serwis pogodowy przeciążony — prognoza zapisana %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serviço de clima ocupado — previsão salva %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Метеосервис перегружен — прогноз сохранён %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vädertjänsten är upptagen — prognos sparad %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hava durumu servisi yoğun — tahmin %@ kaydedildi"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Метеосервіс перевантажений — прогноз збережено %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天气服务繁忙 — 预报保存于%@"
+          }
+        }
+      }
     },
     "Weather service busy — no saved forecast. Sun, moon and tide only.": {
-      "comment": "Shown when the weather server is rate limited or out of its daily budget and nothing is saved on the phone. TRANSLATION PENDING."
+      "comment": "Shown when the weather server is rate limited or out of its daily budget and nothing is saved on the phone.",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vejrtjenesten er optaget — ingen gemt prognose. Kun sol, måne og tidevand."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wetterdienst ausgelastet — keine gespeicherte Vorhersage. Nur Sonne, Mond und Gezeiten."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servicio meteorológico saturado — sin pronóstico guardado. Solo sol, luna y marea."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Säätiedot ruuhkautuneet — ei tallennettua ennustetta. Vain aurinko, kuu ja vuorovesi."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service météo saturé — aucune prévision enregistrée. Soleil, lune et marée uniquement."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servizio meteo occupato — nessuna previsione salvata. Solo sole, luna e marea."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "気象サービスが混雑中 — 保存済みの予報なし。太陽・月・潮汐のみ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "날씨 서비스 혼잡 — 저장된 예보 없음. 해, 달, 조석만 반영."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Værtjenesten er opptatt — ingen lagret varsel. Bare sol, måne og tidevann."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weerdienst bezet — geen bewaarde voorspelling. Alleen zon, maan en getij."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serwis pogodowy przeciążony — brak zapisanej prognozy. Tylko słońce, Księżyc i pływy."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serviço de clima ocupado — nenhuma previsão salva. Só sol, lua e maré."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Метеосервис перегружен — сохранённого прогноза нет. Только солнце, луна и прилив."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vädertjänsten är upptagen — ingen sparad prognos. Bara sol, måne och tidvatten."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hava durumu servisi yoğun — kayıtlı tahmin yok. Yalnızca güneş, ay ve gelgit."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Метеосервіс перевантажений — збереженого прогнозу немає. Лише сонце, місяць і приплив."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天气服务繁忙 — 无已保存的预报。仅按太阳、月亮和潮汐。"
+          }
+        }
+      }
     },
     "More from the developer": {
       "localizations": {

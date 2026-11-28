@@ -295,6 +295,13 @@ final class ForecastService {
               let temp = payload.tempC, let source = payload.source.flatMap(WaterEstimate.Source.init(rawValue:)),
               (-3...40).contains(temp) else { return cached }
         let estimate = WaterEstimate(tempC: temp, source: source)
+        // The server's last good copy while its budget is spent: kept in memory only (the
+        // 60 s memo that `cachedWaterEstimate` reads), never on disk, so it cannot restart the
+        // saved estimate's age and stay on as if it were new.
+        if (result.1 as? HTTPURLResponse)?.value(forHTTPHeaderField: "x-cache") == "stale" {
+            waterLock.withLock { waterMemo[file.path] = (estimate, Date()) }
+            return estimate
+        }
         if let data = try? JSONEncoder().encode(estimate) { try? data.write(to: file, options: .atomic) }
         waterLock.lock()
         waterMemo[file.path] = (estimate, Date())

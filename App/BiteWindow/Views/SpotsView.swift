@@ -226,7 +226,8 @@ private struct SpotCard: View {
                         } else if unavailable == .serviceBusy {
                             Label("Weather service busy — no saved forecast. Sun, moon and tide only.", systemImage: "clock.arrow.circlepath")
                         } else {
-                            Label("Offline", systemImage: "wifi.slash")
+                            // Nothing saved: the index on this card is sun and moon only, so say so.
+                            Label("No weather data — sun, moon and tide only", systemImage: "wifi.slash")
                         }
                     }
                     .font(.caption)
@@ -297,15 +298,20 @@ private struct SpotCard: View {
             snapshot = SpotSnapshot(spot: spot, context: context, forecast: saved, calendar: spot.calendar)
             loaded = true
         }
-        let tide = spot.isSalt
-            ? await ForecastService.shared.tideStation(latitude: spot.latitude, longitude: spot.longitude) : nil
-        let forecast = await ForecastService.shared.forecast(latitude: spot.latitude, longitude: spot.longitude)
-        // The water estimate feeds the score; the context is rebuilt once it is in.
-        await ForecastService.shared.waterEstimate(latitude: spot.latitude, longitude: spot.longitude, isSalt: spot.isSalt)
-        context = spot.context
+        // Tide and forecast at the same time: with no signal each can take the full timeout.
+        let (latitude, longitude, isSalt) = (spot.latitude, spot.longitude, spot.isSalt)
+        async let tideRequest = isSalt ? ForecastService.shared.tideStation(latitude: latitude, longitude: longitude) : nil
+        async let forecastRequest = ForecastService.shared.forecast(latitude: latitude, longitude: longitude)
+        let (tide, forecast) = await (tideRequest, forecastRequest)
+        // Shown now, not after the water estimate's own wait; redrawn once that is in.
         context.tide = tide
         snapshot = SpotSnapshot(spot: spot, context: context, forecast: forecast, calendar: spot.calendar)
         loaded = true
+        // The water estimate feeds the score; the context is rebuilt once it is in.
+        await ForecastService.shared.waterEstimate(latitude: latitude, longitude: longitude, isSalt: isSalt)
+        context = spot.context
+        context.tide = tide
+        snapshot = SpotSnapshot(spot: spot, context: context, forecast: forecast, calendar: spot.calendar)
         // Once the spot's zone is known the card redraws in it (the zone is part of the task id).
         await SpotTimeZone.resolveIfNeeded(spot)
     }

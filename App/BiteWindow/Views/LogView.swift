@@ -486,6 +486,8 @@ private struct TripHistoryCard: View {
                             .contentShape(.rect)
                     }
                     .labelStyle(.iconOnly)
+                    // The card reads as one element; this names the button among its actions.
+                    .accessibilityLabel(Text("Share"))
                 }
                 .font(.footnote)
                 .foregroundStyle(.secondary)

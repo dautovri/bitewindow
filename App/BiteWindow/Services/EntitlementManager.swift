@@ -42,10 +42,18 @@ final class EntitlementManager {
     /// Recomputes access from verified current entitlements. StoreKit keeps a
     /// subscription in `currentEntitlements` during the billing grace period.
     func refresh() async {
+        isPro = await Self.updateCachedPro()
+    }
+
+    /// Reads the verified entitlements and stores the result in `cachedIsPro`. Also called by the
+    /// background refresh, which may run (after an update, a purchase elsewhere or a refund)
+    /// before any screen has refreshed the cached state.
+    @discardableResult
+    static func updateCachedPro() async -> Bool {
         var pro = false
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }
-            if transaction.revocationDate == nil, Self.allIDs.contains(transaction.productID) {
+            if transaction.revocationDate == nil, allIDs.contains(transaction.productID) {
                 pro = true
             }
         }
@@ -53,7 +61,7 @@ final class EntitlementManager {
         // `-BCPro YES` unlocks Pro in Debug builds (screenshots, UI checks).
         if UserDefaults.standard.bool(forKey: "BCPro") { pro = true }
         #endif
-        isPro = pro
-        UserDefaults.standard.set(pro, forKey: Self.cachedProKey)
+        UserDefaults.standard.set(pro, forKey: cachedProKey)
+        return pro
     }
 }

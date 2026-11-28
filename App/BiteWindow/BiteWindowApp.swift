@@ -89,6 +89,8 @@ enum OfflineStore {
 
     /// Downloads forecasts for all spots.
     static func refresh() async -> (saved: Int, total: Int) {
+        // Alerts and widgets cover the days the current Pro state allows.
+        await EntitlementManager.updateCachedPro()
         let all = places()
         let saved = await ForecastService.shared.prefetch(all)
         // Alerts and widgets follow the newest forecast the phone has.
